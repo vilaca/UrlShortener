@@ -38,6 +38,8 @@ public class Database {
 
 	static void start(String folder) throws IOException {
 
+		System.out.println("Resuming: " + folder);
+
 		// fix database path
 
 		if (!folder.endsWith(System.getProperty("file.separator"))) {
@@ -61,14 +63,17 @@ public class Database {
 
 			final File latest = files[files.length - 1];
 
-			next = Integer.parseInt(latest.getName())+1;
+			next = Integer.parseInt(latest.getName()) + 1;
 
 		} else {
 			next = 0;
 		}
 
-		resumeLog = new BufferedWriter(new FileWriter(folder
-				+ Integer.toString(next)));
+		final String filename = folder + String.format("%05d", next);
+
+		System.out.println("New: " + filename);
+
+		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
 
 	static void stop() throws IOException {
@@ -86,6 +91,8 @@ public class Database {
 		for (final File file : files) {
 			try (final FileReader fr = new FileReader(file.getAbsolutePath());
 					final BufferedReader br = new BufferedReader(fr);) {
+
+				System.out.println("Resume file: " + file.getName());
 
 				// read all lines in file
 
@@ -170,7 +177,8 @@ public class Database {
 		url2Hash.put(url, hk);
 
 		try {
-			resumeLog.write(hk.toString() + "," + url);
+			resumeLog.write(hk.toString() + "," + url
+					+ System.getProperty("line.separator"));
 			resumeLog.flush();
 
 		} catch (IOException e) {
