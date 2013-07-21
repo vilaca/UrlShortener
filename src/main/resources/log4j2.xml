@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="WARN">
+  <appenders>
+    <File name="File" fileName="go2.pt.log">
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+    </File>
+  </appenders>
+  <loggers>
+    <root level="error">
+      <appender-ref ref="File"/>
+    </root>
+  </loggers>
+</configuration>
