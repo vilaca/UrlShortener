@@ -67,7 +67,16 @@ class Server {
 		// database must reload hashes
 
 		try {
-			Database.start(properties.getProperty("database.folder"));
+
+			final String resumeFolder = properties
+					.getProperty("database.folder");
+
+			if (resumeFolder == null) {
+				logger.error("database.folder not found on .properties");
+			}
+
+			Database.start(resumeFolder);
+
 		} catch (IOException e1) {
 			logger.fatal("Database unstable.");
 			return;
