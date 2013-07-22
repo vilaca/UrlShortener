@@ -77,7 +77,7 @@ class Server {
 			return;			
 		}
 		
-		// get bind setting from propertie files		
+		// get bind setting from properties files		
 		
 		try {
 
@@ -209,7 +209,7 @@ class Server {
 
 		final StringBuilder sb = new StringBuilder();
 
-		sb.append(params.getRemoteAddress());
+		sb.append(params.getRemoteAddress().getAddress().getHostAddress());
 		sb.append(" - - [");
 		sb.append(new SimpleDateFormat("dd/MMM/yyyy:hh:mm:ss Z")
 				.format(new Date()));
