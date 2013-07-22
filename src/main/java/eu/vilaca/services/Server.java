@@ -4,9 +4,11 @@
 package eu.vilaca.services;
 
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -54,10 +56,8 @@ class Server {
 			return;
 		}
 
-		Properties prop;
-		try {
-			prop = loadPropertiesFile(base + "application.properties");
-		} catch (IOException e1) {
+		final Properties properties = loadPropertiesFile();
+		if (properties == null) {
 			logger.fatal("Can't read properties.");
 			return;
 		}
@@ -65,7 +65,7 @@ class Server {
 		// database must reload hashes
 
 		try {
-			Database.start(prop.getProperty("database.folder"));
+			Database.start(properties.getProperty("database.folder"));
 		} catch (IOException e1) {
 			logger.fatal("Database unstable.");
 			return;
@@ -74,7 +74,7 @@ class Server {
 		// start access_log
 
 		try {
-			final String filename = prop.getProperty("access_log");
+			final String filename = properties.getProperty("access_log");
 			if (filename != null) {
 				accessLog = new BufferedWriter(new FileWriter(filename));
 			}
@@ -85,7 +85,7 @@ class Server {
 		// get bind setting from properties files
 		InetSocketAddress sockAddress;
 		try {
-			sockAddress = createInetSocketAddress(prop);
+			sockAddress = createInetSocketAddress(properties);
 		} catch (Exception ex) {
 			logger.fatal("Bad parameters for server address/port.");
 			return;
@@ -99,7 +99,7 @@ class Server {
 		try {
 
 			// get backlog from properties too
-			final int backlog = getBacklog(prop);
+			final int backlog = getBacklog(properties);
 			listener = HttpServer.create(sockAddress, backlog);
 
 		} catch (IOException e) {
@@ -126,7 +126,7 @@ class Server {
 		} while (running);
 
 		logger.trace("Server stopping.");
-		
+
 		listener.stop(1);
 
 		try {
@@ -138,8 +138,36 @@ class Server {
 			accessLog.close();
 		} catch (IOException e) {
 		}
-		
+
 		logger.trace("Server stopped.");
+	}
+
+	private static Properties loadPropertiesFile() {
+		InputStream is = null;
+		final Properties prop = new Properties();
+		try {
+
+			if (new File("application.properties").exists()) {
+				is = new FileInputStream("application.properties");
+			} else {
+				is = Server.class.getResourceAsStream(base
+						+ "application.properties");
+			}
+			prop.load(is);
+
+		} catch (IOException e1) {
+			return null;
+		} finally {
+			try {
+				if (is != null) {
+					is.close();
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return prop;
 	}
 
 	private static int getBacklog(Properties prop) {
@@ -147,14 +175,14 @@ class Server {
 		final String _backlog = prop.getProperty("server.backlog");
 
 		// default to 0
-		
+
 		if (_backlog != null) {
 			try {
 				return Integer.parseInt(_backlog);
 			} catch (NumberFormatException ex) {
 			}
 		}
-		
+
 		return 0;
 	}
 
@@ -214,19 +242,6 @@ class Server {
 		} else {
 			return new InetSocketAddress(host, _port);
 		}
-	}
-
-	/**
-	 * @param string
-	 * @param prop
-	 * @throws IOException
-	 * @throws FileNotFoundException
-	 */
-	private static Properties loadPropertiesFile(String filename)
-			throws IOException {
-		final Properties prop = new Properties();
-		prop.load(Server.class.getResourceAsStream(filename));
-		return prop;
 	}
 
 	/**
