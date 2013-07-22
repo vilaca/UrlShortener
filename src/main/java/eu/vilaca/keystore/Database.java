@@ -14,12 +14,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author vilaca
  * 
  */
 public class Database {
+
+	static final Logger logger = LogManager.getLogger(Database.class.getName());
 
 	// TODO make this a singleton to avoid statics?
 
@@ -38,13 +42,18 @@ public class Database {
 
 	public static void start(String folder) throws IOException {
 
-		System.out.println("Resuming: " + folder);
-
 		// fix database path
 
-		if (!folder.endsWith(System.getProperty("file.separator"))) {
+		if (folder == null) {
+
+			// default to base directory
+			folder = "";
+
+		} else if (!folder.endsWith(System.getProperty("file.separator"))) {
 			folder += System.getProperty("file.separator");
 		}
+
+		logger.trace("Resuming from folder: " + folder);
 
 		// get all files sorted
 
@@ -52,6 +61,8 @@ public class Database {
 		final int next;
 
 		if (files != null && files.length > 0) {
+
+			logger.trace("Found " + files.length + " old files.");
 
 			// read old data
 
@@ -71,7 +82,7 @@ public class Database {
 
 		final String filename = folder + String.format("%05d", next);
 
-		System.out.println("New: " + filename);
+		logger.trace("Next (resume) file: " + filename);
 
 		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
@@ -92,7 +103,7 @@ public class Database {
 			try (final FileReader fr = new FileReader(file.getAbsolutePath());
 					final BufferedReader br = new BufferedReader(fr);) {
 
-				System.out.println("Resume file: " + file.getName());
+				logger.trace("Reading from Resume file: " + file.getName());
 
 				// read all lines in file
 
@@ -115,7 +126,7 @@ public class Database {
 				}
 
 			} catch (IOException e) {
-				System.out.println("error reading: " + file.getAbsolutePath());
+				logger.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
 	}
