@@ -4,3 +4,9 @@
 #*.jar - comments out because of external dependencies jars - TODO use submodules?
 *.war
 *.ear
+
+#bin folder
+bin/*
+
+#dont commit logs
+*.log
