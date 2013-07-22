@@ -21,7 +21,7 @@ import org.apache.commons.validator.routines.UrlValidator;
  */
 public class Database {
 
-	// TODO make this a sigleton ?
+	// TODO make this a singleton to avoid statics?
 
 	// hash map to URL
 	// TODO can be optimized, only one MAP is needed
@@ -165,8 +165,8 @@ public class Database {
 			}
 
 			// create a base64 hash based on system timer
-			final long ticks = hash2Url.hashCode() * System.currentTimeMillis()
-					^ url2Hash.hashCode();
+			final long ticks = hash2Url.hashCode() ^ System.currentTimeMillis()
+					* url2Hash.hashCode();
 			hk = new HashKey(ticks * tries);
 
 			// loop if hash already being used
