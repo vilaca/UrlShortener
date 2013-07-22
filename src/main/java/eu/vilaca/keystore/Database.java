@@ -82,12 +82,15 @@ public class Database {
 
 		final String filename = folder + String.format("%05d", next);
 
-		logger.trace("Next (resume) file: " + filename);
+		logger.info("Next (resume) file: " + filename);
 
 		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
 
 	public static void stop() throws IOException {
+
+		logger.trace("Stopping database.");
+
 		resumeLog.flush();
 		resumeLog.close();
 	}
@@ -172,7 +175,10 @@ public class Database {
 			tries++;
 			if (tries > 10) {
 				// give up
+				logger.warn("Giving up rehashing " + url);
 				return null;
+			} else if (tries > 1) {
+				logger.warn("Rehashing " + url + " / " + tries + "try.");
 			}
 
 			// create a base64 hash based on system timer
@@ -193,6 +199,8 @@ public class Database {
 			resumeLog.flush();
 
 		} catch (IOException e) {
+
+			logger.error("Could not write to the resume log :(");
 
 			hash2Url.remove(hk);
 			url2Hash.remove(url);
