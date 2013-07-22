@@ -3,7 +3,9 @@
  */
 package eu.vilaca.services;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
@@ -29,75 +31,79 @@ import eu.vilaca.pagelets.StaticPageLet;
 class Server {
 
 	static final Logger logger = LogManager.getLogger(Server.class.getName());
-	
+	static BufferedWriter accessLog;
+
 	// resource file locations on JAR
-	
+
 	private static final String base = "/";
-	
+
 	/**
 	 * Process initial method
 	 */
 	public static void main(final String[] args) {
 
 		logger.trace("Entering application.");
-		
+
 		// map static pages to URI part
 
 		final Map<String, PageLet> pages;
-
 		try {
-
 			pages = generateResourceDecoder();
-
 		} catch (IOException ex) {
-
 			logger.fatal(ex.getMessage());
 			return;
 		}
 
-		InetSocketAddress sockAddress;
-
 		Properties prop;
 		try {
-			
-			prop = loadPropertiesFile(base +"application.properties");
-		
+			prop = loadPropertiesFile(base + "application.properties");
 		} catch (IOException e1) {
-			
 			logger.fatal("Can't read properties.");
 			return;
 		}
 
-		// database must reload from files
-		
+		// database must reload hashes
+
 		try {
 			Database.start(prop.getProperty("database.folder"));
 		} catch (IOException e1) {
-			System.out.println("Database unstable.");
-			return;			
+			logger.fatal("Database unstable.");
+			return;
 		}
-		
-		// get bind setting from properties files		
-		
+
+		// start access_log
+
 		try {
+			final String filename = prop.getProperty("access_log");
+			if (filename != null) {
+				accessLog = new BufferedWriter(new FileWriter(filename));
+			}
+		} catch (IOException e1) {
+			System.out.println("Access log redirected to console.");
+		}
 
+		// get bind setting from properties files
+		InetSocketAddress sockAddress;
+		try {
 			sockAddress = createInetSocketAddress(prop);
-
-		} catch (NumberFormatException ex) {
-
+		} catch (Exception ex) {
+			logger.fatal("Bad parameters for server address/port.");
 			return;
 		}
 
 		// create listener
-		
+
+		logger.trace("Server now starting....");
+
 		final HttpServer listener;
 		try {
 
-			listener = HttpServer.create(sockAddress, 0);
+			// get backlog from properties too
+			final int backlog = getBacklog(prop);
+			listener = HttpServer.create(sockAddress, backlog);
 
 		} catch (IOException e) {
-
-			e.printStackTrace();
+			logger.fatal("Could not create listener.");
 			return;
 		}
 
@@ -107,7 +113,7 @@ class Server {
 		listener.createContext("/", new RequestHandler(pages));
 		listener.setExecutor(null); // creates a default executor
 		listener.start();
-		
+
 		System.out.println("Server Running. Press [k] to kill listener.");
 		boolean running = true;
 		do {
@@ -116,8 +122,10 @@ class Server {
 				running = System.in.read() == 'k';
 			} catch (IOException e) {
 			}
-			
+
 		} while (running);
+
+		logger.trace("Server stopping.");
 		
 		listener.stop(1);
 
@@ -125,6 +133,29 @@ class Server {
 			Database.stop();
 		} catch (IOException e) {
 		}
+
+		try {
+			accessLog.close();
+		} catch (IOException e) {
+		}
+		
+		logger.trace("Server stopped.");
+	}
+
+	private static int getBacklog(Properties prop) {
+
+		final String _backlog = prop.getProperty("server.backlog");
+
+		// default to 0
+		
+		if (_backlog != null) {
+			try {
+				return Integer.parseInt(_backlog);
+			} catch (NumberFormatException ex) {
+			}
+		}
+		
+		return 0;
 	}
 
 	/**
@@ -137,7 +168,7 @@ class Server {
 		// static pages
 
 		pages = new HashMap<String, PageLet>();
-		
+
 		pages.put("/", StaticPageLet.fromFile(base + "index.html"));
 
 		pages.put("ajax.js", StaticPageLet.fromFile(base + "ajax.js"));
@@ -162,7 +193,7 @@ class Server {
 	 * @throws NumberFormatException
 	 */
 	private static InetSocketAddress createInetSocketAddress(
-			final Properties prop) throws IllegalArgumentException {
+			final Properties prop) {
 
 		// both parameters are optional
 
@@ -221,8 +252,18 @@ class Server {
 		sb.append(responseCode);
 		sb.append(" 435 \"-\" \"browser info ignored\"");
 
-		// TODO don't stream to console
+		final String output = sb.toString();
 
-		System.out.println(sb.toString());
+		if (accessLog != null) {
+			try {
+				accessLog.write(output);
+				accessLog.flush();
+				return;
+			} catch (IOException e) {
+			}
+		}
+
+		System.out.println(output);
+
 	}
 }
