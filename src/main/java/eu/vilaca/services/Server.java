@@ -163,8 +163,6 @@ class Server {
 					is.close();
 				}
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
 			}
 		}
 		return prop;
