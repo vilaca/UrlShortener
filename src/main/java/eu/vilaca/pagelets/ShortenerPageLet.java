@@ -8,10 +8,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-
 import com.sun.net.httpserver.HttpExchange;
 
-import eu.vilaca.services.Database;
+import eu.vilaca.keystore.Database;
 
 /**
  * @author vilaca
@@ -20,7 +19,7 @@ import eu.vilaca.services.Database;
 public class ShortenerPageLet extends PageLet {
 
 	@Override
-	public byte[] main (final HttpExchange params) throws IOException {
+	public byte[] main(final HttpExchange params) throws IOException {
 
 		try (final InputStream is = params.getRequestBody();
 				final InputStreamReader sr = new InputStreamReader(is);

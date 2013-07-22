@@ -5,8 +5,8 @@ package eu.vilaca.pagelets;
 
 import com.sun.net.httpserver.HttpExchange;
 
-import eu.vilaca.services.Database;
-import eu.vilaca.services.HashKey;
+import eu.vilaca.keystore.Database;
+import eu.vilaca.keystore.HashKey;
 
 /**
  * @author vilaca
@@ -19,18 +19,18 @@ public class RedirectPageLet extends PageLet {
 	@Override
 	byte[] main(final HttpExchange exchange) {
 
-		final String[] tokens = exchange.getRequestURI().getRawPath().split("/");
+		final String[] tokens = exchange.getRequestURI().getRawPath()
+				.split("/");
 		final HashKey hk = new HashKey(tokens[1].getBytes());
-		
+
 		final String url = Database.get(hk);
-		
-		if ( url == null)
-		{
+
+		if (url == null) {
 			return null;
 		}
-		
+
 		exchange.getResponseHeaders().set("Location", url);
-		
+
 		return buffer;
 	}
 

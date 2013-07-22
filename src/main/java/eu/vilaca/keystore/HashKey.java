@@ -1,4 +1,4 @@
-package eu.vilaca.services;
+package eu.vilaca.keystore;
 
 import java.util.Arrays;
 
@@ -25,7 +25,7 @@ public class HashKey {
 	public byte[] getBytes() {
 		return this.key;
 	}
-	
+
 	@Override
 	public int hashCode() {
 		return (int) hash;

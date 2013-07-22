@@ -20,7 +20,7 @@ public abstract class PageLet {
 
 	final public boolean execute(final HttpExchange exchange)
 			throws IOException {
-		
+
 		final byte[] buffer = main(exchange);
 
 		if (buffer == null)

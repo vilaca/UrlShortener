@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.vilaca.services;
+package eu.vilaca.keystore;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -36,7 +36,7 @@ public class Database {
 	private Database() {
 	}
 
-	static void start(String folder) throws IOException {
+	public static void start(String folder) throws IOException {
 
 		System.out.println("Resuming: " + folder);
 
@@ -76,7 +76,7 @@ public class Database {
 		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
 
-	static void stop() throws IOException {
+	public static void stop() throws IOException {
 		resumeLog.flush();
 		resumeLog.close();
 	}

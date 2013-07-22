@@ -22,6 +22,7 @@ import org.apache.logging.log4j.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
+import eu.vilaca.keystore.Database;
 import eu.vilaca.pagelets.PageLet;
 import eu.vilaca.pagelets.ShortenerPageLet;
 import eu.vilaca.pagelets.StaticPageLet;
