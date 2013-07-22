@@ -4,11 +4,12 @@ import java.util.Arrays;
 
 public class HashKey {
 
-	private final byte[] key;
-	private final int hash;
+	private byte[] key;
+	private long hash;
 
-	public HashKey(final long ticks) {
-		this(Encode64(ticks));
+	public HashKey() {
+		this.hash = super.hashCode();
+		this.hash *= System.currentTimeMillis();
 	}
 
 	public HashKey(final byte[] key) {
@@ -23,6 +24,9 @@ public class HashKey {
 	}
 
 	public byte[] getBytes() {
+		if ( this.key != null)
+			return this.key;
+		Encode64();
 		return this.key;
 	}
 
@@ -56,11 +60,12 @@ public class HashKey {
 		return sb.toString();
 	}
 
-	private static byte[] Encode64(long v) {
+	private void Encode64() {
 
-		final byte[] output = new byte[6];
+		this.key = new byte[6];
 
 		int i = 5;
+		long v = this.hash;
 
 		while (i >= 0) {
 
@@ -78,10 +83,9 @@ public class HashKey {
 			} else {
 				b = '-';
 			}
-			output[i] = (byte) b;
+			this.key[i] = (byte) b;
 			i--;
 		}
-		return output;
 	}
 
 }
