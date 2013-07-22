@@ -6,7 +6,7 @@
     </File>
   </appenders>
   <loggers>
-    <root level="error">
+    <root level="trace">
       <appender-ref ref="File"/>
     </root>
   </loggers>
