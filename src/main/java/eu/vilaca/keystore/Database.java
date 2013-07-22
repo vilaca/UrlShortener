@@ -181,10 +181,7 @@ public class Database {
 				logger.warn("Rehashing " + url + " / " + tries + "try.");
 			}
 
-			// create a base64 hash based on system timer
-			final long ticks = hash2Url.hashCode() ^ System.currentTimeMillis()
-					* url2Hash.hashCode();
-			hk = new HashKey(ticks * tries);
+			hk = new HashKey();
 
 			// loop if hash already being used
 
