@@ -38,6 +38,7 @@ class Server {
 	// resource file locations on JAR
 
 	private static final String base = "/";
+	private static final String PROPERTIES = "application.properties";
 
 	/**
 	 * Process initial method
@@ -147,12 +148,9 @@ class Server {
 		final Properties prop = new Properties();
 		try {
 
-			if (new File("application.properties").exists()) {
-				is = new FileInputStream("application.properties");
-			} else {
-				is = Server.class.getResourceAsStream(base
-						+ "application.properties");
-			}
+			is = new File(PROPERTIES).exists() ? new FileInputStream(PROPERTIES)
+					: Server.class.getResourceAsStream(base + PROPERTIES);
+
 			prop.load(is);
 
 		} catch (IOException e1) {
