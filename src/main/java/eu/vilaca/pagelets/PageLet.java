@@ -17,6 +17,7 @@ public abstract class PageLet {
 	abstract byte[] main(final HttpExchange exchange) throws IOException;
 
 	abstract public int getResponseCode();
+
 	abstract public String getMimeType();
 
 	final public boolean execute(final HttpExchange exchange)
@@ -29,6 +30,7 @@ public abstract class PageLet {
 
 		final OutputStream os = exchange.getResponseBody();
 
+		exchange.getResponseHeaders().set("Content-Type:", getMimeType());
 		exchange.sendResponseHeaders(getResponseCode(), buffer.length);
 
 		os.write(buffer);
