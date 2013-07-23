@@ -46,7 +46,7 @@ class Server {
 	 */
 	public static void main(final String[] args) {
 
-		logger.trace("Entering application.");
+		logger.trace("Starting server...");
 
 		// map static pages to URI part
 
@@ -64,6 +64,10 @@ class Server {
 			return;
 		}
 
+		// log server version
+		
+		logger.trace("V" + properties.getProperty("server.version", "undefined"));
+		
 		// database must reload hashes
 
 		try {
