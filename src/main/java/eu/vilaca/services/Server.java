@@ -266,10 +266,10 @@ class Server {
 	 * Access log output
 	 * 
 	 * @param params
-	 * @param responseCode
+	 * @param resource
 	 */
 	static void printLogMessage(final HttpExchange params,
-			final int responseCode) {
+			final PageLet resource) {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -282,8 +282,10 @@ class Server {
 		sb.append(" ");
 		sb.append(params.getRequestURI().toString());
 		sb.append(" HTTP/1.0\" ");
-		sb.append(responseCode);
-		sb.append(" 435 \"-\" \"browser info ignored\"");
+		sb.append(resource.getResponseCode());
+		sb.append(" ");
+		sb.append(resource.getResponseSize());
+		sb.append(" \"-\" \"browser info discarded\"");
 
 		final String output = sb.toString();
 

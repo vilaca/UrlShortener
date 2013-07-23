@@ -49,7 +49,7 @@ class RequestHandler implements HttpHandler {
 
 		exchange.getResponseHeaders().set("Server", version);
 		
-		Server.printLogMessage(exchange, resource.getResponseCode());
+		Server.printLogMessage(exchange, resource);
 	}
 
 	/**

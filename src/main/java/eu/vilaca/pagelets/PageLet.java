@@ -14,12 +14,15 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public abstract class PageLet {
 
+	
 	abstract byte[] main(final HttpExchange exchange) throws IOException;
 
 	abstract public int getResponseCode();
 
 	abstract public String getMimeType();
 
+	private int responseSize;
+	
 	final public boolean execute(final HttpExchange exchange)
 			throws IOException {
 
@@ -33,11 +36,17 @@ public abstract class PageLet {
 		exchange.getResponseHeaders().set("Content-Type", getMimeType());
 		exchange.sendResponseHeaders(getResponseCode(), buffer.length);
 
+		responseSize = buffer.length;
+		
 		os.write(buffer);
 		os.flush();
 		os.close();
 
 		return true;
+	}
+
+	public int getResponseSize() {
+		return responseSize;
 	}
 
 }
