@@ -10,35 +10,41 @@ public class HashKey {
 		this.hash = super.hashCode();
 		this.hash *= millis;
 		// 36 bit limit
-		this.hash &= 68719476736l;
+		this.hash = this.hash & (68719476736l-1);
 		Encode64();
 	}
 
 	public HashKey(final byte[] key) {
 		this.key = key;
 
-		int hash = 0;
+		long hash = 0;
 		
 		for (byte b : key) {
 
-			hash *= 64;
-
+			long inc;
+			
 			if (b >= 'a' && b <= 'z') {
-				hash += b - 'a';
+				inc = b - 'a';
 		
 			} else if (b >= 'A' && b <= 'Z') {
-				hash += b - 'A' + 26;
+				inc = b - 'A' + 26;
 			
 			} else if (b >= '0' && b <= '9') {
-				hash += b - '0' + 52;
+				inc = b - '0' + 52;
 			
 			} else if (b == '_') {
-				hash += 62;
+				inc = 62;
 			
 			} else {
-				hash += 63;
+				inc = 63;
 			}
+			
+			hash *= 64;
+			hash += inc;
+
 		}
+		
+		
 		this.hash = hash;
 	}
 
@@ -70,7 +76,8 @@ public class HashKey {
 
 		// internal hash is long, white hashCode() is int
 
-		return this.hash == ((HashKey) obj).hash;
+		HashKey hash =(HashKey) obj;
+		return this.hash == hash.hash;
 	}
 
 	@Override
@@ -86,10 +93,10 @@ public class HashKey {
 
 		this.key = new byte[6];
 
-		int i = 0;
+		int i = 5;
 		long v = this.hash;
 
-		while (i < 6) {
+		while (i >= 0) {
 
 			long b = v & (64 - 1);
 			v >>= 6;
@@ -106,7 +113,7 @@ public class HashKey {
 				b = '-';
 			}
 			this.key[i] = (byte) b;
-			i++;
+			i--;
 		}
 	}
 
