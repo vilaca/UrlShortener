@@ -66,7 +66,7 @@ class Server {
 
 		// log server version
 
-		logger.trace("V"
+		logger.trace("Preparing to run "
 				+ properties.getProperty("server.version", "undefined"));
 
 		// database must reload hashes
