@@ -3,10 +3,12 @@
  */
 package eu.vilaca.pagelets;
 
-import java.io.ByteArrayOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author vilaca
@@ -16,26 +18,21 @@ public class PageLetFileReader {
 
 	private final Properties properties;
 	private final String base;
+	private final String SMART_TAG_MASK = "\\[\\$\\w*\\$\\]";
+	private final Pattern pattern = Pattern.compile(SMART_TAG_MASK);
 
 	public PageLetFileReader(final String base, final Properties properties) {
 		this.base = base;
 		this.properties = properties;
 	}
 
-	public byte[] read(final String filename) throws IOException
-	{
-		try (final InputStream input = StaticPageLet.class
-				.getResourceAsStream(base + filename);
-				final ByteArrayOutputStream baos = new ByteArrayOutputStream();) {
+	public byte[] read(final String filename) throws IOException {
+		try (final BufferedReader br = new BufferedReader(
+				new InputStreamReader(
+						StaticPageLet.class
+								.getResourceAsStream(base + filename)));) {
 
-			if (input == null) {
-				throw new IOException("Could not open: " + filename + "."); //
-			}
-
-			readFromFile(input, baos);
-			baos.flush();
-
-			return baos.toByteArray();
+			return readFromFile(br);
 		}
 	}
 
@@ -44,20 +41,31 @@ public class PageLetFileReader {
 	 * @param baos
 	 * @throws IOException
 	 */
-	private static void readFromFile(final InputStream input,
-			final ByteArrayOutputStream baos) throws IOException {
+	private byte[] readFromFile(final BufferedReader br) throws IOException {
 
-		final byte[] buffer = new byte[4096];
+		final StringBuilder sb = new StringBuilder();
 
-		do {
-			final int read = input.read(buffer);
+		String line = br.readLine();
 
-			if (read == -1)
-				break;
+		while (line != null) {
+			Matcher matcher = pattern.matcher(line);
 
-			baos.write(buffer, 0, read);
+			while (matcher.find()) {
+				
+				String tag = matcher.group();
+				tag = tag.substring(2, tag.length() - 2);
+				
+				final String value = properties.getProperty("web." + tag);
+				
+				if ( value != null) line = matcher.replaceAll(value);
+			}
 
-		} while (true);
+			// don't use "system/OS" definition here, \r\n is what is needed
+			sb.append(line + "\r\n");
+			
+			line = br.readLine();
+		}
+
+		return sb.toString().getBytes();
 	}
-
 }
