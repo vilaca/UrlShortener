@@ -8,8 +8,10 @@ public class HashKey {
 	private long hash;
 
 	public HashKey() {
+		final long millis = System.currentTimeMillis();
 		this.hash = super.hashCode();
-		this.hash *= System.currentTimeMillis();
+		this.hash *= millis;
+		Encode64();
 	}
 
 	public HashKey(final byte[] key) {
@@ -23,10 +25,12 @@ public class HashKey {
 		this.hash = hash;
 	}
 
-	public byte[] getBytes() {
-		if ( this.key != null)
-			return this.key;
+	public void rehash() {
+		this.hash += System.currentTimeMillis() % 256;
 		Encode64();
+	}
+
+	public byte[] getBytes() {
 		return this.key;
 	}
 

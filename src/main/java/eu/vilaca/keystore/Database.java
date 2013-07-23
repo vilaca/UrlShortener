@@ -168,24 +168,25 @@ public class Database {
 
 		// TODO check granularity, may add a random value to avoid too many
 		// repeats in case of hash collision
-		int tries = 0;
-		HashKey hk;
-		do {
+		int retries = 0;
+		HashKey hk = new HashKey();
 
-			tries++;
-			if (tries > 10) {
+		// loop if hash already being used
+
+		while (hash2Url.containsKey(hk)) {
+
+			retries++;
+			if (retries > 10) {
 				// give up
 				logger.warn("Giving up rehashing " + url);
 				return null;
-			} else if (tries > 1) {
-				logger.warn("Rehashing " + url + " / " + tries + "try.");
+			} else if (retries > 1) {
+				logger.warn("Rehashing " + url + " / " + retries + "try.");
 			}
 
-			hk = new HashKey();
+			hk.rehash();
 
-			// loop if hash already being used
-
-		} while (hash2Url.containsKey(hk));
+		}
 
 		hash2Url.put(hk, url);
 		url2Hash.put(url, hk);
