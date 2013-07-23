@@ -24,6 +24,7 @@ import com.sun.net.httpserver.HttpServer;
 
 import eu.vilaca.keystore.Database;
 import eu.vilaca.pagelets.PageLet;
+import eu.vilaca.pagelets.PageLetFileReader;
 import eu.vilaca.pagelets.ShortenerPageLet;
 import eu.vilaca.pagelets.StaticPageLet;
 
@@ -33,12 +34,15 @@ import eu.vilaca.pagelets.StaticPageLet;
  */
 class Server {
 
-	static final Logger logger = LogManager.getLogger(Server.class.getName());
-	static BufferedWriter accessLog;
+	static private final Logger logger = LogManager.getLogger(Server.class
+			.getName());
+
+	static private Properties properties;
+	static private BufferedWriter accessLog;
 
 	// resource file locations on JAR
 
-	private static final String base = "/";
+	private static final String BASE = "/";
 	private static final String PROPERTIES = "application.properties";
 
 	/**
@@ -48,17 +52,7 @@ class Server {
 
 		logger.trace("Starting server...");
 
-		// map static pages to URI part
-
-		final Map<String, PageLet> pages;
-		try {
-			pages = generateResourceDecoder();
-		} catch (IOException ex) {
-			logger.fatal(ex.getMessage());
-			return;
-		}
-
-		final Properties properties = loadPropertiesFile();
+		properties = loadPropertiesFile();
 		if (properties == null) {
 			logger.fatal("Can't read properties.");
 			return;
@@ -68,6 +62,16 @@ class Server {
 
 		logger.trace("Preparing to run "
 				+ properties.getProperty("server.version", "undefined"));
+
+		// map static pages to URI part
+
+		final Map<String, PageLet> pages;
+		try {
+			pages = generateResourceDecoder(properties);
+		} catch (IOException ex) {
+			logger.fatal(ex.getMessage());
+			return;
+		}
 
 		// database must reload hashes
 
@@ -164,7 +168,7 @@ class Server {
 		try {
 
 			is = new File(PROPERTIES).exists() ? new FileInputStream(PROPERTIES)
-					: Server.class.getResourceAsStream(base + PROPERTIES);
+					: Server.class.getResourceAsStream(BASE + PROPERTIES);
 
 			prop.load(is);
 
@@ -201,32 +205,31 @@ class Server {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<String, PageLet> generateResourceDecoder()
-			throws IOException {
-		final Map<String, PageLet> pages;
-		// static pages
+	private static Map<String, PageLet> generateResourceDecoder(
+			Properties properties) throws IOException {
 
-		pages = new HashMap<String, PageLet>();
+		final PageLetFileReader fr = new PageLetFileReader(BASE, properties);
+		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
 
-		pages.put("/", StaticPageLet.fromFile(base + "index.html"));
+		pages.put("/", new StaticPageLet(fr.read("index.html")));
 
-		pages.put("ajax.js", StaticPageLet.fromFile(base + "ajax.js",
+		pages.put("ajax.js", new StaticPageLet(fr.read("ajax.js"),
 				"application/javascript"));
 
-		pages.put("robots.txt",
-				StaticPageLet.fromFile(base + "robots.txt", "text/plain"));
+		pages.put("robots.txt", new StaticPageLet(fr.read("robots.txt"),
+				"text/plain"));
 
-		pages.put("sitemap.xml",
-				StaticPageLet.fromFile(base + "map.txt", "text/xml"));
+		pages.put("sitemap.xml", new StaticPageLet(fr.read("map.txt"),
+				"text/xml"));
 
-		pages.put("style.css",
-				StaticPageLet.fromFile(base + "style.css", "text/css"));
+		pages.put("style.css", new StaticPageLet(fr.read("style.css"),
+				"text/css"));
 
 		// dynamic pages
 		pages.put("new", new ShortenerPageLet());
 
 		// error pages
-		pages.put("404", StaticPageLet.fromFile(base + "404.html", 404));
+		pages.put("404", new StaticPageLet(fr.read("404.html"), 404));
 		return pages;
 	}
 
