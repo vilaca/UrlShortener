@@ -31,6 +31,7 @@ class RequestHandler implements HttpHandler {
 		this.resources = Collections.unmodifiableMap(pages);
 		this.version = properties.getProperty("server.version", "unversioned");
 	}
+	
 
 	/**
 	 * Handle request, parse URI filename from request into page resource
@@ -46,7 +47,7 @@ class RequestHandler implements HttpHandler {
 
 		resource.execute(exchange);
 
-		exchange.getResponseHeaders().set("Server:", version);
+		exchange.getResponseHeaders().set("Server", version);
 		
 		Server.printLogMessage(exchange, resource.getResponseCode());
 	}
