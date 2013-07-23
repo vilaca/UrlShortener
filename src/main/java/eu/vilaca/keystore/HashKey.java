@@ -51,8 +51,9 @@ public class HashKey {
 		if (obj.getClass() != getClass())
 			return false;
 
-		return this.hash == ((HashKey) obj).hash
-				&& Arrays.equals(this.key, ((HashKey) obj).key);
+		// internal hash is long, white hashCode() is int
+		
+		return this.hash == ((HashKey) obj).hash;
 	}
 
 	@Override
