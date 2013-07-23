@@ -61,7 +61,7 @@ window.onload = function () {
                     if (http.responseText === undefined || http.responseText === '') return false;
 
                     // place result in form and select text
-                    f.v.value = 'go2.pt/' + http.responseText;
+                    f.v.value = '[$shortlinkdomain$]' + http.responseText;
                     f.v.focus();
                     f.v.select();
 
