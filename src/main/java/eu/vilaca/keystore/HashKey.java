@@ -41,9 +41,7 @@ public class HashKey {
 			
 			hash *= 64;
 			hash += inc;
-
 		}
-		
 		
 		this.hash = hash;
 	}
@@ -116,5 +114,4 @@ public class HashKey {
 			i--;
 		}
 	}
-
 }
