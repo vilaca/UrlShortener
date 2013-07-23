@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
+import java.util.Properties;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -14,17 +15,21 @@ import eu.vilaca.pagelets.RedirectPageLet;
 class RequestHandler implements HttpHandler {
 
 	private final Map<String, PageLet> resources;
+	private final String version;
 
 	/**
 	 * private c'tor to avoid external instantiation
 	 * 
+	 * @param properties
+	 * 
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(final Map<String, PageLet> pages) {
+	RequestHandler(final Map<String, PageLet> pages, Properties properties) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
+		this.version = properties.getProperty("server.version", "unversioned");
 	}
 
 	/**
@@ -36,6 +41,8 @@ class RequestHandler implements HttpHandler {
 	 */
 	@Override
 	public void handle(final HttpExchange exchange) throws IOException {
+
+		exchange.getRequestHeaders().set("Server: ", version);
 
 		final PageLet resource = getPageContents(exchange);
 

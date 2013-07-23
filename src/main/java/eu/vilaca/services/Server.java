@@ -121,7 +121,7 @@ class Server {
 		// configure server context to /
 		// and use default executor (single-threaded)
 
-		listener.createContext("/", new RequestHandler(pages));
+		listener.createContext("/", new RequestHandler(pages, properties));
 		listener.setExecutor(null); // creates a default executor
 		listener.start();
 
