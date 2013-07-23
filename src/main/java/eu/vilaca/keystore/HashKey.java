@@ -1,7 +1,5 @@
 package eu.vilaca.keystore;
 
-import java.util.Arrays;
-
 public class HashKey {
 
 	private byte[] key;
