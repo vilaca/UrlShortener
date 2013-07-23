@@ -39,4 +39,9 @@ public class ShortenerPageLet extends PageLet {
 	public int getResponseCode() {
 		return 200;
 	}
+
+	@Override
+	public String getMimeType() {
+		return "text/plain";
+	}
 }

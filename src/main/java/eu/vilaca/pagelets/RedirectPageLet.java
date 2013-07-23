@@ -39,4 +39,9 @@ public class RedirectPageLet extends PageLet {
 		return 302;
 	}
 
+	@Override
+	public String getMimeType() {
+		return "text/plain";
+	}
+
 }

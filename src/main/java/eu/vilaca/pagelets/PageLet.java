@@ -17,6 +17,7 @@ public abstract class PageLet {
 	abstract byte[] main(final HttpExchange exchange) throws IOException;
 
 	abstract public int getResponseCode();
+	abstract public String getMimeType();
 
 	final public boolean execute(final HttpExchange exchange)
 			throws IOException {

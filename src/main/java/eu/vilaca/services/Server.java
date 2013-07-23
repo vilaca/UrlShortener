@@ -65,9 +65,10 @@ class Server {
 		}
 
 		// log server version
-		
-		logger.trace("V" + properties.getProperty("server.version", "undefined"));
-		
+
+		logger.trace("V"
+				+ properties.getProperty("server.version", "undefined"));
+
 		// database must reload hashes
 
 		try {
@@ -209,13 +210,17 @@ class Server {
 
 		pages.put("/", StaticPageLet.fromFile(base + "index.html"));
 
-		pages.put("ajax.js", StaticPageLet.fromFile(base + "ajax.js"));
+		pages.put("ajax.js", StaticPageLet.fromFile(base + "ajax.js",
+				"application/javascript"));
 
-		pages.put("robots.txt", StaticPageLet.fromFile(base + "robots.txt"));
+		pages.put("robots.txt",
+				StaticPageLet.fromFile(base + "robots.txt", "text/plain"));
 
-		pages.put("sitemap.xml", StaticPageLet.fromFile(base + "map.txt"));
+		pages.put("sitemap.xml",
+				StaticPageLet.fromFile(base + "map.txt", "text/xml"));
 
-		pages.put("style.css", StaticPageLet.fromFile(base + "style.css"));
+		pages.put("style.css",
+				StaticPageLet.fromFile(base + "style.css", "text/css"));
 
 		// dynamic pages
 		pages.put("new", new ShortenerPageLet());

@@ -9,15 +9,20 @@ import com.sun.net.httpserver.HttpExchange;
 public class StaticPageLet extends PageLet {
 
 	final byte[] content;
-	private int responseCode;
+	final private int responseCode;
+	final private String mimeType;
 
-	private StaticPageLet(final byte[] content, final int responseCode) {
+	protected StaticPageLet(final byte[] content, final String mimeType,
+			final int responseCode) {
 		this.content = content;
 		this.responseCode = responseCode;
+		this.mimeType = mimeType;
 	}
 
-	public static PageLet fromFile(final String filename, final int responseCode)
-			throws IOException {
+	public static PageLet fromFile(final String filename,
+			final String mimeType, final int responseCode) throws IOException {
+
+		// TODO: remove this block to its own class?
 
 		try (final InputStream input = StaticPageLet.class
 				.getResourceAsStream(filename);
@@ -30,12 +35,22 @@ public class StaticPageLet extends PageLet {
 			readFromFile(input, baos);
 			baos.flush();
 
-			return new StaticPageLet(baos.toByteArray(), responseCode);
+			return new StaticPageLet(baos.toByteArray(), mimeType, responseCode);
 		}
 	}
 
 	public static PageLet fromFile(final String filename) throws IOException {
-		return fromFile(filename, 200);
+		return fromFile(filename, "text/html", 200);
+	}
+
+	public static PageLet fromFile(final String filename, final String mimeType)
+			throws IOException {
+		return fromFile(filename, mimeType, 200);
+	}
+
+	public static PageLet fromFile(final String filename, final int responseCode)
+			throws IOException {
+		return fromFile(filename, "text/html", responseCode);
 	}
 
 	/**
@@ -67,5 +82,10 @@ public class StaticPageLet extends PageLet {
 	@Override
 	public int getResponseCode() {
 		return responseCode;
+	}
+
+	@Override
+	public String getMimeType() {
+		return mimeType;
 	}
 }
