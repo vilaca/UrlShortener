@@ -42,26 +42,17 @@ class RequestHandler implements HttpHandler {
 	@Override
 	public void handle(final HttpExchange exchange) throws IOException {
 
-		exchange.getRequestHeaders().set("Server: ", version);
-
 		final PageLet resource = getPageContents(exchange);
 
-		if (resource == null || !resource.execute(exchange)) {
+		resource.execute(exchange);
 
-			// if no page was found use page 404
-
-			resources.get("404").execute(exchange);
-
-			Server.printLogMessage(exchange, 404);
-
-			return;
-		}
-
+		exchange.getResponseHeaders().set("Server:", version);
+		
 		Server.printLogMessage(exchange, resource.getResponseCode());
 	}
 
 	/**
-	 * Resolve URI to correct page/resource
+	 * Resolve URI to correct page/resource or use 404
 	 * 
 	 * @param exchange
 	 *            .getRequestURI()
@@ -75,7 +66,9 @@ class RequestHandler implements HttpHandler {
 			return new RedirectPageLet();
 		}
 
-		return resources.get(filename);
+		final PageLet page = resources.get(filename);
+		
+		return page != null ? page : resources.get("404");
 	}
 
 	/**
