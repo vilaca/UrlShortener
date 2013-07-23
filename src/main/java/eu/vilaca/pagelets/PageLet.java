@@ -30,7 +30,7 @@ public abstract class PageLet {
 
 		final OutputStream os = exchange.getResponseBody();
 
-		exchange.getResponseHeaders().set("Content-Type:", getMimeType());
+		exchange.getResponseHeaders().set("Content-Type", getMimeType());
 		exchange.sendResponseHeaders(getResponseCode(), buffer.length);
 
 		os.write(buffer);
