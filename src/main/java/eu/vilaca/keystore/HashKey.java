@@ -9,6 +9,8 @@ public class HashKey {
 		final long millis = System.currentTimeMillis();
 		this.hash = super.hashCode();
 		this.hash *= millis;
+		// 36 bit limit
+		this.hash &= 68719476736l;
 		Encode64();
 	}
 
@@ -16,9 +18,26 @@ public class HashKey {
 		this.key = key;
 
 		int hash = 0;
+		
 		for (byte b : key) {
-			hash *= 10;
-			hash += b;
+
+			hash *= 64;
+
+			if (b >= 'a' && b <= 'z') {
+				hash += b - 'a';
+		
+			} else if (b >= 'A' && b <= 'Z') {
+				hash += b - 'A' + 26;
+			
+			} else if (b >= '0' && b <= '9') {
+				hash += b - '0' + 52;
+			
+			} else if (b == '_') {
+				hash += 62;
+			
+			} else {
+				hash += 63;
+			}
 		}
 		this.hash = hash;
 	}
@@ -50,7 +69,7 @@ public class HashKey {
 			return false;
 
 		// internal hash is long, white hashCode() is int
-		
+
 		return this.hash == ((HashKey) obj).hash;
 	}
 
@@ -67,10 +86,10 @@ public class HashKey {
 
 		this.key = new byte[6];
 
-		int i = 5;
+		int i = 0;
 		long v = this.hash;
 
-		while (i >= 0) {
+		while (i < 6) {
 
 			long b = v & (64 - 1);
 			v >>= 6;
@@ -87,7 +106,7 @@ public class HashKey {
 				b = '-';
 			}
 			this.key[i] = (byte) b;
-			i--;
+			i++;
 		}
 	}
 
