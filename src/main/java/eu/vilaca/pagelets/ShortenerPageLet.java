@@ -16,7 +16,7 @@ import eu.vilaca.keystore.Database;
  * @author vilaca
  * 
  */
-public class ShortenerPageLet extends PageLet {
+public class ShortenerPageLet extends AbstractPageLet {
 
 	@Override
 	public byte[] main(final HttpExchange params) throws IOException {

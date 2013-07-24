@@ -12,7 +12,7 @@ import eu.vilaca.keystore.HashKey;
  * @author vilaca
  * 
  */
-public class RedirectPageLet extends PageLet {
+public class RedirectPageLet extends AbstractPageLet {
 
 	private final byte[] buffer = new byte[0];
 
@@ -21,6 +21,7 @@ public class RedirectPageLet extends PageLet {
 
 		final String[] tokens = exchange.getRequestURI().getRawPath()
 				.split("/");
+		
 		final HashKey hk = new HashKey(tokens[1].getBytes());
 
 		final String url = Database.get(hk);

@@ -12,9 +12,8 @@ import com.sun.net.httpserver.HttpExchange;
  * @author vilaca
  * 
  */
-public abstract class PageLet {
+public abstract class AbstractPageLet {
 
-	
 	abstract byte[] main(final HttpExchange exchange) throws IOException;
 
 	abstract public int getResponseCode();

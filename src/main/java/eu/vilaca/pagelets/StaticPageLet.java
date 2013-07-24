@@ -2,7 +2,7 @@ package eu.vilaca.pagelets;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class StaticPageLet extends PageLet {
+public class StaticPageLet extends AbstractPageLet {
 
 	final byte[] content;
 	final private int responseCode;

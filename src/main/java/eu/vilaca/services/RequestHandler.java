@@ -9,12 +9,12 @@ import java.util.Properties;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import eu.vilaca.pagelets.PageLet;
+import eu.vilaca.pagelets.AbstractPageLet;
 import eu.vilaca.pagelets.RedirectPageLet;
 
 class RequestHandler implements HttpHandler {
 
-	private final Map<String, PageLet> resources;
+	private final Map<String, AbstractPageLet> resources;
 	private final String version;
 
 	/**
@@ -25,7 +25,7 @@ class RequestHandler implements HttpHandler {
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(final Map<String, PageLet> pages, Properties properties) {
+	RequestHandler(final Map<String, AbstractPageLet> pages, Properties properties) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
@@ -43,7 +43,7 @@ class RequestHandler implements HttpHandler {
 	@Override
 	public void handle(final HttpExchange exchange) throws IOException {
 
-		final PageLet resource = getPageContents(exchange);
+		final AbstractPageLet resource = getPageContents(exchange);
 
 		resource.execute(exchange);
 
@@ -59,7 +59,7 @@ class RequestHandler implements HttpHandler {
 	 *            .getRequestURI()
 	 * @return
 	 */
-	private PageLet getPageContents(final HttpExchange exchange) {
+	private AbstractPageLet getPageContents(final HttpExchange exchange) {
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
@@ -67,7 +67,7 @@ class RequestHandler implements HttpHandler {
 			return new RedirectPageLet();
 		}
 
-		final PageLet page = resources.get(filename);
+		final AbstractPageLet page = resources.get(filename);
 		
 		return page != null ? page : resources.get("404");
 	}

@@ -23,7 +23,7 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
 import eu.vilaca.keystore.Database;
-import eu.vilaca.pagelets.PageLet;
+import eu.vilaca.pagelets.AbstractPageLet;
 import eu.vilaca.pagelets.PageLetFileReader;
 import eu.vilaca.pagelets.ShortenerPageLet;
 import eu.vilaca.pagelets.StaticPageLet;
@@ -65,7 +65,7 @@ class Server {
 
 		// map static pages to URI part
 
-		final Map<String, PageLet> pages;
+		final Map<String, AbstractPageLet> pages;
 		try {
 			pages = generateResourceDecoder(properties);
 		} catch (IOException ex) {
@@ -205,11 +205,11 @@ class Server {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<String, PageLet> generateResourceDecoder(
+	private static Map<String, AbstractPageLet> generateResourceDecoder(
 			Properties properties) throws IOException {
 
 		final PageLetFileReader fr = new PageLetFileReader(BASE, properties);
-		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
+		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
 
 		pages.put("/", new StaticPageLet(fr.read("index.html")));
 
@@ -269,7 +269,7 @@ class Server {
 	 * @param resource
 	 */
 	static void printLogMessage(final HttpExchange params,
-			final PageLet resource) {
+			final AbstractPageLet resource) {
 
 		final StringBuilder sb = new StringBuilder();
 
