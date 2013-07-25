@@ -1,8 +1,39 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<project default="create_run_jar" name="Create Runnable Jar for Project UrlShortener">
-    <!--this file was created by Eclipse Runnable JAR Export Wizard-->
-    <!--ANT 1.7 is required                                        -->
-    <target name="create_run_jar">
+<project>
+
+	<property name="lib.dir"     value="lib"/>
+
+	<path id="classpath">
+		<fileset dir="${lib.dir}" includes="**/*.jar"/>
+	</path>
+
+	<target name="clean">
+		<delete dir="build"/>
+	</target>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="build/classes"/>
+		<javac srcdir="src/main" destdir="build/classes" classpathref="classpath"/>
+	</target>
+
+	<target name="jar" depends="compile">
+		<mkdir dir="build/jar"/>
+		<jar destfile="build/jar/UrlShortener.jar" basedir="build/classes">
+			<manifest>
+				<attribute name="Main-Class" value="eu.vilaca.services.Server"/>
+			</manifest>
+		</jar>
+	</target>
+
+	<target name="run">
+		<java jar="build/jar/UrlShortener.jar" fork="true"/>
+		<classpath>
+			<path refid="classpath"/>
+			<path location="build/jar/UrlShortener.jar"/>
+		</classpath>
+	</target>
+
+<!-- For reference
+<target name="create_run_jar">
         <jar destfile="UrlShortener.jar" filesetmanifest="mergewithoutmain">
             <manifest>
                 <attribute name="Main-Class" value="eu.vilaca.services.Server"/>
@@ -14,4 +45,5 @@
             <zipfileset excludes="META-INF/*.SF" src="lib/log4j-core-2.0-beta8.jar"/>
         </jar>
     </target>
+-->
 </project>
