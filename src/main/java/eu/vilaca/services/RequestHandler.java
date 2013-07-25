@@ -9,8 +9,8 @@ import java.util.Properties;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+import eu.vilaca.keystore.Database;
 import eu.vilaca.pagelets.AbstractPageLet;
-import eu.vilaca.pagelets.RedirectPageLet;
 
 class RequestHandler implements HttpHandler {
 
@@ -64,7 +64,7 @@ class RequestHandler implements HttpHandler {
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
 		if (filename.length() == 6) {
-			return new RedirectPageLet();
+			return Database.getDatabase().get(filename);
 		}
 
 		final AbstractPageLet page = resources.get(filename);

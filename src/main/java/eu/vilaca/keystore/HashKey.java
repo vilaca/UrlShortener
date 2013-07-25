@@ -1,6 +1,6 @@
 package eu.vilaca.keystore;
 
-public class HashKey {
+class HashKey {
 
 	private byte[] key;
 	private long hash;

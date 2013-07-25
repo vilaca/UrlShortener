@@ -17,6 +17,8 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import eu.vilaca.pagelets.StaticPageLet;
+
 /**
  * Database implemented as Singleton
  * 
@@ -33,7 +35,7 @@ public class Database {
 	static final private Database inner = new Database();
 
 	// hash map to URL
-	final private Map<HashKey, String> hash2Url = new HashMap<HashKey, String>();
+	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>();
 	final private Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
 
 	static BufferedWriter resumeLog;
@@ -44,11 +46,10 @@ public class Database {
 	private Database() {
 	}
 
-	static public Database getDatabase()
-	{
+	static public Database getDatabase() {
 		return inner;
 	}
-	
+
 	public void start(String folder) throws IOException {
 
 		// fix database path
@@ -123,7 +124,15 @@ public class Database {
 
 					// store data
 
-					hash2Url.put(hk, url);
+					final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+					
+					StaticPageLet redirect = 
+							new StaticPageLet.Builder()
+							.setContent(new byte[0])
+							.setResponseCode(302)
+							.setRedirect(completeUrl).build();
+					
+					hash2Url.put(hk, redirect);
 					url2Hash.put(url, hk);
 
 					line = br.readLine();
@@ -187,7 +196,15 @@ public class Database {
 
 		}
 
-		hash2Url.put(hk, url);
+		final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+		
+		final StaticPageLet redirect = 
+				new StaticPageLet.Builder()
+				.setContent(new byte[0])
+				.setResponseCode(302)
+				.setRedirect(completeUrl).build();
+		
+		hash2Url.put(hk, redirect);
 		url2Hash.put(url, hk);
 
 		try {
@@ -211,22 +228,12 @@ public class Database {
 	/**
 	 * get redirect based on hashkey
 	 * 
-	 * @param key
+	 * @param filename
 	 * @return
 	 */
-	public String get(final HashKey key) {
+	public StaticPageLet get(final String filename) {
 
-		final String url = hash2Url.get(key);
-
-		if (url == null) {
-			return null;
-		}
-
-		if (url.startsWith("http")) {
-			return url;
-		}
-
-		return "http://" + url;
+		return hash2Url.get(new HashKey(filename.getBytes()));
 	}
 
 	public void stop() throws IOException {
@@ -235,7 +242,7 @@ public class Database {
 
 		resumeLog.flush();
 		resumeLog.close();
-		
+
 	}
 
 }
