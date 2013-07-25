@@ -94,7 +94,7 @@ public class Database {
 			next = 0;
 		}
 
-		final String filename = folder + String.format("%05d", next);
+		final String filename = folder + String.format("%07d", next);
 
 		logger.info("Next (resume) file: " + filename);
 
