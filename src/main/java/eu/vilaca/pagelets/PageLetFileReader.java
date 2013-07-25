@@ -29,7 +29,7 @@ public class PageLetFileReader {
 	public byte[] read(final String filename) throws IOException {
 		try (final BufferedReader br = new BufferedReader(
 				new InputStreamReader(
-						StaticPageLet.class
+						PageLetFileReader.class
 								.getResourceAsStream(base + filename)));) {
 
 			return readFromFile(br);
