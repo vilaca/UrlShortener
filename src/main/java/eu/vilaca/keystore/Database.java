@@ -12,12 +12,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import eu.vilaca.pagelets.StaticPageLet;
+import eu.vilaca.services.PropertiesManager;
 
 /**
  * Database implemented as Singleton
@@ -37,7 +39,9 @@ public class Database {
 	// hash map to URL
 	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>();
 	final private Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
-
+	final private Properties properties = PropertiesManager.getProperties();
+	private int redirectCode;
+	
 	static BufferedWriter resumeLog;
 
 	/**
@@ -102,6 +106,8 @@ public class Database {
 	 */
 	private void readSerializedData(final File[] files) {
 
+		redirectCode = getRedirectCode();
+		
 		// load all data from each file
 
 		for (final File file : files) {
@@ -129,7 +135,7 @@ public class Database {
 					StaticPageLet redirect = 
 							new StaticPageLet.Builder()
 							.setContent(new byte[0])
-							.setResponseCode(302)
+							.setResponseCode(redirectCode)
 							.setRedirect(completeUrl).build();
 					
 					hash2Url.put(hk, redirect);
@@ -142,6 +148,28 @@ public class Database {
 				logger.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
+	}
+
+	private int getRedirectCode() {
+		final String _redirectCode = properties.getProperty("server.redirect");
+		
+		int redirectCode;
+		if ( _redirectCode != null)
+		{
+			try
+			{
+				redirectCode = Integer.parseInt(_redirectCode);
+			}
+			catch(NumberFormatException ex)
+			{
+				redirectCode = 302;
+			}
+		}
+		else
+		{
+			redirectCode = 302;
+		}
+		return redirectCode;
 	}
 
 	public byte[] add(String url) {
@@ -201,7 +229,7 @@ public class Database {
 		final StaticPageLet redirect = 
 				new StaticPageLet.Builder()
 				.setContent(new byte[0])
-				.setResponseCode(302)
+				.setResponseCode(redirectCode)
 				.setRedirect(completeUrl).build();
 		
 		hash2Url.put(hk, redirect);

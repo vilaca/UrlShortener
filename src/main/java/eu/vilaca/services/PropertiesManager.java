@@ -32,7 +32,7 @@ public class PropertiesManager {
 		}
 	}
 	
-	static Properties getProperties()
+	public static Properties getProperties()
 	{
 		return prop;
 	}
