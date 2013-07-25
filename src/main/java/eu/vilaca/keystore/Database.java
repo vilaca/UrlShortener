@@ -18,6 +18,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
+ * Database implemented as Singleton
+ * 
+ * Holds all mappings on URLs to HASHED keys and vice versa
+ * 
  * @author vilaca
  * 
  */
@@ -25,12 +29,12 @@ public class Database {
 
 	static final Logger logger = LogManager.getLogger(Database.class.getName());
 
-	// TODO make this a singleton to avoid statics?
+	// for singleton
+	static final private Database inner = new Database();
 
 	// hash map to URL
-	// TODO can be optimized, only one MAP is needed
-	final static Map<HashKey, String> hash2Url = new HashMap<HashKey, String>();
-	final static Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
+	final private Map<HashKey, String> hash2Url = new HashMap<HashKey, String>();
+	final private Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
 
 	static BufferedWriter resumeLog;
 
@@ -40,7 +44,12 @@ public class Database {
 	private Database() {
 	}
 
-	public static void start(String folder) throws IOException {
+	static public Database getDatabase()
+	{
+		return inner;
+	}
+	
+	public void start(String folder) throws IOException {
 
 		// fix database path
 
@@ -87,18 +96,10 @@ public class Database {
 		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
 
-	public static void stop() throws IOException {
-
-		logger.trace("Stopping database.");
-
-		resumeLog.flush();
-		resumeLog.close();
-	}
-
 	/**
 	 * @param files
 	 */
-	private static void readSerializedData(final File[] files) {
+	private void readSerializedData(final File[] files) {
 
 		// load all data from each file
 
@@ -134,7 +135,7 @@ public class Database {
 		}
 	}
 
-	public static byte[] add(String url) {
+	public byte[] add(String url) {
 
 		// trim whitespace
 
@@ -166,8 +167,6 @@ public class Database {
 			return base64hash.getBytes();
 		}
 
-		// TODO check granularity, may add a random value to avoid too many
-		// repeats in case of hash collision
 		int retries = 0;
 		HashKey hk = new HashKey();
 
@@ -209,7 +208,13 @@ public class Database {
 		return hk.getBytes();
 	}
 
-	public static String get(final HashKey key) {
+	/**
+	 * get redirect based on hashkey
+	 * 
+	 * @param key
+	 * @return
+	 */
+	public String get(final HashKey key) {
 
 		final String url = hash2Url.get(key);
 
@@ -222,6 +227,15 @@ public class Database {
 		}
 
 		return "http://" + url;
+	}
+
+	public void stop() throws IOException {
+
+		logger.trace("Stopping database.");
+
+		resumeLog.flush();
+		resumeLog.close();
+		
 	}
 
 }

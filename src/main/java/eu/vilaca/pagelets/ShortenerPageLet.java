@@ -30,7 +30,7 @@ public class ShortenerPageLet extends AbstractPageLet {
 			// format for form content is 'fieldname=value'
 			final String[] formContents = postBody.split("=");
 
-			return Database.add(formContents[1]);
+			return Database.getDatabase().add(formContents[1]);
 		}
 
 	}

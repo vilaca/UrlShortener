@@ -24,7 +24,7 @@ public class RedirectPageLet extends AbstractPageLet {
 		
 		final HashKey hk = new HashKey(tokens[1].getBytes());
 
-		final String url = Database.get(hk);
+		final String url = Database.getDatabase().get(hk);
 
 		if (url == null) {
 			return null;

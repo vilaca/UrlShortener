@@ -84,7 +84,7 @@ class Server {
 				logger.error("database.folder not found on .properties");
 			}
 
-			Database.start(resumeFolder);
+			Database.getDatabase().start(resumeFolder);
 
 		} catch (IOException e1) {
 			logger.fatal("Database unstable.");
@@ -150,7 +150,7 @@ class Server {
 		listener.stop(1);
 
 		try {
-			Database.stop();
+			Database.getDatabase().stop();
 		} catch (IOException e) {
 		}
 
