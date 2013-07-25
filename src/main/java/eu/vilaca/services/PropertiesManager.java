@@ -16,7 +16,7 @@ import java.util.Properties;
 public class PropertiesManager {
 
 	// resource file locations on JAR
-	private static final String PROPERTIES = "application.properties";
+	private static final String PROPERTIES = "/application.properties";
 	private static final Properties prop = new Properties();
 	
 	static {

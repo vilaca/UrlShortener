@@ -260,7 +260,12 @@ class Server {
 		sb.append(resource.getResponseCode());
 		sb.append(" ");
 		sb.append(resource.getResponseSize());
-		sb.append(" \"-\" \"browser info discarded\"");
+		sb.append(" \"");
+		
+		final String referer = params.getRequestHeaders().getFirst("Referer");
+		sb.append(referer == null ? "-" : referer);
+		
+		sb.append("\" \"browser info discarded\"");
 
 		final String output = sb.toString();
 
