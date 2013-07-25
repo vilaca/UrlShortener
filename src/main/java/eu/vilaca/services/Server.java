@@ -34,7 +34,7 @@ class Server {
 	static private final Logger logger = LogManager.getLogger(Server.class
 			.getName());
 
-	static private Properties properties;
+	static private final Properties properties = PropertiesManager.getProperties();
 	static private BufferedWriter accessLog;
 
 	/**
@@ -43,8 +43,6 @@ class Server {
 	public static void main(final String[] args) {
 
 		logger.trace("Starting server...");
-
-		properties = PropertiesManager.getProperties();
 
 		// log server version
 
