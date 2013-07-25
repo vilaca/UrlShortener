@@ -211,25 +211,37 @@ class Server {
 		final PageLetFileReader fr = new PageLetFileReader(BASE, properties);
 		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
 
-		pages.put("/", new StaticPageLet(fr.read("index.html")));
+		pages.put("/", new StaticPageLet.Builder().setContent(fr.read("index.html")).build());
 
-		pages.put("ajax.js", new StaticPageLet(fr.read("ajax.js"),
-				"application/javascript"));
+		pages.put("ajax.js",
+				new StaticPageLet.Builder()
+						.setContent(fr.read("ajax.js"))
+						.setMimeType("application/javascript").build());
 
-		pages.put("robots.txt", new StaticPageLet(fr.read("robots.txt"),
-				"text/plain"));
+		pages.put("robots.txt",
+				new StaticPageLet.Builder()
+						.setContent(fr.read("robots.txt"))
+						.setMimeType("text/plain").build());
 
-		pages.put("sitemap.xml", new StaticPageLet(fr.read("map.txt"),
-				"text/xml"));
+		pages.put("sitemap.xml",
+				new StaticPageLet.Builder()
+						.setContent(fr.read("map.txt"))
+						.setMimeType("text/xml").build());
 
-		pages.put("style.css", new StaticPageLet(fr.read("style.css"),
-				"text/css"));
+		pages.put("style.css",
+				new StaticPageLet.Builder()
+						.setContent(fr.read("style.css"))
+						.setMimeType("text/css").build());
 
 		// dynamic pages
 		pages.put("new", new ShortenerPageLet());
 
 		// error pages
-		pages.put("404", new StaticPageLet(fr.read("404.html"), 404));
+		pages.put("404",
+				new StaticPageLet.Builder()
+						.setContent(fr.read("404.html"))
+						.setResponseCode(404).build());
+		
 		return pages;
 	}
 
