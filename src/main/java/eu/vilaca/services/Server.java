@@ -4,11 +4,8 @@
 package eu.vilaca.services;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -40,11 +37,6 @@ class Server {
 	static private Properties properties;
 	static private BufferedWriter accessLog;
 
-	// resource file locations on JAR
-
-	private static final String BASE = "/";
-	private static final String PROPERTIES = "application.properties";
-
 	/**
 	 * Process initial method
 	 */
@@ -52,11 +44,7 @@ class Server {
 
 		logger.trace("Starting server...");
 
-		properties = loadPropertiesFile();
-		if (properties == null) {
-			logger.fatal("Can't read properties.");
-			return;
-		}
+		properties = PropertiesManager.getProperties();
 
 		// log server version
 
@@ -162,29 +150,6 @@ class Server {
 		logger.trace("Server stopped.");
 	}
 
-	private static Properties loadPropertiesFile() {
-		InputStream is = null;
-		final Properties prop = new Properties();
-		try {
-
-			is = new File(PROPERTIES).exists() ? new FileInputStream(PROPERTIES)
-					: Server.class.getResourceAsStream(BASE + PROPERTIES);
-
-			prop.load(is);
-
-		} catch (IOException e1) {
-			return null;
-		} finally {
-			try {
-				if (is != null) {
-					is.close();
-				}
-			} catch (IOException e) {
-			}
-		}
-		return prop;
-	}
-
 	private static int getBacklog(Properties prop) {
 
 		final String _backlog = prop.getProperty("server.backlog");
@@ -208,7 +173,7 @@ class Server {
 	private static Map<String, AbstractPageLet> generateResourceDecoder(
 			Properties properties) throws IOException {
 
-		final PageLetFileReader fr = new PageLetFileReader(BASE, properties);
+		final PageLetFileReader fr = new PageLetFileReader("/", properties);
 		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
 
 		pages.put("/", new StaticPageLet.Builder().setContent(fr.read("index.html")).build());
