@@ -80,9 +80,9 @@ class Server {
 		// start access_log
 
 		try {
-			final String filename = properties.getProperty("access_log");
+			final String filename = properties.getProperty("server.accessLog");
 			if (filename != null) {
-				accessLog = new BufferedWriter(new FileWriter(filename));
+				accessLog = new BufferedWriter(new FileWriter(filename, true));
 			}
 		} catch (IOException e1) {
 			System.out.println("Access log redirected to console.");
@@ -266,6 +266,7 @@ class Server {
 		sb.append(referer == null ? "-" : referer);
 		
 		sb.append("\" \"browser info discarded\"");
+		sb.append(System.getProperty("line.separator"));
 
 		final String output = sb.toString();
 
@@ -278,7 +279,7 @@ class Server {
 			}
 		}
 
-		System.out.println(output);
+		System.out.print(output);
 
 	}
 }
