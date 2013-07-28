@@ -23,7 +23,7 @@ public class PropertiesManager {
 		try (
 
 		InputStream is = new File(PROPERTIES).exists() ? new FileInputStream(
-				PROPERTIES) : Server.class.getResourceAsStream(PROPERTIES);) {
+				PROPERTIES) : Server.class.getResourceAsStream("/" + PROPERTIES);) {
 
 			prop.load(is);
 
