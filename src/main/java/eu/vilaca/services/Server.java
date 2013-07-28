@@ -169,32 +169,34 @@ class Server {
 	 * @throws IOException
 	 */
 	private static Map<String, AbstractPageLet> generateResourceDecoder(
-			Properties properties) throws IOException {
+			final Properties properties) throws IOException {
 
 		final PageLetFileReader fr = new PageLetFileReader("/", properties);
 		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
 
-		pages.put("/", new StaticPageLet.Builder().setContent(fr.read("index.html")).build());
+		pages.put("/", 
+				new StaticPageLet.Builder()
+						.setContent(fr.read("index.html")).zip().build());
 
 		pages.put("ajax.js",
 				new StaticPageLet.Builder()
 						.setContent(fr.read("ajax.js"))
-						.setMimeType("application/javascript").build());
+						.setMimeType("application/javascript").zip().build());
 
 		pages.put("robots.txt",
 				new StaticPageLet.Builder()
 						.setContent(fr.read("robots.txt"))
-						.setMimeType("text/plain").build());
+						.setMimeType("text/plain").zip().build());
 
 		pages.put("sitemap.xml",
 				new StaticPageLet.Builder()
 						.setContent(fr.read("map.txt"))
-						.setMimeType("text/xml").build());
+						.setMimeType("text/xml").zip().build());
 
 		pages.put("style.css",
 				new StaticPageLet.Builder()
 						.setContent(fr.read("style.css"))
-						.setMimeType("text/css").build());
+						.setMimeType("text/css").zip().build());
 
 		// dynamic pages
 		pages.put("new", new ShortenerPageLet());
@@ -203,7 +205,7 @@ class Server {
 		pages.put("404",
 				new StaticPageLet.Builder()
 						.setContent(fr.read("404.html"))
-						.setResponseCode(404).build());
+						.setResponseCode(404).zip().build());
 		
 		return pages;
 	}
