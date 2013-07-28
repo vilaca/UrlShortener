@@ -11,22 +11,22 @@ import java.util.Properties;
 
 /**
  * @author vilaca
- *
+ * 
  */
 public class PropertiesManager {
 
 	// resource file locations on JAR
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
-	
+
 	static {
-		
+
 		boolean propertiesOnBaseDir = new File(PROPERTIES).exists();
-		
+
 		try (
 
-		InputStream is = propertiesOnBaseDir ? new FileInputStream(
-				PROPERTIES) : Server.class.getResourceAsStream("/" + PROPERTIES);) {
+		InputStream is = propertiesOnBaseDir ? new FileInputStream(PROPERTIES)
+				: Server.class.getResourceAsStream("/" + PROPERTIES);) {
 
 			prop.load(is);
 
@@ -34,10 +34,9 @@ public class PropertiesManager {
 
 		}
 	}
-	
-	public static Properties getProperties()
-	{
+
+	public static Properties getProperties() {
 		return prop;
 	}
-	
+
 }
