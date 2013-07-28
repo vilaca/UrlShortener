@@ -53,7 +53,7 @@ class Server {
 
 		final Map<String, AbstractPageLet> pages;
 		try {
-			pages = generateResourceDecoder(properties);
+			pages = generateResourceDecoder();
 		} catch (IOException ex) {
 			logger.fatal(ex.getMessage());
 			return;
@@ -168,10 +168,9 @@ class Server {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<String, AbstractPageLet> generateResourceDecoder(
-			final Properties properties) throws IOException {
+	private static Map<String, AbstractPageLet> generateResourceDecoder() throws IOException {
 
-		final PageLetFileReader fr = new PageLetFileReader("/", properties);
+		final PageLetFileReader fr = new PageLetFileReader("/");
 		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
 
 		pages.put("/", 

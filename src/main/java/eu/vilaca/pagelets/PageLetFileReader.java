@@ -10,20 +10,21 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import eu.vilaca.services.PropertiesManager;
+
 /**
  * @author vilaca
  * 
  */
-public class PageLetFileReader {
+public final class PageLetFileReader {
 
-	private final Properties properties;
+	private static final String SMART_TAG_MASK = "\\[\\$\\w*\\$\\]";
+	private final Properties properties = PropertiesManager.getProperties();
 	private final String base;
-	private final String SMART_TAG_MASK = "\\[\\$\\w*\\$\\]";
 	private final Pattern pattern = Pattern.compile(SMART_TAG_MASK);
 
-	public PageLetFileReader(final String base, final Properties properties) {
+	public PageLetFileReader(final String base) {
 		this.base = base;
-		this.properties = properties;
 	}
 
 	public byte[] read(final String filename) throws IOException {
