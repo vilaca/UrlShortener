@@ -27,6 +27,8 @@ public class ShortenerPageLet extends AbstractPageLet {
 
 			final String postBody = br.readLine();
 
+			if ( postBody == null ) throw new IOException("Badly formed Request Body.");
+			
 			// format for form content is 'fieldname=value'
 			final String[] formContents = postBody.split("=");
 
