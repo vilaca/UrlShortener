@@ -20,9 +20,12 @@ public class PropertiesManager {
 	private static final Properties prop = new Properties();
 	
 	static {
+		
+		boolean propertiesOnBaseDir = new File(PROPERTIES).exists();
+		
 		try (
 
-		InputStream is = new File(PROPERTIES).exists() ? new FileInputStream(
+		InputStream is = propertiesOnBaseDir ? new FileInputStream(
 				PROPERTIES) : Server.class.getResourceAsStream("/" + PROPERTIES);) {
 
 			prop.load(is);
