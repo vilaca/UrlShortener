@@ -39,10 +39,10 @@ public class Database {
 	// hash map to URL
 	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>();
 	final private Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
+
 	final private Properties properties = PropertiesManager.getProperties();
 	private int redirectCode;
-	
-	static private BufferedWriter resumeLog;
+	private BufferedWriter resumeLog;
 
 	/**
 	 * private c'tor to forbid instantiation
