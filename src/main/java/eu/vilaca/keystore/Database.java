@@ -42,7 +42,7 @@ public class Database {
 	final private Properties properties = PropertiesManager.getProperties();
 	private int redirectCode;
 	
-	static BufferedWriter resumeLog;
+	static private BufferedWriter resumeLog;
 
 	/**
 	 * private c'tor to forbid instantiation
