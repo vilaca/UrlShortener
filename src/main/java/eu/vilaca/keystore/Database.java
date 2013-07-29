@@ -189,6 +189,19 @@ public class Database {
 			url = url.substring(0, url.length() - 1);
 		}
 
+		// make sure scheme, domain and TLD are lower case
+		
+		final int idx = url.indexOf("/"); // first path separator
+		
+		if (idx == -1) {
+			
+			// do whole Url
+			url = url.toLowerCase();
+			
+		} else {
+			url = url.substring(0, idx).toLowerCase() + url.substring(idx);
+		}
+		
 		// remove http:// but keep https://
 
 		if (url.startsWith("http://")) {
