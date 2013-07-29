@@ -1,6 +1,3 @@
-/**
- * 
- */
 package eu.vilaca.keystore;
 
 import java.io.BufferedReader;
@@ -36,9 +33,11 @@ public class Database {
 	// for singleton
 	static final private Database inner = new Database();
 
-	// hash map to URL
-	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>();
-	final private Map<String, HashKey> url2Hash = new HashMap<String, HashKey>();
+	// hash to URL
+	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>(1600000);
+	
+	// URL to hash
+	final private Map<AsciiString, HashKey> url2Hash = new HashMap<AsciiString, HashKey>(1600000);
 
 	final private Properties properties = PropertiesManager.getProperties();
 	private int redirectCode;
@@ -139,7 +138,7 @@ public class Database {
 							.setRedirect(completeUrl).build();
 					
 					hash2Url.put(hk, redirect);
-					url2Hash.put(url, hk);
+					url2Hash.put(new AsciiString(url), hk);
 
 					line = br.readLine();
 				}
@@ -231,9 +230,9 @@ public class Database {
 				.setContent(new byte[0])
 				.setResponseCode(redirectCode)
 				.setRedirect(completeUrl).build();
-		
+
 		hash2Url.put(hk, redirect);
-		url2Hash.put(url, hk);
+		url2Hash.put(new AsciiString(url), hk);
 
 		try {
 			resumeLog.write(hk.toString() + "," + url
