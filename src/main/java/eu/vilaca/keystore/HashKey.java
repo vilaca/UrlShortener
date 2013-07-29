@@ -11,7 +11,7 @@ class HashKey {
 		this.hash *= millis;
 		// 36 bit limit
 		this.hash = this.hash & (68719476736l-1);
-		Encode64();
+		encode64();
 	}
 
 	public HashKey(final byte[] key) {
@@ -48,7 +48,7 @@ class HashKey {
 
 	public void rehash() {
 		this.hash += System.currentTimeMillis() % 256;
-		Encode64();
+		encode64();
 	}
 
 	public byte[] getBytes() {
@@ -87,7 +87,7 @@ class HashKey {
 		return sb.toString();
 	}
 
-	private void Encode64() {
+	private void encode64() {
 
 		this.key = new byte[6];
 
