@@ -210,7 +210,7 @@ public class Database {
 
 		// lookup database to see if URL is already there
 
-		HashKey base64hash = url2Hash.get(url);
+		HashKey base64hash = url2Hash.get(new AsciiString(url));
 
 		if (base64hash != null) {
 			return base64hash.getBytes();
