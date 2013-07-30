@@ -39,8 +39,13 @@ public class Database {
 	// URL to hash
 	final private Map<AsciiString, HashKey> url2Hash = new HashMap<AsciiString, HashKey>(1600000);
 
+	// used to read configuration
 	final private Properties properties = PropertiesManager.getProperties();
+	
+	// configurable redirect code
 	private int redirectCode;
+	
+	// log hashes to disk
 	private BufferedWriter resumeLog;
 
 	/**
@@ -49,10 +54,21 @@ public class Database {
 	private Database() {
 	}
 
+	/**
+	 * Get Database instance
+	 * 
+	 * @return
+	 */
 	static public Database getDatabase() {
 		return inner;
 	}
 
+	/**
+	 * Start database: Load hashes from disk and turn on logging
+	 * 
+	 * @param folder
+	 * @throws IOException
+	 */
 	public void start(String folder) throws IOException {
 
 		// fix database path
@@ -101,6 +117,8 @@ public class Database {
 	}
 
 	/**
+	 * Read hashes persistent in disk
+	 * 
 	 * @param files
 	 */
 	private void readSerializedData(final File[] files) {
@@ -149,6 +167,11 @@ public class Database {
 		}
 	}
 
+	/**
+	 * Read http response code used for redirection. Usually 301 or 302(default).
+	 * 
+	 * @return
+	 */
 	private int getRedirectCode() {
 		final String _redirectCode = properties.getProperty("server.redirect");
 		
@@ -171,6 +194,12 @@ public class Database {
 		return redirectCode;
 	}
 
+	/**
+	 * Add Url to Database
+	 * 
+	 * @param url
+	 * @return
+	 */
 	public byte[] add(String url) {
 
 		// trim whitespace
@@ -183,30 +212,7 @@ public class Database {
 			return null;
 		}
 
-		// normalize Url ending
-
-		if (url.endsWith("/")) {
-			url = url.substring(0, url.length() - 1);
-		}
-
-		// make sure scheme, domain and TLD are lower case
-		
-		final int idx = url.indexOf("/"); // first path separator
-		
-		if (idx == -1) {
-			
-			// do whole Url
-			url = url.toLowerCase();
-			
-		} else {
-			url = url.substring(0, idx).toLowerCase() + url.substring(idx);
-		}
-		
-		// remove http:// but keep https://
-
-		if (url.startsWith("http://")) {
-			url = url.substring("http://".length());
-		}
+		url = normalizeUrl(url);
 
 		// lookup database to see if URL is already there
 
@@ -266,6 +272,43 @@ public class Database {
 	}
 
 	/**
+	 * Strategy to identify repeated URLs more easily. Javascript also does
+	 * something similar but can't trust input to be correct.
+	 * 
+	 * @param url
+	 * @return
+	 */
+	private String normalizeUrl(String url) {
+
+		// normalize Url ending
+
+		if (url.endsWith("/")) {
+			url = url.substring(0, url.length() - 1);
+		}
+
+		// make sure scheme, domain and TLD are lower case
+		
+		final int idx = url.indexOf("/"); // first path separator
+		
+		if (idx == -1) {
+			
+			// do whole Url
+			url = url.toLowerCase();
+			
+		} else {
+			url = url.substring(0, idx).toLowerCase() + url.substring(idx);
+		}
+		
+		// remove http:// but keep https://
+
+		if (url.startsWith("http://")) {
+			url = url.substring("http://".length());
+		}
+		
+		return url;
+	}
+
+	/**
 	 * get redirect based on hashkey
 	 * 
 	 * @param filename
@@ -276,6 +319,11 @@ public class Database {
 		return hash2Url.get(new HashKey(filename.getBytes()));
 	}
 
+	/**
+	 * Stop database logging 
+	 * 
+	 * @throws IOException
+	 */
 	public void stop() throws IOException {
 
 		logger.trace("Stopping database.");
