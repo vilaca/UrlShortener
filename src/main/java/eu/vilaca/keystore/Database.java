@@ -241,14 +241,12 @@ public class Database {
 			hk.rehash();
 
 		}
-
-		final String completeUrl = url.startsWith("http") ? url : "http://" + url;
 		
 		final StaticPageLet redirect = 
 				new StaticPageLet.Builder()
 				.setContent(new byte[0])
 				.setResponseCode(redirectCode)
-				.setRedirect(completeUrl).build();
+				.setRedirect(url).build();
 
 		hash2Url.put(hk, redirect);
 		url2Hash.put(new AsciiString(url), hk);
@@ -299,9 +297,9 @@ public class Database {
 			url = url.substring(0, idx).toLowerCase() + url.substring(idx);
 		}
 		
-		// remove http:// but keep https://
+		// add http:// scheme if needed
 
-		if (url.startsWith("http://")) {
+		if (!url.startsWith("http://") || !url.startsWith("https://")) {
 			url = url.substring("http://".length());
 		}
 		

@@ -6,7 +6,7 @@ function getUrlFromForm() {
 
     var url = f.v.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
 
-    if (url.indexOf('http') !== 0) {
+    if ((url.indexOf('http://') !== 0) && (url.indexOf('https://') !== 0)) {
         return 'http://' + url;
     }
 
