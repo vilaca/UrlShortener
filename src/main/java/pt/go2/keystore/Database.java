@@ -1,4 +1,4 @@
-package eu.vilaca.keystore;
+package pt.go2.keystore;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -15,8 +15,9 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import eu.vilaca.pagelets.StaticPageLet;
-import eu.vilaca.services.PropertiesManager;
+import pt.go2.pagelets.StaticPageLet;
+import pt.go2.services.PropertiesManager;
+
 
 /**
  * Database implemented as Singleton

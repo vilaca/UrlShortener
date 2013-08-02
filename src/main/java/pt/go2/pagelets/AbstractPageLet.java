@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.vilaca.pagelets;
+package pt.go2.pagelets;
 
 import java.io.IOException;
 import java.io.OutputStream;

@@ -1,4 +1,4 @@
-package eu.vilaca.pagelets;
+package pt.go2.pagelets;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -93,7 +93,7 @@ public class StaticPageLet extends AbstractPageLet {
 	 * (non-Javadoc)
 	 * 
 	 * @see
-	 * eu.vilaca.pagelets.AbstractPageLet#main(com.sun.net.httpserver.HttpExchange
+	 * pt.go2.pagelets.AbstractPageLet#main(com.sun.net.httpserver.HttpExchange
 	 * )
 	 */
 	@Override

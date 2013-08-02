@@ -1,4 +1,4 @@
-package eu.vilaca.services;
+package pt.go2.services;
 
 import java.io.IOException;
 import java.net.URI;
@@ -6,11 +6,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
+import pt.go2.keystore.Database;
+import pt.go2.pagelets.AbstractPageLet;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import eu.vilaca.keystore.Database;
-import eu.vilaca.pagelets.AbstractPageLet;
 
 class RequestHandler implements HttpHandler {
 

@@ -1,10 +1,11 @@
 /**
  * 
  */
-package eu.vilaca.keystore;
+package pt.go2.keystore;
 
 import org.junit.Assert;
 import org.junit.Test;
+
 
 /**
  * 

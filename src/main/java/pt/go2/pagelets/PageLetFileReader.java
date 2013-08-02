@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.vilaca.pagelets;
+package pt.go2.pagelets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -10,7 +10,8 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import eu.vilaca.services.PropertiesManager;
+import pt.go2.services.PropertiesManager;
+
 
 /**
  * @author vilaca

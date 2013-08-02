@@ -1,16 +1,17 @@
 /**
  * 
  */
-package eu.vilaca.pagelets;
+package pt.go2.pagelets;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import pt.go2.keystore.Database;
+
 import com.sun.net.httpserver.HttpExchange;
 
-import eu.vilaca.keystore.Database;
 
 /**
  * @author vilaca

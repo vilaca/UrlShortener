@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.vilaca.services;
+package pt.go2.services;
 
 import java.io.File;
 import java.io.FileInputStream;

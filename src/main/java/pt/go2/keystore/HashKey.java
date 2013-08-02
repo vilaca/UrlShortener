@@ -1,4 +1,4 @@
-package eu.vilaca.keystore;
+package pt.go2.keystore;
 
 class HashKey {
 

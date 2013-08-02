@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.vilaca.services;
+package pt.go2.services;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -16,14 +16,15 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.keystore.Database;
+import pt.go2.pagelets.AbstractPageLet;
+import pt.go2.pagelets.PageLetFileReader;
+import pt.go2.pagelets.ShortenerPageLet;
+import pt.go2.pagelets.StaticPageLet;
+
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-import eu.vilaca.keystore.Database;
-import eu.vilaca.pagelets.AbstractPageLet;
-import eu.vilaca.pagelets.PageLetFileReader;
-import eu.vilaca.pagelets.ShortenerPageLet;
-import eu.vilaca.pagelets.StaticPageLet;
 
 /**
  * @author vilaca
