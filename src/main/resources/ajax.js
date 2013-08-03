@@ -5,7 +5,7 @@
 function getUrlFromForm() {
 
     var url = f.v.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
-
+	
     if ((url.indexOf('http://') !== 0) && (url.indexOf('https://') !== 0)) {
         return 'http://' + url
     }
@@ -44,15 +44,22 @@ window.onload = function () {
 
             http.onreadystatechange = function () {
 
-                if (http.readyState == 4 && http.status == 200) {
-
-                    if (http.responseText === undefined || http.responseText === '') return false
-
-                    // place result in form and select text
-                    f.v.value = '[$shortlinkdomain$]' + http.responseText
-                    f.v.focus()
-                    f.v.select()
-
+                if (http.readyState == 4 )
+                {
+                 	if ( http.status == 200)
+                 	{
+						if (http.responseText !== 'BAD-URI')
+						{
+        	            	// place result in form and select text
+            	        	f.v.value = '[$shortlinkdomain$]' + http.responseText
+                	    	f.v.focus()
+                    		f.v.select()
+                    	}
+                    	else
+                    	{
+				            f.v.style.color = 'red'
+                    	}
+					}
                 }
 			};
 

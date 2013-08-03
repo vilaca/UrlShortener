@@ -33,7 +33,9 @@ public class ShortenerPageLet extends AbstractPageLet {
 			// format for form content is 'fieldname=value'
 			final String[] formContents = postBody.split("=");
 
-			return Database.getDatabase().add(formContents[1]);
+			byte[] response = Database.getDatabase().add(formContents[1]);
+			
+			return response == null ? "BAD-URI".getBytes() : response;
 		}
 
 	}
