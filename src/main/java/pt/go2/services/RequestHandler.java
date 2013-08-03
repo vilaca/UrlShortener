@@ -46,10 +46,9 @@ class RequestHandler implements HttpHandler {
 
 		final AbstractPageLet resource = getPageContents(exchange);
 
-		exchange.getResponseHeaders().set("Server", "Carapau de Corrida " + version);
-		
-		resource.execute(exchange);
+		exchange.getResponseHeaders().set("Server", "Carapau de corrida " + version);
 
+		resource.execute(exchange);
 		
 		Server.printLogMessage(exchange, resource);
 	}
