@@ -4,13 +4,13 @@
 
 function getUrlFromForm() {
 
-    var url = f.v.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '');
+    var url = f.v.value.replace(/^\s\s*/, '').replace(/\s\s*$/, '')
 
     if ((url.indexOf('http://') !== 0) && (url.indexOf('https://') !== 0)) {
-        return 'http://' + url;
+        return 'http://' + url
     }
 
-    return url;
+    return url
 }
 
 function isValidUrl(url) {
@@ -22,46 +22,46 @@ function isValidUrl(url) {
 window.onload = function () {
 
     f.v.onfocus = function () {
-        f.v.style.color = 'black';
+        f.v.style.color = 'black'
     };
 
     f.onsubmit = function () {
 
         // do basic validation, server will still refuse invalid Urls
 
-        var su = getUrlFromForm();
+        var su = getUrlFromForm()
 
         if (!isValidUrl(su)) {
         
-            f.v.style.color = 'red';
+            f.v.style.color = 'red'
         
         } else {
-            f.v.style.color = 'black';
+            f.v.style.color = 'black'
 
-            var params = 'v=' + su;
+            var params = 'v=' + su
 
-            var http = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+            var http = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP")
 
             http.onreadystatechange = function () {
 
                 if (http.readyState == 4 && http.status == 200) {
 
-                    if (http.responseText === undefined || http.responseText === '') return false;
+                    if (http.responseText === undefined || http.responseText === '') return false
 
                     // place result in form and select text
-                    f.v.value = '[$shortlinkdomain$]' + http.responseText;
-                    f.v.focus();
-                    f.v.select();
+                    f.v.value = '[$shortlinkdomain$]' + http.responseText
+                    f.v.focus()
+                    f.v.select()
 
                 }
 			};
 
-            http.open('POST', '/new', true);
-            http.send(params);
+            http.open('POST', '/new', true)
+            http.send(params)
 
         };
   
         // returning 'false' cancels HTML basic submit behavior
-        return false;
+        return false
     };
 };
