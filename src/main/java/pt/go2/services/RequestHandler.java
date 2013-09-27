@@ -1,21 +1,22 @@
 package pt.go2.services;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Properties;
 
 import pt.go2.keystore.Database;
-import pt.go2.pagelets.AbstractPageLet;
+import pt.go2.pagelets.PageLet;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-
 class RequestHandler implements HttpHandler {
 
-	private final Map<String, AbstractPageLet> resources;
+	private final Map<String, PageLet> resources;
 	private final String version;
 
 	/**
@@ -26,13 +27,13 @@ class RequestHandler implements HttpHandler {
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(final Map<String, AbstractPageLet> pages, Properties properties) {
+	RequestHandler(final Map<String, PageLet> pages,
+			Properties properties) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
 		this.version = properties.getProperty("server.version", "unversioned");
 	}
-	
 
 	/**
 	 * Handle request, parse URI filename from request into page resource
@@ -44,12 +45,39 @@ class RequestHandler implements HttpHandler {
 	@Override
 	public void handle(final HttpExchange exchange) throws IOException {
 
-		final AbstractPageLet resource = getPageContents(exchange);
+		final PageLet resource = getPageContents(exchange);
 
 		exchange.getResponseHeaders().set("Server", "Carapau de corrida " + version);
 
-		HttpResponse response = resource.execute(exchange);
+		// execute abstract method of PageLet
+
+		final HttpResponse response = resource.getPageLet(exchange);
+
+		if (!response.success()) {
 		
+			final Headers headers = exchange.getResponseHeaders();
+
+			headers.set("Content-Type", response.getMimeType());
+
+			exchange.sendResponseHeaders(response.getHttpErrorCode(),
+					response.getSize());
+			
+		} else {
+			
+			final OutputStream os = exchange.getResponseBody();
+			final Headers headers = exchange.getResponseHeaders();
+
+			headers.set("Content-Type", response.getMimeType());
+
+			exchange.sendResponseHeaders(response.getHttpErrorCode(),
+					response.getSize());
+
+			os.write(response.getBody());
+
+			os.flush();
+			os.close();
+		}
+
 		Server.printLogMessage(exchange, response);
 	}
 
@@ -60,7 +88,7 @@ class RequestHandler implements HttpHandler {
 	 *            .getRequestURI()
 	 * @return
 	 */
-	private AbstractPageLet getPageContents(final HttpExchange exchange) {
+	private PageLet getPageContents(final HttpExchange exchange) {
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
@@ -68,8 +96,8 @@ class RequestHandler implements HttpHandler {
 			return Database.getDatabase().get(filename);
 		}
 
-		final AbstractPageLet page = resources.get(filename);
-		
+		final PageLet page = resources.get(filename);
+
 		return page != null ? page : resources.get("404");
 	}
 

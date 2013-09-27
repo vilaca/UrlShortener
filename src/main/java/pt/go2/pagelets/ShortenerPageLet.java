@@ -17,7 +17,7 @@ import com.sun.net.httpserver.HttpExchange;
  * @author vilaca
  * 
  */
-public class ShortenerPageLet extends AbstractPageLet {
+public class ShortenerPageLet implements PageLet {
 
 	private static final Database db = Database.getDatabase();
 

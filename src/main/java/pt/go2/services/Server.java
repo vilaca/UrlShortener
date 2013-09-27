@@ -17,7 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.keystore.Database;
-import pt.go2.pagelets.AbstractPageLet;
+import pt.go2.pagelets.PageLet;
 import pt.go2.pagelets.PageLetFileReader;
 import pt.go2.pagelets.ShortenerPageLet;
 import pt.go2.pagelets.StaticPageLet;
@@ -52,7 +52,7 @@ class Server {
 
 		// map static pages to URI part
 
-		final Map<String, AbstractPageLet> pages;
+		final Map<String, PageLet> pages;
 		try {
 			pages = generateResourceDecoder();
 		} catch (IOException ex) {
@@ -169,10 +169,10 @@ class Server {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<String, AbstractPageLet> generateResourceDecoder() throws IOException {
+	private static Map<String, PageLet> generateResourceDecoder() throws IOException {
 
 		final PageLetFileReader fr = new PageLetFileReader("/");
-		final Map<String, AbstractPageLet> pages = new HashMap<String, AbstractPageLet>();
+		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
 
 		pages.put("/", 
 				new StaticPageLet.Builder()

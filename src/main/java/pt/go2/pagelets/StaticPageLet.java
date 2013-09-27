@@ -13,7 +13,7 @@ import com.sun.net.httpserver.HttpExchange;
 /*
  * Immutable class for static pages, including  
  */
-public class StaticPageLet extends AbstractPageLet {
+public class StaticPageLet implements PageLet {
 
 	final private String redirect;
 	final private HttpResponse response;
@@ -38,7 +38,7 @@ public class StaticPageLet extends AbstractPageLet {
 		}
 
 		public Builder zip() throws IOException {
-			
+
 			try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					GZIPOutputStream zip = new GZIPOutputStream(baos);) {
 
@@ -74,15 +74,16 @@ public class StaticPageLet extends AbstractPageLet {
 			final int responseCode, final String redirect, final byte[] gzipped) {
 		this.redirect = redirect;
 		this.response = HttpResponse.create(mimeType, content, responseCode);
-		this.compressedResponse = HttpResponse.createZipped(mimeType, content, responseCode);
+		this.compressedResponse = HttpResponse.createZipped(mimeType, content,
+				responseCode);
 	}
 
 	@Override
-	HttpResponse getPageLet(final HttpExchange exchange) throws IOException {
+	public HttpResponse getPageLet(final HttpExchange exchange) throws IOException {
 
 		if (redirect != null) {
 			exchange.getResponseHeaders().set("Location", redirect);
-			return this.response;	
+			return this.response;
 		}
 
 		if (this.compressedResponse != null) {
@@ -99,8 +100,8 @@ public class StaticPageLet extends AbstractPageLet {
 				return this.compressedResponse;
 			}
 		}
-		
+
 		return this.response;
-			
+
 	}
 }
