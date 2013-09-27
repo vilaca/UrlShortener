@@ -61,7 +61,11 @@ public final class PageLetFileReader {
 
 		while (line != null) {
 
-			if ( line.charAt(0) == '#' ) continue;
+			if (line.isEmpty() || line.charAt(0) == '#')
+			{
+				line = br.readLine();
+				continue;
+			}
 			
 			final Matcher tagMatcher = tagPattern.matcher(line);
 
