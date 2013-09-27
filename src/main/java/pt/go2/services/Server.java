@@ -25,7 +25,6 @@ import pt.go2.pagelets.StaticPageLet;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
-
 /**
  * @author vilaca
  * 
@@ -35,7 +34,8 @@ class Server {
 	static private final Logger logger = LogManager.getLogger(Server.class
 			.getName());
 
-	static private final Properties properties = PropertiesManager.getProperties();
+	static private final Properties properties = PropertiesManager
+			.getProperties();
 	static private BufferedWriter accessLog;
 
 	/**
@@ -243,10 +243,10 @@ class Server {
 	 * Access log output
 	 * 
 	 * @param params
-	 * @param resource
+	 * @param response
 	 */
 	static void printLogMessage(final HttpExchange params,
-			final AbstractPageLet resource) {
+			final HttpResponse response) {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -259,14 +259,14 @@ class Server {
 		sb.append(" ");
 		sb.append(params.getRequestURI().toString());
 		sb.append(" HTTP/1.0\" ");
-		sb.append(resource.getResponseCode());
+		sb.append(response.getHttpErrorCode());
 		sb.append(" ");
-		sb.append(resource.getResponseSize());
+		sb.append(response.getSize());
 		sb.append(" \"");
-		
+
 		final String referer = params.getRequestHeaders().getFirst("Referer");
 		sb.append(referer == null ? "-" : referer);
-		
+
 		sb.append("\" \"browser info discarded\"");
 		sb.append(System.getProperty("line.separator"));
 

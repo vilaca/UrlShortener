@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
+import pt.go2.services.HttpResponse;
+
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
@@ -13,11 +15,9 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class StaticPageLet extends AbstractPageLet {
 
-	final private byte[] content;
-	final private byte[] gzipped;
-	final private int responseCode;
-	final private String mimeType;
 	final private String redirect;
+	final private HttpResponse response;
+	final private HttpResponse compressedResponse;
 
 	/**
 	 * Builder object to build immutable StaticPageLet
@@ -72,54 +72,35 @@ public class StaticPageLet extends AbstractPageLet {
 
 	private StaticPageLet(final byte[] content, final String mimeType,
 			final int responseCode, final String redirect, final byte[] gzipped) {
-		this.content = content;
-		this.responseCode = responseCode;
-		this.mimeType = mimeType;
 		this.redirect = redirect;
-		this.gzipped = gzipped;
+		this.response = HttpResponse.create(mimeType, content, responseCode);
+		this.compressedResponse = HttpResponse.createZipped(mimeType, content, responseCode);
 	}
 
 	@Override
-	public int getResponseCode() {
-		return responseCode;
-	}
-
-	@Override
-	public String getMimeType() {
-		return mimeType;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * pt.go2.pagelets.AbstractPageLet#main(com.sun.net.httpserver.HttpExchange
-	 * )
-	 */
-	@Override
-	byte[] main(final HttpExchange exchange) throws IOException {
+	HttpResponse getPageLet(final HttpExchange exchange) throws IOException {
 
 		if (redirect != null) {
 			exchange.getResponseHeaders().set("Location", redirect);
-			return this.content;	
+			return this.response;	
 		}
 
-		if (this.gzipped == null)
-		{
-			return this.content;
+		if (this.compressedResponse != null) {
+
+			// check if gzip is allowed
+
+			final Headers headers = exchange.getRequestHeaders();
+			final List<String> values = headers.get("Accept-encoding");
+			final boolean sendZipped = values.size() > 0
+					&& values.get(0).indexOf("gzip") != -1;
+
+			if (sendZipped) {
+				exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+				return this.compressedResponse;
+			}
 		}
 		
-		Headers headers = exchange.getRequestHeaders();
-		List<String> values = headers.get("Accept-encoding");
-		boolean sendZipped =  values.size() > 0 && values.get(0).indexOf("gzip") != -1; 
-		
-		if ( sendZipped )
-		{
-			exchange.getResponseHeaders().set("Content-Encoding", "gzip");
-			return this.gzipped;
-		}
-		
-		return this.content;
+		return this.response;
 			
 	}
 }

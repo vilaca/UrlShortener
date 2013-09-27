@@ -48,9 +48,9 @@ class RequestHandler implements HttpHandler {
 
 		exchange.getResponseHeaders().set("Server", "Carapau de corrida " + version);
 
-		resource.execute(exchange);
+		HttpResponse response = resource.execute(exchange);
 		
-		Server.printLogMessage(exchange, resource);
+		Server.printLogMessage(exchange, response);
 	}
 
 	/**

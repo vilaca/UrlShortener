@@ -6,6 +6,9 @@ package pt.go2.pagelets;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import pt.go2.services.HttpResponse;
+
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
@@ -14,38 +17,38 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public abstract class AbstractPageLet {
 
-	abstract byte[] main(final HttpExchange exchange) throws IOException;
+	abstract HttpResponse getPageLet(final HttpExchange exchange)
+			throws IOException;
 
-	abstract public int getResponseCode();
-
-	abstract public String getMimeType();
-
-	private int responseSize;
-	
-	final public boolean execute(final HttpExchange exchange)
+	final public HttpResponse execute(final HttpExchange exchange)
 			throws IOException {
 
-		final byte[] buffer = main(exchange);
+		// execute abstract method of PageLet
 
-		if (buffer == null)
-			return false;
+		final HttpResponse response = getPageLet(exchange);
 
-		final OutputStream os = exchange.getResponseBody();
+		if (!response.success()) {
+			final Headers headers = exchange.getResponseHeaders();
 
-		exchange.getResponseHeaders().set("Content-Type", getMimeType());
-		exchange.sendResponseHeaders(getResponseCode(), buffer.length);
+			headers.set("Content-Type", response.getMimeType());
 
-		responseSize = buffer.length;
-		
-		os.write(buffer);
-		os.flush();
-		os.close();
+			exchange.sendResponseHeaders(response.getHttpErrorCode(),
+					response.getSize());
+		} else {
+			final OutputStream os = exchange.getResponseBody();
+			final Headers headers = exchange.getResponseHeaders();
 
-		return true;
+			headers.set("Content-Type", response.getMimeType());
+
+			exchange.sendResponseHeaders(response.getHttpErrorCode(),
+					response.getSize());
+
+			os.write(response.getBody());
+
+			os.flush();
+			os.close();
+		}
+		return response;
+
 	}
-
-	public int getResponseSize() {
-		return responseSize;
-	}
-
 }

@@ -9,9 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import pt.go2.keystore.Database;
+import pt.go2.services.HttpResponse;
 
 import com.sun.net.httpserver.HttpExchange;
-
 
 /**
  * @author vilaca
@@ -19,8 +19,11 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class ShortenerPageLet extends AbstractPageLet {
 
+	private static final Database db = Database.getDatabase();
+
 	@Override
-	public byte[] main(final HttpExchange params) throws IOException {
+	public HttpResponse getPageLet(final HttpExchange params)
+			throws IOException {
 
 		try (final InputStream is = params.getRequestBody();
 				final InputStreamReader sr = new InputStreamReader(is);
@@ -28,25 +31,27 @@ public class ShortenerPageLet extends AbstractPageLet {
 
 			final String postBody = br.readLine();
 
-			if ( postBody == null ) throw new IOException("Badly formed Request Body.");
-			
+			if (postBody == null) {
+				return HttpResponse.createBadRequest();
+			}
 			// format for form content is 'fieldname=value'
+
 			final String[] formContents = postBody.split("=");
 
-			byte[] response = Database.getDatabase().add(formContents[1]);
-			
-			return response == null ? "BAD-URI".getBytes() : response;
+			if (formContents.length < 2) {
+				return HttpResponse.createBadRequest();
+			}
+
+			final byte[] hashedUri = db.add(formContents[1]);
+
+			if (hashedUri == null) {
+				return HttpResponse.createBadRequest();
+			}
+
+			HttpResponse response = HttpResponse.create("text/plain",
+					hashedUri, 200);
+
+			return response;
 		}
-
-	}
-
-	@Override
-	public int getResponseCode() {
-		return 200;
-	}
-
-	@Override
-	public String getMimeType() {
-		return "text/plain";
 	}
 }
