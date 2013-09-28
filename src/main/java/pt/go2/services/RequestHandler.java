@@ -16,6 +16,8 @@ import com.sun.net.httpserver.HttpHandler;
 
 class RequestHandler implements HttpHandler {
 
+	private final Database db = Database.getDatabase();
+
 	private final Map<String, PageLet> resources;
 	private final String version;
 
@@ -27,8 +29,7 @@ class RequestHandler implements HttpHandler {
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(final Map<String, PageLet> pages,
-			Properties properties) {
+	RequestHandler(final Map<String, PageLet> pages, Properties properties) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
@@ -47,42 +48,28 @@ class RequestHandler implements HttpHandler {
 
 		final PageLet resource = getPageContents(exchange);
 
-		exchange.getResponseHeaders().set("Server", "Carapau de corrida " + version);
-
-		// execute abstract method of PageLet
+		exchange.getResponseHeaders().set("Server",
+				"Carapau de corrida " + version);
 
 		final HttpResponse response = resource.getPageLet(exchange);
 
-		if (!response.success()) {
-		
-			final Headers headers = exchange.getResponseHeaders();
+		final Headers headers = exchange.getResponseHeaders();
 
-			headers.set("Content-Type", response.getMimeType());
-
-			exchange.sendResponseHeaders(response.getHttpErrorCode(),
-					response.getSize());
-			
-		} else {
-			
-			final Headers headers = exchange.getResponseHeaders();
-
-			if ( response.isZipped() )
-			{
-				headers.set("Content-Encoding", "gzip");
-			}
-
-			headers.set("Content-Type", response.getMimeType());				
-			
-			exchange.sendResponseHeaders(response.getHttpErrorCode(),
-					response.getSize());
-			
-			final OutputStream os = exchange.getResponseBody();
-			
-			os.write(response.getBody());
-
-			os.flush();
-			os.close();
+		if (response.isZipped()) {
+			headers.set("Content-Encoding", "gzip");
 		}
+
+		headers.set("Content-Type", response.getMimeType());
+
+		exchange.sendResponseHeaders(response.getHttpErrorCode(),
+				response.getSize());
+
+		final OutputStream os = exchange.getResponseBody();
+
+		os.write(response.getBody());
+
+		os.flush();
+		os.close();
 
 		Server.printLogMessage(exchange, response);
 	}
@@ -99,7 +86,7 @@ class RequestHandler implements HttpHandler {
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
 		if (filename.length() == 6) {
-			return Database.getDatabase().get(filename);
+			return db.get(filename);
 		}
 
 		final PageLet page = resources.get(filename);

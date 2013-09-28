@@ -36,6 +36,9 @@ class Server {
 
 	static private final Properties properties = PropertiesManager
 			.getProperties();
+	
+	static private final Database db = Database.getDatabase();
+	
 	static private BufferedWriter accessLog;
 
 	/**
@@ -71,7 +74,7 @@ class Server {
 				logger.error("database.folder not found on .properties");
 			}
 
-			Database.getDatabase().start(resumeFolder);
+			db.start(resumeFolder);
 
 		} catch (IOException e1) {
 			logger.fatal("Database unstable.");
@@ -137,7 +140,7 @@ class Server {
 		listener.stop(1);
 
 		try {
-			Database.getDatabase().stop();
+			db.stop();
 		} catch (IOException e) {
 		}
 
