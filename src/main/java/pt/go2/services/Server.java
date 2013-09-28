@@ -193,9 +193,9 @@ class Server {
 						.setContent(fr.read("map.txt"))
 						.setMimeType("text/xml").zip().build());
 
-		pages.put("style.css",
+		pages.put("screen.css",
 				new StaticPageLet.Builder()
-						.setContent(fr.read("style.css"))
+						.setContent(fr.read("screen.css"))
 						.setMimeType("text/css").zip().build());
 
 		// dynamic pages
