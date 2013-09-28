@@ -145,6 +145,13 @@ public class Database {
 					// fields are comma separated [hashkey,url]
 
 					final String fields[] = line.split(",");
+					
+					if ( fields.length < 2 )
+					{
+						logger.error("Error on DB restore file. Skipping.");
+						continue;
+					}
+					
 					final HashKey hk = new HashKey(fields[0].getBytes());
 					final String url = fields[1];
 
