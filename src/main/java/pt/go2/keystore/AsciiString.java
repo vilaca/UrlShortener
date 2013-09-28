@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package pt.go2.keystore;
 
 /**
