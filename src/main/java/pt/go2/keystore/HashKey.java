@@ -2,18 +2,27 @@ package pt.go2.keystore;
 
 class HashKey {
 
-	private byte[] key;
+	private final long MAX_HASH = 68719476735l;
+
+	// hash key as Base10
 	private long hash;
 
+	// hash key as Base64
+	private byte[] key;
+
+	/**
+	 * C'tor
+	 */
 	public HashKey() {
-		final long millis = System.currentTimeMillis();
-		this.hash = super.hashCode();
-		this.hash *= millis;
-		// 36 bit limit
-		this.hash = this.hash & (68719476736l - 1);
-		encode64();
+		generateHash();
 	}
 
+	/**
+	 * Convert from base 64 to decimal.
+	 * 
+	 * @param key
+	 *            base64 key/hash
+	 */
 	public HashKey(final byte[] key) {
 		this.key = key;
 
@@ -46,15 +55,27 @@ class HashKey {
 		this.hash = hash;
 	}
 
+	/**
+	 * Use this
+	 * 
+	 */
 	public void rehash() {
-		this.hash += System.currentTimeMillis() % 256;
-		encode64();
+		generateHash();
 	}
 
+	/**
+	 * Get key in base64 format as a byte array
+	 * 
+	 * @return key
+	 */
 	public byte[] getBytes() {
 		return this.key;
 	}
 
+	/**
+	 * Get hashcode as integer
+	 * 
+	 */
 	@Override
 	public int hashCode() {
 		return (int) hash;
@@ -72,7 +93,7 @@ class HashKey {
 		if (obj.getClass() != getClass())
 			return false;
 
-		// internal hash is long, white hashCode() is int
+		// internal hash is long, while hashCode() is int
 
 		HashKey hash = (HashKey) obj;
 		return this.hash == hash.hash;
@@ -83,6 +104,21 @@ class HashKey {
 		return new String(key);
 	}
 
+	/**
+	 * Generate a "random" hashkey
+	 */
+	private void generateHash() {
+		final long millis = System.currentTimeMillis();
+		this.hash = super.hashCode();
+		this.hash *= millis;
+		// 36 bit limit
+		this.hash = this.hash & (MAX_HASH);
+		encode64();
+	}
+
+	/**
+	 * Encode hashkey as a base64 byte array
+	 */
 	private void encode64() {
 
 		this.key = new byte[6];
