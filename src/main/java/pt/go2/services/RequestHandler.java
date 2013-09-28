@@ -85,11 +85,15 @@ class RequestHandler implements HttpHandler {
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
+		final PageLet page;
+		
 		if (filename.length() == 6) {
-			return db.get(filename);
+			page = db.get(filename);
 		}
-
-		final PageLet page = resources.get(filename);
+		else
+		{
+			page = resources.get(filename);
+		}
 
 		return page != null ? page : resources.get("404");
 	}
