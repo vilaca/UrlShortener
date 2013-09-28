@@ -16,9 +16,9 @@ import java.util.Properties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.fileio.PageLetFileReader;
 import pt.go2.keystore.Database;
 import pt.go2.pagelets.PageLet;
-import pt.go2.pagelets.PageLetFileReader;
 import pt.go2.pagelets.ShortenerPageLet;
 import pt.go2.pagelets.StaticPageLet;
 
