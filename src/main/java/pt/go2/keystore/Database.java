@@ -150,18 +150,7 @@ public class Database {
 
 					// store data
 
-					final String completeUrl = url.startsWith("http") ? url : "http://" + url;
-					
-					logger.trace("Stored URI (" + url + ") is now (" + completeUrl + ").");
-					
-					StaticPageLet redirect = 
-							new StaticPageLet.Builder()
-							.setContent(new byte[0])
-							.setResponseCode(redirectCode)
-							.setRedirect(completeUrl).build();
-					
-					hash2Url.put(hk, redirect);
-					url2Hash.put(new AsciiString(url), hk);
+					storeHash(hk, url);
 
 					line = br.readLine();
 				}
@@ -170,6 +159,21 @@ public class Database {
 				logger.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
+	}
+
+	private void storeHash(final HashKey hk, final String url) {
+		final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+		
+		logger.trace("Stored URI (" + url + ") is now (" + completeUrl + ").");
+		
+		StaticPageLet redirect = 
+				new StaticPageLet.Builder()
+				.setContent(new byte[0])
+				.setResponseCode(redirectCode)
+				.setRedirect(completeUrl).build();
+		
+		hash2Url.put(hk, redirect);
+		url2Hash.put(new AsciiString(url), hk);
 	}
 
 	/**
@@ -247,17 +251,8 @@ public class Database {
 
 		}
 		
-		final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+		storeHash(hk, url);
 		
-		final StaticPageLet redirect = 
-				new StaticPageLet.Builder()
-				.setContent(new byte[0])
-				.setResponseCode(redirectCode)
-				.setRedirect(completeUrl).build();
-
-		hash2Url.put(hk, redirect);
-		url2Hash.put(new AsciiString(url), hk);
-
 		try {
 			resumeLog.write(hk.toString() + "," + url
 					+ System.getProperty("line.separator"));
