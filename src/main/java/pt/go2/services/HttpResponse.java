@@ -9,14 +9,15 @@ package pt.go2.services;
  */
 public class HttpResponse {
 
+	private final static HttpResponse BAD_REQUEST = new HttpResponse("text/plain", "Bad request.".getBytes(), 400, false);
+	
 	private final String mimeType;
 	private final byte[] body;
 	private final int httpError;
 	private final boolean isZipped;
 
 	public static HttpResponse createBadRequest() {
-		// TODO return static instead of creating new one ?
-		return new HttpResponse(null, null, 400, false);
+		return BAD_REQUEST;
 	}
 
 	public static HttpResponse createZipped(String mimeType, byte[] body,
@@ -35,10 +36,6 @@ public class HttpResponse {
 		this.mimeType = mimeType;
 		this.body = body;
 		this.isZipped = zipped;
-	}
-
-	public boolean success() {
-		return httpError == 200 || httpError == 301 || httpError == 302;
 	}
 
 	public int getHttpErrorCode() {
