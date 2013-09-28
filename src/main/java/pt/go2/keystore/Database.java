@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -82,8 +83,9 @@ public class Database {
 		} else if (!folder.endsWith(System.getProperty("file.separator"))) {
 			folder += System.getProperty("file.separator");
 		}
-
-		logger.trace("Resuming from folder: " + folder);
+		
+		logger.trace("Current relative path is:" + Paths.get("").toAbsolutePath().toString());		
+		logger.trace("Resuming DB from folder: " + folder);
 
 		// get all files sorted
 
@@ -149,6 +151,8 @@ public class Database {
 					// store data
 
 					final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+					
+					logger.trace("Stored URI (" + url + ") is now (" + completeUrl + ").");
 					
 					StaticPageLet redirect = 
 							new StaticPageLet.Builder()
@@ -224,7 +228,7 @@ public class Database {
 		}
 
 		int retries = 0;
-		HashKey hk = new HashKey();
+		final HashKey hk = new HashKey();
 
 		// loop if hash already being used
 
@@ -243,11 +247,13 @@ public class Database {
 
 		}
 		
+		final String completeUrl = url.startsWith("http") ? url : "http://" + url;
+		
 		final StaticPageLet redirect = 
 				new StaticPageLet.Builder()
 				.setContent(new byte[0])
 				.setResponseCode(redirectCode)
-				.setRedirect(url).build();
+				.setRedirect(completeUrl).build();
 
 		hash2Url.put(hk, redirect);
 		url2Hash.put(new AsciiString(url), hk);
