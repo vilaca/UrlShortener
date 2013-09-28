@@ -10,7 +10,7 @@ class HashKey {
 		this.hash = super.hashCode();
 		this.hash *= millis;
 		// 36 bit limit
-		this.hash = this.hash & (68719476736l-1);
+		this.hash = this.hash & (68719476736l - 1);
 		encode64();
 	}
 
@@ -18,31 +18,31 @@ class HashKey {
 		this.key = key;
 
 		long hash = 0;
-		
+
 		for (byte b : key) {
 
 			long inc;
-			
+
 			if (b >= 'a' && b <= 'z') {
 				inc = b - 'a';
-		
+
 			} else if (b >= 'A' && b <= 'Z') {
 				inc = b - 'A' + 26;
-			
+
 			} else if (b >= '0' && b <= '9') {
 				inc = b - '0' + 52;
-			
+
 			} else if (b == '_') {
 				inc = 62;
-			
+
 			} else {
 				inc = 63;
 			}
-			
+
 			hash *= 64;
 			hash += inc;
 		}
-		
+
 		this.hash = hash;
 	}
 
@@ -74,17 +74,13 @@ class HashKey {
 
 		// internal hash is long, white hashCode() is int
 
-		HashKey hash =(HashKey) obj;
+		HashKey hash = (HashKey) obj;
 		return this.hash == hash.hash;
 	}
 
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		for (byte b : key) {
-			sb.append((char) b);
-		}
-		return sb.toString();
+		return new String(key);
 	}
 
 	private void encode64() {
