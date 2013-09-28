@@ -74,12 +74,13 @@ public class StaticPageLet implements PageLet {
 			final int responseCode, final String redirect, final byte[] gzipped) {
 		this.redirect = redirect;
 		this.response = HttpResponse.create(mimeType, content, responseCode);
-		this.compressedResponse = HttpResponse.createZipped(mimeType, content,
+		this.compressedResponse = HttpResponse.createZipped(mimeType, gzipped,
 				responseCode);
 	}
 
 	@Override
-	public HttpResponse getPageLet(final HttpExchange exchange) throws IOException {
+	public HttpResponse getPageLet(final HttpExchange exchange)
+			throws IOException {
 
 		if (redirect != null) {
 			exchange.getResponseHeaders().set("Location", redirect);
@@ -88,20 +89,20 @@ public class StaticPageLet implements PageLet {
 
 		if (this.compressedResponse != null) {
 
-			// check if gzip is allowed
-
-			final Headers headers = exchange.getRequestHeaders();
-			final List<String> values = headers.get("Accept-encoding");
-			final boolean sendZipped = values.size() > 0
-					&& values.get(0).indexOf("gzip") != -1;
-
-			if (sendZipped) {
-				exchange.getResponseHeaders().set("Content-Encoding", "gzip");
+			if (clientAcceptsZip(exchange)) {
 				return this.compressedResponse;
 			}
 		}
 
 		return this.response;
 
+	}
+
+	private boolean clientAcceptsZip(final HttpExchange exchange) {
+		final Headers headers = exchange.getRequestHeaders();
+		final List<String> values = headers.get("Accept-encoding");
+		final boolean sendZipped = values.size() > 0
+				&& values.get(0).indexOf("gzip") != -1;
+		return sendZipped;
 	}
 }

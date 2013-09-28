@@ -64,14 +64,20 @@ class RequestHandler implements HttpHandler {
 			
 		} else {
 			
-			final OutputStream os = exchange.getResponseBody();
 			final Headers headers = exchange.getResponseHeaders();
 
-			headers.set("Content-Type", response.getMimeType());
+			if ( response.isZipped() )
+			{
+				headers.set("Content-Encoding", "gzip");
+			}
 
+			headers.set("Content-Type", response.getMimeType());				
+			
 			exchange.sendResponseHeaders(response.getHttpErrorCode(),
 					response.getSize());
-
+			
+			final OutputStream os = exchange.getResponseBody();
+			
 			os.write(response.getBody());
 
 			os.flush();
