@@ -8,5 +8,9 @@
 #bin folder
 bin/*
 
+#database restore folder
+go2db/*
+
 #dont commit logs
 *.log
+access_log
