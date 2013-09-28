@@ -38,7 +38,7 @@ public class HttpResponse {
 	}
 
 	public boolean success() {
-		return httpError != 200 && httpError != 301 && httpError != 302;
+		return httpError == 200 || httpError == 301 || httpError == 302;
 	}
 
 	public int getHttpErrorCode() {
