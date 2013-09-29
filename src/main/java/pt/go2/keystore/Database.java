@@ -16,7 +16,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.pagelets.StaticPageLet;
+import pt.go2.pagelets.RedirectPageLet;
 import pt.go2.services.PropertiesManager;
 
 
@@ -36,10 +36,10 @@ public class Database {
 	static final private Database inner = new Database();
 
 	// hash to URL
-	final private Map<HashKey, StaticPageLet> hash2Url = new HashMap<HashKey, StaticPageLet>(1600000);
+	final private Map<HashKey, RedirectPageLet> hash2Url = new HashMap<HashKey, RedirectPageLet>();
 	
 	// URL to hash
-	final private Map<AsciiString, HashKey> url2Hash = new HashMap<AsciiString, HashKey>(1600000);
+	final private Map<AsciiString, HashKey> url2Hash = new HashMap<AsciiString, HashKey>();
 
 	// used to read configuration
 	final private Properties properties = PropertiesManager.getProperties();
@@ -173,11 +173,7 @@ public class Database {
 		
 		logger.trace("Stored URI (" + url + ") is now (" + completeUrl + ").");
 		
-		StaticPageLet redirect = 
-				new StaticPageLet.Builder()
-				.setContent(new byte[0])
-				.setResponseCode(redirectCode)
-				.setRedirect(completeUrl).build();
+		RedirectPageLet redirect = new RedirectPageLet(redirectCode, completeUrl);
 		
 		hash2Url.put(hk, redirect);
 		url2Hash.put(new AsciiString(url), hk);
@@ -321,7 +317,7 @@ public class Database {
 	 * @param filename
 	 * @return
 	 */
-	public StaticPageLet get(final String filename) {
+	public RedirectPageLet get(final String filename) {
 
 		return hash2Url.get(new HashKey(filename.getBytes()));
 	}
