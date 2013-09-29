@@ -36,10 +36,10 @@ class Server {
 
 	static private final Properties properties = PropertiesManager
 			.getProperties();
-	
+
 	static private final Database db = Database.getDatabase();
-	
-	static private BufferedWriter accessLog;
+
+	static private BufferedWriter accessLog = null;
 
 	/**
 	 * Process initial method
@@ -53,6 +53,51 @@ class Server {
 		logger.trace("Preparing to run "
 				+ properties.getProperty("server.version", "undefined"));
 
+		try {
+			final HttpServer listener = prepareServer();
+
+			if (listener == null) {
+				return;
+			}
+
+			listener.setExecutor(null); // creates a default executor
+			listener.start();
+
+			System.out.println("Server Running. Press [k] to kill listener.");
+			boolean running = true;
+			do {
+
+				try {
+					running = System.in.read() == 'k';
+				} catch (IOException e) {
+				}
+
+			} while (running);
+
+			logger.trace("Server stopping.");
+
+			listener.stop(1);
+			
+		} finally {
+			
+			try {
+				db.stop();
+			} catch (IOException e) {
+			}
+
+			try {
+				if (accessLog != null)
+				{
+					accessLog.close();
+				}
+			} catch (IOException e) {
+			}
+			logger.trace("Server stopped.");
+		}
+
+	}
+
+	private static HttpServer prepareServer() {
 		// map static pages to URI part
 
 		final Map<String, PageLet> pages;
@@ -60,7 +105,7 @@ class Server {
 			pages = generateResourceDecoder();
 		} catch (IOException ex) {
 			logger.fatal(ex.getMessage());
-			return;
+			return null;
 		}
 
 		// database must reload hashes
@@ -78,7 +123,7 @@ class Server {
 
 		} catch (IOException e1) {
 			logger.fatal("Database unstable.");
-			return;
+			return null;
 		}
 
 		// start access_log
@@ -98,7 +143,7 @@ class Server {
 			sockAddress = createInetSocketAddress(properties);
 		} catch (Exception ex) {
 			logger.fatal("Bad parameters for server address/port.");
-			return;
+			return null;
 		}
 
 		// create listener
@@ -114,42 +159,14 @@ class Server {
 
 		} catch (IOException e) {
 			logger.fatal("Could not create listener.");
-			return;
+			return null;
 		}
 
 		// configure server context to /
 		// and use default executor (single-threaded)
 
 		listener.createContext("/", new RequestHandler(pages, properties));
-		listener.setExecutor(null); // creates a default executor
-		listener.start();
-
-		System.out.println("Server Running. Press [k] to kill listener.");
-		boolean running = true;
-		do {
-
-			try {
-				running = System.in.read() == 'k';
-			} catch (IOException e) {
-			}
-
-		} while (running);
-
-		logger.trace("Server stopping.");
-
-		listener.stop(1);
-
-		try {
-			db.stop();
-		} catch (IOException e) {
-		}
-
-		try {
-			accessLog.close();
-		} catch (IOException e) {
-		}
-
-		logger.trace("Server stopped.");
+		return listener;
 	}
 
 	private static int getBacklog(Properties prop) {
@@ -172,7 +189,8 @@ class Server {
 	 * @return
 	 * @throws IOException
 	 */
-	private static Map<String, PageLet> generateResourceDecoder() throws IOException {
+	private static Map<String, PageLet> generateResourceDecoder()
+			throws IOException {
 
 		final PageLetFileReader fr = new PageLetFileReader("/");
 		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
