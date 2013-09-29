@@ -235,7 +235,7 @@ public class Database {
 		}
 
 		int retries = 0;
-		final HashKey hk = new HashKey();
+		HashKey hk = new HashKey();
 
 		// loop if hash already being used
 
@@ -250,8 +250,7 @@ public class Database {
 				logger.warn("Rehashing " + url + " / " + retries + "try.");
 			}
 
-			hk.rehash();
-
+			hk = new HashKey();
 		}
 		
 		storeHash(hk, url);

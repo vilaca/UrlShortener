@@ -56,14 +56,6 @@ class HashKey {
 	}
 
 	/**
-	 * Use this
-	 * 
-	 */
-	public void rehash() {
-		generateHash();
-	}
-
-	/**
 	 * Get key in base64 format as a byte array
 	 * 
 	 * @return key
