@@ -15,7 +15,6 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class StaticPageLet implements PageLet {
 
-	final private String redirect;
 	final private HttpResponse response;
 	final private HttpResponse compressedResponse;
 
@@ -30,10 +29,9 @@ public class StaticPageLet implements PageLet {
 		private byte[] zipped;
 		private int responseCode = 200; // HTTP OK
 		private String mimeType = "text/html";
-		private String redirect = null;
 
 		public StaticPageLet build() {
-			return new StaticPageLet(content, mimeType, responseCode, redirect,
+			return new StaticPageLet(content, mimeType, responseCode,
 					zipped);
 		}
 
@@ -63,16 +61,10 @@ public class StaticPageLet implements PageLet {
 			this.mimeType = mimeType;
 			return this;
 		}
-
-		public Builder setRedirect(String url) {
-			this.redirect = url;
-			return this;
-		}
 	}
 
 	private StaticPageLet(final byte[] content, final String mimeType,
-			final int responseCode, final String redirect, final byte[] gzipped) {
-		this.redirect = redirect;
+			final int responseCode, final byte[] gzipped) {
 		this.response = HttpResponse.create(mimeType, content, responseCode);
 		this.compressedResponse = HttpResponse.createZipped(mimeType, gzipped,
 				responseCode);
@@ -81,11 +73,6 @@ public class StaticPageLet implements PageLet {
 	@Override
 	public HttpResponse getPageLet(final HttpExchange exchange)
 			throws IOException {
-
-		if (redirect != null) {
-			exchange.getResponseHeaders().set("Location", redirect);
-			return this.response;
-		}
 
 		if (this.compressedResponse != null) {
 
