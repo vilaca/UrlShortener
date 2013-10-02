@@ -40,3 +40,7 @@ input:focus{
     outline: none;
 	color: black;
 }
+
+p.error {
+	color: red;
+}

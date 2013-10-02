@@ -19,11 +19,43 @@ function isValidUrl(url) {
 
 }
 
+function inputError()
+{
+	f.v.style.borderColor = 'red'
+	error.innerHTML = 'Invalid URL!'
+}
+
+function inputDisable()
+{
+	f.v.enabled = false;
+	f.s.enabled = false;
+}
+
+function inputEnable()
+{
+	f.v.enabled = true;
+	f.s.enabled = true;
+}
+
+function clearError()
+{
+	f.v.style.borderColor = 'black'
+	error.innerHTML = '&nbsp;'
+}
+
 window.onload = function () {
 
     f.v.onfocus = function () {
-        f.v.style.color = 'black'
+        clearError()
     };
+
+	f.v.onclick = function() {
+		f.v.select()
+	};
+
+	f.v.onchange = function() {
+		clearError()
+	};
 
     f.onsubmit = function () {
 
@@ -33,7 +65,7 @@ window.onload = function () {
 
         if (!isValidUrl(su)) {
         
-            f.v.style.color = 'red'
+            inputError()
         
         } else {
             f.v.style.color = 'black'
@@ -42,28 +74,47 @@ window.onload = function () {
 
             var http = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP")
 
+
+			var tmr = setTimeout( function() {
+				
+				http.abort()
+				error.innerHTML = 'Please try again.'
+    			inputEnable()
+    		 
+			},2000)
+
             http.onreadystatechange = function () {
 
                 if (http.readyState == 4 )
                 {
+					inputEnable()
+                	window.clearTimeout(tmr)
+                
                  	if ( http.status == 200)
                  	{
-						if (http.responseText !== 'BAD-URI')
+						if (http.responseText !== '')
 						{
         	            	// place result in form and select text
             	        	f.v.value = '[$shortlinkdomain$]' + http.responseText
                 	    	f.v.focus()
                     		f.v.select()
                     	}
-                    	else
-                    	{
-				            f.v.style.color = 'red'
-                    	}
-					}
+                    }
+                    else if ( http.status == 400)
+                   	{
+				        inputError()
+                   	}
+                   	else
+                   	{
+                   		error.innerHTML = 'Please try again.'
+                   	}
                 }
 			};
 
+			inputDisable()
+
             http.open('POST', '/new', true)
+            
             http.send(params)
 
         };
