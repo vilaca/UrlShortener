@@ -34,15 +34,16 @@ public class ShortenerPageLet implements PageLet {
 			if (postBody == null) {
 				return HttpResponse.createBadRequest();
 			}
+
 			// format for form content is 'fieldname=value'
 
-			final String[] formContents = postBody.split("=");
+			final int idx = postBody.indexOf('=') + 1;
 
-			if (formContents.length < 2) {
+			if (idx == -1 || postBody.length() - idx < 3) {
 				return HttpResponse.createBadRequest();
 			}
 
-			final byte[] hashedUri = db.add(formContents[1]);
+			final byte[] hashedUri = db.add(postBody.substring(idx));
 
 			if (hashedUri == null) {
 				return HttpResponse.createBadRequest();

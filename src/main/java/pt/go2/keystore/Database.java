@@ -143,22 +143,16 @@ public class Database {
 				while (line != null) {
 
 					// fields are comma separated [hashkey,url]
-
-					final String fields[] = line.split(",");
 					
-					if ( fields.length < 2 )
-					{
-						logger.error("Error on DB restore file. Skipping.");
-						continue;
-					}
+					final byte[] hashkey = line.substring(0, 6).getBytes();
+					final String url = line.substring(7);
 					
-					final HashKey hk = new HashKey(fields[0].getBytes());
-					final String url = fields[1];
-
 					// store data
 
-					storeHash(hk, url);
+					storeHash(new HashKey(hashkey), url);
 
+					// next line
+					
 					line = br.readLine();
 				}
 

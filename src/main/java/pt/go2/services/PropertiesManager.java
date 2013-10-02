@@ -1,6 +1,4 @@
-/**
- * 
- */
+
 package pt.go2.services;
 
 import java.io.File;
