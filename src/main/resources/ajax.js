@@ -39,7 +39,7 @@ function inputEnable()
 
 function clearError()
 {
-	f.v.style.borderColor = 'black'
+	f.v.style.borderColor = '#444'
 	error.innerHTML = '&nbsp;'
 }
 
