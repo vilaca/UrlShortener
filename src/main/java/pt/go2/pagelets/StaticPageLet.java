@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import pt.go2.services.HttpResponse;
+import pt.go2.application.HttpResponse;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
@@ -18,6 +18,20 @@ public class StaticPageLet implements PageLet {
 	final private HttpResponse response;
 	final private HttpResponse compressedResponse;
 
+	@Override
+	public HttpResponse getPageLet(final HttpExchange exchange)
+			throws IOException {
+
+		if (this.compressedResponse != null) {
+
+			if (clientAcceptsZip(exchange)) {
+				return this.compressedResponse;
+			}
+		}
+
+		return this.response;
+	}
+	
 	/**
 	 * Builder object to build immutable StaticPageLet
 	 * 
@@ -68,21 +82,6 @@ public class StaticPageLet implements PageLet {
 		this.response = HttpResponse.create(mimeType, content, responseCode);
 		this.compressedResponse = HttpResponse.createZipped(mimeType, gzipped,
 				responseCode);
-	}
-
-	@Override
-	public HttpResponse getPageLet(final HttpExchange exchange)
-			throws IOException {
-
-		if (this.compressedResponse != null) {
-
-			if (clientAcceptsZip(exchange)) {
-				return this.compressedResponse;
-			}
-		}
-
-		return this.response;
-
 	}
 
 	private boolean clientAcceptsZip(final HttpExchange exchange) {
