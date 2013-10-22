@@ -1,4 +1,3 @@
-
 package pt.go2.fileio;
 
 import java.io.BufferedReader;
@@ -7,21 +6,11 @@ import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import pt.go2.services.PropertiesManager;
+public final class SmartTagParser {
 
-
-/**
- *
- * @author vilaca
- * 
- */
-public final class PageLetFileReader {
-
-	private final Properties properties = PropertiesManager.getProperties();
 	private final String base;
 	
 	private final Pattern tagPattern = Pattern.compile( "\\[\\$\\w*\\$\\]");
@@ -29,28 +18,20 @@ public final class PageLetFileReader {
 	private final Pattern tagFuncNamePattern = Pattern.compile("^\\w*");
 	private final Pattern tagFuncParamPattern = Pattern.compile("\\(.*\\)");
 
-	public PageLetFileReader(final String base) {
+	public SmartTagParser(final String base) {
 		this.base = base;
 	}
 
 	public byte[] read(final String filename) throws IOException {
 		try (final BufferedReader br = new BufferedReader(
 				new InputStreamReader(
-						PageLetFileReader.class
+						SmartTagParser.class
 								.getResourceAsStream(base + filename)));) {
 
 			return readFromFile(br);
 		}
 	}
 
-	/**
-	 * 
-	 * 
-	 * @param input
-	 * @param baos
-	 * 
-	 * @throws IOException
-	 */
 	private byte[] readFromFile(final BufferedReader br) throws IOException {
 
 		final StringBuilder sb = new StringBuilder();
@@ -72,7 +53,7 @@ public final class PageLetFileReader {
 				String tag = tagMatcher.group();
 				tag = tag.substring(2, tag.length() - 2);
 				
-				final String value = properties.getProperty("web." + tag);
+				final String value = Configuration.getProperty("web." + tag);
 				
 				if ( value != null) line = tagMatcher.replaceFirst(value);
 			}
