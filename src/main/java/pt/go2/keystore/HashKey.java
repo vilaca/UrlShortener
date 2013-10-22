@@ -1,6 +1,6 @@
 package pt.go2.keystore;
 
-class HashKey {
+public class HashKey {
 
 	private final long MAX_HASH = 68719476735l;
 
@@ -23,12 +23,13 @@ class HashKey {
 	 * @param key
 	 *            base64 key/hash
 	 */
-	public HashKey(final byte[] key) {
-		this.key = key;
+	public HashKey(final String key) {
+		
+		this.key = key.getBytes();
 
 		long hash = 0;
 
-		for (byte b : key) {
+		for (byte b : this.key) {
 
 			long inc;
 
