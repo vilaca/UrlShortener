@@ -1,6 +1,3 @@
-/**
- * 
- */
 package pt.go2.pagelets;
 
 import java.io.BufferedReader;
@@ -8,8 +5,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import pt.go2.keystore.Database;
-import pt.go2.services.HttpResponse;
+import pt.go2.application.HttpResponse;
+import pt.go2.keystore.KeyValueStore;
+import pt.go2.keystore.Uri;
 
 import com.sun.net.httpserver.HttpExchange;
 
@@ -19,8 +17,13 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class ShortenerPageLet implements PageLet {
 
-	private static final Database db = Database.getDatabase();
+	private final KeyValueStore db;
 
+	public ShortenerPageLet(final KeyValueStore db) {
+		
+		this.db = db;
+	}
+	
 	@Override
 	public HttpResponse getPageLet(final HttpExchange params)
 			throws IOException {
@@ -43,7 +46,13 @@ public class ShortenerPageLet implements PageLet {
 				return HttpResponse.createBadRequest();
 			}
 
-			final byte[] hashedUri = db.add(postBody.substring(idx));
+			final Uri uri = Uri.create(postBody.substring(idx));
+
+			if (uri == null) {
+				return HttpResponse.createBadRequest();
+			}
+
+			final byte[] hashedUri = db.add(uri);
 
 			if (hashedUri == null) {
 				return HttpResponse.createBadRequest();
