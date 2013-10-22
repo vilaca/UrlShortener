@@ -1,13 +1,12 @@
-package pt.go2.services;
+package pt.go2.application;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
-import java.util.Properties;
 
-import pt.go2.keystore.Database;
+import pt.go2.keystore.KeyValueStore;
 import pt.go2.pagelets.PageLet;
 
 import com.sun.net.httpserver.Headers;
@@ -16,8 +15,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 class RequestHandler implements HttpHandler {
 
-	private final Database db = Database.getDatabase();
-
+	private final KeyValueStore db;
 	private final Map<String, PageLet> resources;
 	private final String version;
 
@@ -29,11 +27,12 @@ class RequestHandler implements HttpHandler {
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(final Map<String, PageLet> pages, Properties properties) {
+	RequestHandler(KeyValueStore db, Map<String, PageLet> pages, String version) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
-		this.version = properties.getProperty("server.version", "unversioned");
+		this.version = version;
+		this.db = db;
 	}
 
 	/**
@@ -61,6 +60,8 @@ class RequestHandler implements HttpHandler {
 
 		headers.set("Content-Type", response.getMimeType());
 
+		headers.set("Cache-Control", "max-age=" + 60 * 60 * 24); // cache for a whole day
+		
 		exchange.sendResponseHeaders(response.getHttpErrorCode(),
 				response.getSize());
 
