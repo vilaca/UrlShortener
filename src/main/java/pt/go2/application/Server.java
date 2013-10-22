@@ -16,7 +16,7 @@ import pt.go2.fileio.SmartTagParser;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.pagelets.PageLet;
 import pt.go2.pagelets.ShortenerPageLet;
-import pt.go2.pagelets.StaticPageLet;
+import pt.go2.pagelets.StaticPageLetBuilder;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
@@ -42,14 +42,14 @@ class Server {
 
 		// log server version
 
-		logger.trace("Preparing to run " + config.serverVersion + ".");
+		logger.trace("Preparing to run " + config.VERSION + ".");
 
-		logger.trace("Current relative path is:" + config.relativePath);
-		logger.trace("Resuming DB from folder: " + config.databaseFolder);
+		logger.trace("Current relative path is:" + config.RELATIVE_PATH);
+		logger.trace("Resuming DB from folder: " + config.DATABASE_FOLDER);
 
 		// restore URI/hash mappings data
 
-		ks = KeyValueStore.create(config.databaseFolder, config.serverRedirect);
+		ks = KeyValueStore.create(config.DATABASE_FOLDER, config.REDIRECT);
 			
 		// map static pages to URI part
 
@@ -68,14 +68,14 @@ class Server {
 		final HttpServer listener;
 		try {
 
-			listener = HttpServer.create(config.host, config.serverBackLog);
+			listener = HttpServer.create(config.HOST, config.BACKLOG);
 
 		} catch (IOException e) {
 			logger.fatal("Could not create listener.");
 			return;
 		}
 
-		listener.createContext("/", new RequestHandler(ks, pages, config.serverVersion));
+		listener.createContext("/", new RequestHandler(ks, pages, config.VERSION));
 		listener.setExecutor(null);
 
 		try {
@@ -83,7 +83,7 @@ class Server {
 			// start access log
 
 			try {
-				final FileWriter file = new FileWriter(config.serverAccessLog, true);
+				final FileWriter file = new FileWriter(config.ACCESS_LOG, true);
 				accessLog = new BufferedWriter(file);
 			} catch (IOException e1) {
 				System.out.println("Access log redirected to console.");
@@ -121,6 +121,8 @@ class Server {
 	}
 
 	/**
+	 * URL to Pagelet Multiplexer
+	 * 
 	 * @return
 	 * @throws IOException
 	 */
@@ -131,26 +133,26 @@ class Server {
 		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
 
 		pages.put("/", 
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("index.html")).zip().build());
 
 		pages.put("ajax.js",
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("ajax.js"))
 						.setMimeType("application/javascript").zip().build());
 
 		pages.put("robots.txt",
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("robots.txt"))
 						.setMimeType("text/plain").zip().build());
 
 		pages.put("sitemap.xml",
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("map.txt"))
 						.setMimeType("text/xml").zip().build());
 
 		pages.put("screen.css",
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("screen.css"))
 						.setMimeType("text/css").zip().build());
 
@@ -159,7 +161,7 @@ class Server {
 
 		// error pages
 		pages.put("404",
-				new StaticPageLet.Builder()
+				new StaticPageLetBuilder()
 						.setContent(fr.read("404.html"))
 						.setResponseCode(404).zip().build());
 		
@@ -209,6 +211,5 @@ class Server {
 		}
 
 		System.out.print(output);
-
 	}
 }

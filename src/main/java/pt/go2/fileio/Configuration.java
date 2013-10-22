@@ -14,14 +14,23 @@ public class Configuration {
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
 	
-	public final InetSocketAddress host;
-	public final int serverBackLog;
-	public final String serverAccessLog;
-	public final String serverVersion;
-	public final int serverRedirect;
-	public final String databaseFolder;
-	public final String relativePath;
+	public final InetSocketAddress HOST;
 	
+	public final int BACKLOG;
+	
+	public final String ACCESS_LOG;
+	
+	public final String VERSION;
+	
+	public final int REDIRECT;
+	
+	public final String DATABASE_FOLDER;
+	
+	public final String RELATIVE_PATH;
+	
+	/**
+	 * Read configuration from file
+	 */
 	public Configuration ()
 	{
 		final boolean propertiesOnBaseDir = new File(PROPERTIES).exists();
@@ -38,17 +47,29 @@ public class Configuration {
 		} catch (IOException e) {
 		}
 
-		host = createInetSocketAddress();
-		serverRedirect = getPropertyAsInt("server.redirect", 301);
-		databaseFolder = getResumeFolder();
+		HOST = createInetSocketAddress();
+		REDIRECT = getPropertyAsInt("server.redirect", 301);
+		DATABASE_FOLDER = getResumeFolder();
 		
-		serverBackLog = getPropertyAsInt("server.backlog", 100);
-		serverAccessLog = getProperty("server.accessLog", "access_log");
-		serverVersion = getProperty("server.version", "beta");
+		BACKLOG = getPropertyAsInt("server.backlog", 100);
+		ACCESS_LOG = getProperty("server.accessLog", "access_log");
+		VERSION = getProperty("server.version", "beta");
 		
-		relativePath = Paths.get("").toAbsolutePath().toString();
+		RELATIVE_PATH = Paths.get("").toAbsolutePath().toString();
 	}
 	
+
+	/**
+	 * Use this method only for Smart Tag parsing
+	 *  
+	 * @param string
+	 * 
+	 * @return
+	 */
+	public static String getProperty(String string) {
+		return prop.getProperty(string);
+	}
+
 	private int getPropertyAsInt(final String key, final int defaultValue) {
 		
 		final String value = prop.getProperty(key);
@@ -114,9 +135,4 @@ public class Configuration {
 			return new InetSocketAddress(host, _port);
 		}
 	}
-
-	public static String getProperty(String string) {
-		return prop.getProperty(string);
-	}
-
 }
