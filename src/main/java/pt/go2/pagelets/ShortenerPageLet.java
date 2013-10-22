@@ -12,18 +12,24 @@ import pt.go2.keystore.Uri;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * @author vilaca
- * 
+ * This pagelet handles a POST request, gets the URL in its body and returns an
+ * Hashed representation of the URL
  */
 public class ShortenerPageLet implements PageLet {
 
+	// hash/url keystore reference
+	
 	private final KeyValueStore db;
 
+	/**
+	 * C'tor
+	 * 
+	 * @param db
+	 */
 	public ShortenerPageLet(final KeyValueStore db) {
-		
 		this.db = db;
 	}
-	
+
 	@Override
 	public HttpResponse getPageLet(final HttpExchange params)
 			throws IOException {

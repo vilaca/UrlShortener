@@ -7,8 +7,7 @@ import pt.go2.application.HttpResponse;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * @author vilaca
- * 
+ * All server responses use this interface.
  */
 public interface PageLet {
 

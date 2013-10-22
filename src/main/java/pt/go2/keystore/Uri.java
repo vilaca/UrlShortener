@@ -13,9 +13,6 @@ import org.apache.commons.validator.routines.UrlValidator;
  * 
  * MUST OVERRIDE BOTH hashCode() and equals(Object). hashCode() value must be
  * calculated in c'tor for faster lookups in Map
- * 
- * @author vilaca
- * 
  */
 public class Uri {
 

@@ -12,8 +12,7 @@ import pt.go2.fileio.Restore.RestoreItem;
 import pt.go2.pagelets.RedirectPageLet;
 
 /**
- * Holds all mappings on URLs to HASHED keys and vice versa
- * 
+ * Handle mappings on URLs to HASHED keys and vice versa
  */
 public class KeyValueStore {
 
