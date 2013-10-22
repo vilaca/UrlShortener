@@ -1,7 +1,4 @@
-/**
- * 
- */
-package pt.go2.services;
+package pt.go2.application;
 
 /**
  * @author vilaca
