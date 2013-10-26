@@ -92,7 +92,7 @@ public class KeyValueStore {
 
 		// loop if hash already being used
 
-		while (map.contains(hk) || storeHash(hk, uri, true)) {
+		while (map.contains(hk) || !storeHash(hk, uri, true)) {
 
 			retries++;
 			if (retries > 10) {
