@@ -16,12 +16,6 @@ Apache Commons Validator 1.4.0 - http://commons.apache.org/proper/commons-valida
 Log4j2 - http://logging.apache.org/log4j/2.x/
 
 
-Status
-======
-
-Work in progress.
-
-
 License
 =======
 
