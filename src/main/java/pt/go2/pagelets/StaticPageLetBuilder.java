@@ -49,6 +49,17 @@ public class StaticPageLetBuilder {
 	}
 
 	/**
+	 * Response contents
+	 * 
+	 * @param content
+	 * @return
+	 */
+	public StaticPageLetBuilder setContent(final String content) {
+		this.content = content.getBytes();
+		return this;
+	}
+
+	/**
 	 * Set response code, usually 200 for OK
 	 * 
 	 * @param responseCode

@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import pt.go2.keystore.KeyValueStore;
@@ -18,6 +19,7 @@ class RequestHandler implements HttpHandler {
 	private final KeyValueStore db;
 	private final Map<String, PageLet> resources;
 	private final String version;
+	private final String host;
 
 	/**
 	 * private c'tor to avoid external instantiation
@@ -27,12 +29,14 @@ class RequestHandler implements HttpHandler {
 	 * @param resources
 	 *            mapping of URI to static content
 	 */
-	RequestHandler(KeyValueStore db, Map<String, PageLet> pages, String version) {
+	RequestHandler(final KeyValueStore db, final Map<String, PageLet> pages,
+			final String version, final String host) {
 
 		// server will not at any case modify this structure
 		this.resources = Collections.unmodifiableMap(pages);
 		this.version = version;
 		this.db = db;
+		this.host = host;
 	}
 
 	/**
@@ -60,8 +64,9 @@ class RequestHandler implements HttpHandler {
 
 		headers.set("Content-Type", response.getMimeType());
 
-		headers.set("Cache-Control", "max-age=" + 60 * 60 * 24); // cache for a whole day
-		
+		headers.set("Cache-Control", "max-age=" + 60 * 60 * 24); // cache for a
+																	// whole day
+
 		exchange.sendResponseHeaders(response.getHttpErrorCode(),
 				response.getSize());
 
@@ -86,17 +91,38 @@ class RequestHandler implements HttpHandler {
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
+		if (filename.equals("/") && host != null && !correctHost(exchange)) {
+			return resources.get("");
+		}
+
 		final PageLet page;
-		
+
 		if (filename.length() == 6) {
 			page = db.get(filename);
-		}
-		else
-		{
+		} else {
 			page = resources.get(filename);
 		}
 
 		return page != null ? page : resources.get("404");
+	}
+
+	private boolean correctHost(final HttpExchange exchange) {
+
+		// we can only know the host if http 1.1 or higher
+
+		if (!exchange.getProtocol().equals("HTTP/1.1"))
+			return true;
+
+		// get host header
+		
+		final List<String> values = exchange.getRequestHeaders().get("Host");
+
+		// malformed request
+		
+		if (values.size() < 1)
+			return true;
+
+		return values.get(0).startsWith(host);
 	}
 
 	/**

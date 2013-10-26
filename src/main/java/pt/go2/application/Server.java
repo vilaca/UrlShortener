@@ -15,6 +15,7 @@ import pt.go2.fileio.Configuration;
 import pt.go2.fileio.SmartTagParser;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.pagelets.PageLet;
+import pt.go2.pagelets.RedirectPageLet;
 import pt.go2.pagelets.ShortenerPageLet;
 import pt.go2.pagelets.StaticPageLetBuilder;
 
@@ -74,7 +75,7 @@ class Server {
 			return;
 		}
 
-		listener.createContext("/", new RequestHandler(ks, pages, config.VERSION));
+		listener.createContext("/", new RequestHandler(ks, pages, config.VERSION, config.ENFORCE_DOMAIN));
 		listener.setExecutor(null);
 
 		try {
@@ -162,6 +163,22 @@ class Server {
 				new StaticPageLetBuilder()
 						.setContent(fr.read("404.html"))
 						.setResponseCode(404).zip().build());
+
+		// google webmaster tools site verification
+		
+		if ( !config.GOOGLE_VALIDATION.isEmpty())
+		{
+			pages.put(config.GOOGLE_VALIDATION,
+					new StaticPageLetBuilder()
+							.setContent("google-site-verification: " + config.GOOGLE_VALIDATION)
+							.setResponseCode(200).zip().build());
+		}
+		
+		// redirect to domain if a subdomain is being used
+		
+		pages.put("",
+				new RedirectPageLet(301, "http://" + config.ENFORCE_DOMAIN));
+
 		
 		return pages;
 	}

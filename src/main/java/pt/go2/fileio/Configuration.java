@@ -23,7 +23,11 @@ public class Configuration {
 	public final int REDIRECT;
 	
 	public final String DATABASE_FOLDER;
-		
+
+	public final String GOOGLE_VALIDATION;
+
+	public final String ENFORCE_DOMAIN;
+	
 	/**
 	 * Read configuration from file
 	 */
@@ -54,6 +58,10 @@ public class Configuration {
 		BACKLOG = getPropertyAsInt("server.backlog", 100);
 		ACCESS_LOG = getProperty("server.accessLog", "access_log");
 		VERSION = getProperty("server.version", "beta");
+		
+		GOOGLE_VALIDATION = getProperty("google-site-verification", "");
+		
+		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
 	}
 	
 	/**
