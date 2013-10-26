@@ -44,7 +44,6 @@ class Server {
 
 		logger.trace("Preparing to run " + config.VERSION + ".");
 
-		logger.trace("Current relative path is:" + config.RELATIVE_PATH);
 		logger.trace("Resuming DB from folder: " + config.DATABASE_FOLDER);
 
 		// restore URI/hash mappings data
@@ -87,7 +86,6 @@ class Server {
 				accessLog = new BufferedWriter(file);
 			} catch (IOException e1) {
 				System.out.println("Access log redirected to console.");
-				return;
 			}
 
 			// start server
@@ -201,15 +199,16 @@ class Server {
 
 		final String output = sb.toString();
 
-		if (accessLog != null) {
-			try {
-				accessLog.write(output);
-				accessLog.flush();
-				return;
-			} catch (IOException e) {
-			}
+		if (accessLog == null) {
+			System.out.print(output);	
+			return;
 		}
 
-		System.out.print(output);
+		try {
+			accessLog.write(output);
+			accessLog.flush();
+		} catch (IOException e) {
+		}
+		
 	}
 }
