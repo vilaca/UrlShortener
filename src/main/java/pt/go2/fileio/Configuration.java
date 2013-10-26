@@ -1,11 +1,9 @@
 package pt.go2.fileio;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
-import java.nio.file.Paths;
 import java.util.Properties;
 
 public class Configuration {
@@ -25,23 +23,25 @@ public class Configuration {
 	public final int REDIRECT;
 	
 	public final String DATABASE_FOLDER;
-	
-	public final String RELATIVE_PATH;
-	
+		
 	/**
 	 * Read configuration from file
 	 */
 	public Configuration ()
 	{
-		final boolean propertiesOnBaseDir = new File(PROPERTIES).exists();
-
-		// TODO is there a '1.7 way' of getting current path?
+		// attempt reading properties/configuration from JAR
 		
-		try (
+		try (InputStream is = Configuration.class.getResourceAsStream("/"+ PROPERTIES);)
+		{
+			prop.load(is);
 
-		InputStream is = propertiesOnBaseDir ? new FileInputStream(PROPERTIES)
-				: Configuration.class.getResourceAsStream("/" + PROPERTIES);) {
+		} catch (IOException e) {
+		}
 
+		// attempt reading properties/configuration from basedir
+		
+		try (InputStream is = new FileInputStream(PROPERTIES);)
+		{
 			prop.load(is);
 
 		} catch (IOException e) {
@@ -54,11 +54,8 @@ public class Configuration {
 		BACKLOG = getPropertyAsInt("server.backlog", 100);
 		ACCESS_LOG = getProperty("server.accessLog", "access_log");
 		VERSION = getProperty("server.version", "beta");
-		
-		RELATIVE_PATH = Paths.get("").toAbsolutePath().toString();
 	}
 	
-
 	/**
 	 * Use this method only for Smart Tag parsing
 	 *  
