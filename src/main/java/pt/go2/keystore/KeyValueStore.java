@@ -16,8 +16,7 @@ import pt.go2.pagelets.RedirectPageLet;
  */
 public class KeyValueStore {
 
-	static final Logger logger = LogManager.getLogger(KeyValueStore.class
-			.getName());
+	static final Logger logger = LogManager.getLogger(KeyValueStore.class);
 
 	final private BidiMap map = BidiMap.create();
 	
@@ -38,6 +37,10 @@ public class KeyValueStore {
 
 	private KeyValueStore(final String resumeFolder, final int redirectCode)
 			throws IOException {
+
+		this.redirectCode = redirectCode;
+		this.backupFile = new Backup(resumeFolder);
+
 		final List<RestoreItem> restoredItems = Restore.start(resumeFolder);
 
 		for (RestoreItem item : restoredItems) {
@@ -47,8 +50,6 @@ public class KeyValueStore {
 			storeHash(hk, uri, false);
 		}
 
-		this.redirectCode = redirectCode;
-		this.backupFile = new Backup(resumeFolder);
 	}
 
 	/**
