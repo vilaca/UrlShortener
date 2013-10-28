@@ -26,8 +26,7 @@ class Server {
 
 	static private final Configuration config = new Configuration();
 	
-	static private final Logger logger = LogManager.getLogger(Server.class
-			.getName());
+	static private final Logger logger = LogManager.getLogger(Server.class);
 
 	static private BufferedWriter accessLog = null;
 
@@ -196,13 +195,15 @@ class Server {
 
 		sb.append(params.getRemoteAddress().getAddress().getHostAddress());
 		sb.append(" - - [");
-		sb.append(new SimpleDateFormat("dd/MMM/yyyy:hh:mm:ss Z")
+		sb.append(new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z")
 				.format(new Date()));
 		sb.append("] \"");
 		sb.append(params.getRequestMethod());
 		sb.append(" ");
 		sb.append(params.getRequestURI().toString());
-		sb.append(" HTTP/1.0\" ");
+		sb.append(" ");
+		sb.append(params.getProtocol());
+		sb.append(" ");
 		sb.append(response.getHttpErrorCode());
 		sb.append(" ");
 		sb.append(response.getSize());
