@@ -7,6 +7,8 @@ Use java -server -jar UrlShortener.jar to run.
 
 Try it on-line at [http://go2.pt/](http://go2.pt/).
 
+Stable version [r9](https://github.com/vilaca/UrlShortener/releases/tag/r9).
+
 
 Dependencies
 ============
