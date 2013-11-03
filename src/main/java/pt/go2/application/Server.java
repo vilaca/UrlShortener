@@ -19,6 +19,7 @@ import pt.go2.pagelets.RedirectPageLet;
 import pt.go2.pagelets.ShortenerPageLet;
 import pt.go2.pagelets.StaticPageLetBuilder;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
 
@@ -128,7 +129,7 @@ class Server {
 			throws IOException {
 
 		final SmartTagParser fr = new SmartTagParser("/");
-		final Map<String, PageLet> pages = new HashMap<String, PageLet>();
+		final Map<String, PageLet> pages = new HashMap<>();
 
 		pages.put("/", 
 				new StaticPageLetBuilder()
@@ -209,10 +210,13 @@ class Server {
 		sb.append(response.getSize());
 		sb.append(" \"");
 
-		final String referer = params.getRequestHeaders().getFirst("Referer");
+		final Headers headers = params.getRequestHeaders();
+		final String referer = headers.getFirst("Referer");
+		final String agent = headers.getFirst("User-Agent");
+		
 		sb.append(referer == null ? "-" : referer);
 
-		sb.append("\" \"browser info discarded\"");
+		sb.append("\" \"" + agent + "\"");
 		sb.append(System.getProperty("line.separator"));
 
 		final String output = sb.toString();
