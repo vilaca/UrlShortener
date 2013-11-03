@@ -1,42 +1,61 @@
 package pt.go2.application;
 
+import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
+import java.text.SimpleDateFormat;
 import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pt.go2.fileio.Configuration;
+import pt.go2.fileio.SmartTagParser;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.pagelets.PageLet;
+import pt.go2.pagelets.RedirectPageLet;
+import pt.go2.pagelets.ShortenerPageLet;
+import pt.go2.pagelets.StaticPageLetBuilder;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-class RequestHandler implements HttpHandler {
+class RequestHandler implements HttpHandler, Closeable {
 
-	private final KeyValueStore db;
+	// Headers set in response
+	private static final String RESPONSE_HEADER_CACHE_CONTROL = "Cache-Control";
+	private static final String RESPONSE_HEADER_CONTENT_ENCODING = "Content-Encoding";
+	private static final String RESPONSE_HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String RESPONSE_HEADER_SERVER = "Server";
+	
+	// Miscellaneous parameters
+	private static final String CARAPAU_DE_CORRIDA = "Carapau de corrida ";
+	
 	private final Map<String, PageLet> resources;
-	private final String version;
-	private final String host;
-
+	private final Configuration config;
+	private final KeyValueStore ks;
+	private final BufferedWriter accessLog;
+	
 	/**
-	 * private c'tor to avoid external instantiation
+	 * C'tor 
 	 * 
-	 * @param properties
-	 * 
-	 * @param resources
-	 *            mapping of URI to static content
+	 * @param config
+	 * @throws IOException
 	 */
-	RequestHandler(final KeyValueStore db, final Map<String, PageLet> pages,
-			final String version, final String host) {
+	public RequestHandler(final Configuration config, final BufferedWriter accessLog) throws IOException {
 
-		// server will not at any case modify this structure
-		this.resources = Collections.unmodifiableMap(pages);
-		this.version = version;
-		this.db = db;
-		this.host = host;
+		this.config = config;
+		this.accessLog = accessLog;
+
+		// restore URI/hash mappings data
+		this.ks = new KeyValueStore(config.DATABASE_FOLDER, config.REDIRECT);
+
+		// map static pages to URI part
+		this.resources = Collections.unmodifiableMap(generateResourceDecoder());		
 	}
 
 	/**
@@ -51,21 +70,21 @@ class RequestHandler implements HttpHandler {
 
 		final PageLet resource = getPageContents(exchange);
 
-		exchange.getResponseHeaders().set("Server",
-				"Carapau de corrida " + version);
+		exchange.getResponseHeaders().set(RESPONSE_HEADER_SERVER,
+				CARAPAU_DE_CORRIDA + config.VERSION);
 
 		final HttpResponse response = resource.getPageLet(exchange);
 
 		final Headers headers = exchange.getResponseHeaders();
 
 		if (response.isZipped()) {
-			headers.set("Content-Encoding", "gzip");
+			headers.set(RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
 		}
 
-		headers.set("Content-Type", response.getMimeType());
+		headers.set(RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
 
-		headers.set("Cache-Control", "max-age=" + 60 * 60 * 24); // cache for a
-																	// whole day
+		// cache for a whole day
+		headers.set(RESPONSE_HEADER_CACHE_CONTROL, "max-age=" + 60 * 60 * 24);
 
 		exchange.sendResponseHeaders(response.getHttpErrorCode(),
 				response.getSize());
@@ -77,7 +96,7 @@ class RequestHandler implements HttpHandler {
 		os.flush();
 		os.close();
 
-		Server.printLogMessage(exchange, response);
+		printLogMessage(exchange, response);
 	}
 
 	/**
@@ -91,14 +110,15 @@ class RequestHandler implements HttpHandler {
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
-		if (filename.equals("/") && host != null && !correctHost(exchange)) {
-			return resources.get("");
+		if (filename.equals("/") && config.ENFORCE_DOMAIN != null) {
+			if (!correctHost(exchange))
+				return resources.get("");
 		}
 
 		final PageLet page;
 
 		if (filename.length() == 6) {
-			page = db.get(filename);
+			page = ks.get(filename);
 		} else {
 			page = resources.get(filename);
 		}
@@ -122,7 +142,7 @@ class RequestHandler implements HttpHandler {
 		if (values.size() < 1)
 			return true;
 
-		return values.get(0).startsWith(host);
+		return values.get(0).startsWith(config.ENFORCE_DOMAIN);
 	}
 
 	/**
@@ -147,4 +167,121 @@ class RequestHandler implements HttpHandler {
 		return "/";
 	}
 
+	/**
+	 * URL to Pagelet Multiplexer
+	 * 
+	 * @return
+	 * @throws IOException
+	 */
+	private Map<String, PageLet> generateResourceDecoder()
+			throws IOException {
+
+		final SmartTagParser fr = new SmartTagParser("/");
+		final Map<String, PageLet> pages = new HashMap<>();
+
+		pages.put("/", 
+				new StaticPageLetBuilder()
+						.setContent(fr.read("index.html")).zip().build());
+
+		pages.put("ajax.js",
+				new StaticPageLetBuilder()
+						.setContent(fr.read("ajax.js"))
+						.setMimeType("application/javascript").zip().build());
+
+		pages.put("robots.txt",
+				new StaticPageLetBuilder()
+						.setContent(fr.read("robots.txt"))
+						.setMimeType("text/plain").zip().build());
+
+		pages.put("sitemap.xml",
+				new StaticPageLetBuilder()
+						.setContent(fr.read("map.txt"))
+						.setMimeType("text/xml").zip().build());
+
+		pages.put("screen.css",
+				new StaticPageLetBuilder()
+						.setContent(fr.read("screen.css"))
+						.setMimeType("text/css").zip().build());
+
+		// dynamic pages
+		pages.put("new", new ShortenerPageLet(ks));
+
+		// error pages
+		pages.put("404",
+				new StaticPageLetBuilder()
+						.setContent(fr.read("404.html"))
+						.setResponseCode(404).zip().build());
+
+		// google webmaster tools site verification
+		
+		if ( !config.GOOGLE_VALIDATION.isEmpty())
+		{
+			pages.put(config.GOOGLE_VALIDATION,
+					new StaticPageLetBuilder()
+							.setContent("google-site-verification: " + config.GOOGLE_VALIDATION)
+							.setResponseCode(200).zip().build());
+		}
+		
+		// redirect to domain if a sub-domain is being used
+		
+		pages.put("",
+				new RedirectPageLet(301, "http://" + config.ENFORCE_DOMAIN));
+
+		return pages;
+	}
+
+	/**
+	 * Access log output
+	 * 
+	 * @param params
+	 * @param response
+	 */
+	void printLogMessage(final HttpExchange params,
+			final HttpResponse response) {
+
+		final StringBuilder sb = new StringBuilder();
+
+		sb.append(params.getRemoteAddress().getAddress().getHostAddress());
+		sb.append(" - - [");
+		sb.append(new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z")
+				.format(new Date()));
+		sb.append("] \"");
+		sb.append(params.getRequestMethod());
+		sb.append(" ");
+		sb.append(params.getRequestURI().toString());
+		sb.append(" ");
+		sb.append(params.getProtocol());
+		sb.append(" ");
+		sb.append(response.getHttpErrorCode());
+		sb.append(" ");
+		sb.append(response.getSize());
+		sb.append(" \"");
+
+		final Headers headers = params.getRequestHeaders();
+		final String referer = headers.getFirst("Referer");
+		final String agent = headers.getFirst("User-Agent");
+		
+		sb.append(referer == null ? "-" : referer);
+
+		sb.append("\" \"" + agent + "\"");
+		sb.append(System.getProperty("line.separator"));
+
+		final String output = sb.toString();
+
+		if (accessLog == null) {
+			System.out.print(output);	
+			return;
+		}
+
+		try {
+			accessLog.write(output);
+			accessLog.flush();
+		} catch (IOException e) {
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		ks.close();
+	}	
 }
