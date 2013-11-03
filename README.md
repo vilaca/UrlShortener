@@ -5,7 +5,7 @@ Fast URL Shortener - Pure Java SE Web Application with embedded web server.
 
 Use java -server -jar UrlShortener.jar to run.
 
-Try it on-line at [http://go2.pt/](http://go2.pt/) or download the [latest jar version](http://vilaca.eu/Download/UrlShortener.jar).
+Try it on-line at [http://go2.pt/](http://go2.pt/) or download the [latest version jar](http://vilaca.eu/Download/UrlShortener.jar).
 
 
 Get the latest version
