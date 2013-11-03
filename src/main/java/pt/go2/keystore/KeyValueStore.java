@@ -26,16 +26,7 @@ public class KeyValueStore {
 	// configurable redirect code
 	final private Backup backupFile;
 
-	public static KeyValueStore create(final String resumeFolder,
-			final int redirectCode) {
-		try {
-			return new KeyValueStore(resumeFolder, redirectCode);
-		} catch (IOException e) {
-			return null;
-		}
-	}
-
-	private KeyValueStore(final String resumeFolder, final int redirectCode)
+	public KeyValueStore(final String resumeFolder, final int redirectCode)
 			throws IOException {
 
 		this.redirectCode = redirectCode;
