@@ -9,7 +9,6 @@ import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import pt.go2.fileio.Configuration;
@@ -35,7 +34,8 @@ class RequestHandler implements HttpHandler, Closeable {
 	// Miscellaneous parameters
 	private static final String CARAPAU_DE_CORRIDA = "Carapau de corrida ";
 	
-	private final Map<String, PageLet> resources;
+	private final Map<String, PageLet> pages;
+	private final Map<Integer, PageLet> special;
 	private final Configuration config;
 	private final KeyValueStore ks;
 	private final BufferedWriter accessLog;
@@ -55,7 +55,10 @@ class RequestHandler implements HttpHandler, Closeable {
 		this.ks = new KeyValueStore(config.DATABASE_FOLDER, config.REDIRECT);
 
 		// map static pages to URI part
-		this.resources = Collections.unmodifiableMap(generateResourceDecoder());		
+		this.pages = Collections.unmodifiableMap(generatePagesDecoder());		
+
+		// map HTTP error responses
+		this.special = Collections.unmodifiableMap(generateSpecialDecoder());		
 	}
 
 	/**
@@ -108,11 +111,19 @@ class RequestHandler implements HttpHandler, Closeable {
 	 */
 	private PageLet getPageContents(final HttpExchange exchange) {
 
+		final Headers headers = exchange.getRequestHeaders();
+
+		if (!validRequest(headers))
+		{
+			return special.get(400);
+		}
+		
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
 		if (filename.equals("/") && config.ENFORCE_DOMAIN != null) {
-			if (!correctHost(exchange))
-				return resources.get("");
+
+			if (!correctHost(headers))
+				return special.get(301);
 		}
 
 		final PageLet page;
@@ -120,29 +131,24 @@ class RequestHandler implements HttpHandler, Closeable {
 		if (filename.length() == 6) {
 			page = ks.get(filename);
 		} else {
-			page = resources.get(filename);
+			page = pages.get(filename);
 		}
 
-		return page != null ? page : resources.get("404");
+		return page != null ? page : special.get(404);
 	}
 
-	private boolean correctHost(final HttpExchange exchange) {
+	/**
+	 * Server needs a Host header
+	 * 
+	 * @param headers
+	 * @return
+	 */
+	private boolean validRequest(final Headers headers) {
+		return headers.get("Host").size() > 0;
+	}
 
-		// we can only know the host if http 1.1 or higher
-
-		if (!exchange.getProtocol().equals("HTTP/1.1"))
-			return true;
-
-		// get host header
-		
-		final List<String> values = exchange.getRequestHeaders().get("Host");
-
-		// malformed request
-		
-		if (values.size() < 1)
-			return true;
-
-		return values.get(0).startsWith(config.ENFORCE_DOMAIN);
+	private boolean correctHost(final Headers headers) {
+		return headers.getFirst("Host").startsWith(config.ENFORCE_DOMAIN);
 	}
 
 	/**
@@ -173,7 +179,7 @@ class RequestHandler implements HttpHandler, Closeable {
 	 * @return
 	 * @throws IOException
 	 */
-	private Map<String, PageLet> generateResourceDecoder()
+	private Map<String, PageLet> generatePagesDecoder()
 			throws IOException {
 
 		final SmartTagParser fr = new SmartTagParser("/");
@@ -206,12 +212,6 @@ class RequestHandler implements HttpHandler, Closeable {
 		// dynamic pages
 		pages.put("new", new ShortenerPageLet(ks));
 
-		// error pages
-		pages.put("404",
-				new StaticPageLetBuilder()
-						.setContent(fr.read("404.html"))
-						.setResponseCode(404).zip().build());
-
 		// google webmaster tools site verification
 		
 		if ( !config.GOOGLE_VALIDATION.isEmpty())
@@ -222,14 +222,33 @@ class RequestHandler implements HttpHandler, Closeable {
 							.setResponseCode(200).zip().build());
 		}
 		
-		// redirect to domain if a sub-domain is being used
-		
-		pages.put("",
-				new RedirectPageLet(301, "http://" + config.ENFORCE_DOMAIN));
-
 		return pages;
 	}
 
+	/**
+	 * Create pagelets for http status codes 
+	 * 
+	 * @return
+	 * @throws IOException 
+	 */
+	private Map<Integer, PageLet> generateSpecialDecoder() throws IOException {
+
+		final SmartTagParser fr = new SmartTagParser("/");
+		final Map<Integer, PageLet> pages = new HashMap<>();
+
+		pages.put(404,
+				new StaticPageLetBuilder().setContent(fr.read("404.html"))
+						.setResponseCode(404).zip().build());
+
+		// redirect to domain if a sub-domain is being used
+
+		pages.put(301, new RedirectPageLet(301, "http://"
+				+ config.ENFORCE_DOMAIN));
+		
+		return pages;
+	}
+
+	
 	/**
 	 * Access log output
 	 * 
