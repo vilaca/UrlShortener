@@ -8,6 +8,7 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Collections;
 import java.util.Date;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,10 +36,14 @@ class RequestHandler implements HttpHandler, Closeable {
 	private static final String CARAPAU_DE_CORRIDA = "Carapau de corrida ";
 	
 	private final Map<String, PageLet> pages;
-	private final Map<Integer, PageLet> special;
+	private final Map<ServerResponse, PageLet> special;
 	private final Configuration config;
 	private final KeyValueStore ks;
 	private final BufferedWriter accessLog;
+
+	enum ServerResponse {
+		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST
+	}
 	
 	/**
 	 * C'tor 
@@ -113,17 +118,16 @@ class RequestHandler implements HttpHandler, Closeable {
 
 		final Headers headers = exchange.getRequestHeaders();
 
-		if (!validRequest(headers))
-		{
-			return special.get(400);
+		if (!validRequest(headers)) {
+			return special.get(ServerResponse.REJECT_SUBDOMAIN);
 		}
-		
+
 		final String filename = getRequestedFilename(exchange.getRequestURI());
 
 		if (filename.equals("/") && config.ENFORCE_DOMAIN != null) {
 
 			if (!correctHost(headers))
-				return special.get(301);
+				return special.get(ServerResponse.REJECT_SUBDOMAIN);
 		}
 
 		final PageLet page;
@@ -134,7 +138,7 @@ class RequestHandler implements HttpHandler, Closeable {
 			page = pages.get(filename);
 		}
 
-		return page != null ? page : special.get(404);
+		return page != null ? page : special.get(ServerResponse.PAGE_NOT_FOUND);
 	}
 
 	/**
@@ -147,6 +151,14 @@ class RequestHandler implements HttpHandler, Closeable {
 		return headers.get("Host").size() > 0;
 	}
 
+	/**
+	 * Is the request for this domain?
+	 * 
+	 * (Used to redirect from www.go2.pt to go2.pt)
+	 * 
+	 * @param headers
+	 * @return
+	 */
 	private boolean correctHost(final Headers headers) {
 		return headers.getFirst("Host").startsWith(config.ENFORCE_DOMAIN);
 	}
@@ -231,21 +243,35 @@ class RequestHandler implements HttpHandler, Closeable {
 	 * @return
 	 * @throws IOException 
 	 */
-	private Map<Integer, PageLet> generateSpecialDecoder() throws IOException {
+	private Map<ServerResponse, PageLet> generateSpecialDecoder() throws IOException {
 
 		final SmartTagParser fr = new SmartTagParser("/");
-		final Map<Integer, PageLet> pages = new HashMap<>();
+		final Map<ServerResponse, PageLet> response = new EnumMap<>(
+				ServerResponse.class);
 
-		pages.put(404,
-				new StaticPageLetBuilder().setContent(fr.read("404.html"))
-						.setResponseCode(404).zip().build());
+		// page not found
+
+		response.put(ServerResponse.PAGE_NOT_FOUND, new StaticPageLetBuilder()
+				.setContent(fr.read("404.html")).setResponseCode(404).zip()
+				.build());
 
 		// redirect to domain if a sub-domain is being used
 
-		pages.put(301, new RedirectPageLet(301, "http://"
-				+ config.ENFORCE_DOMAIN));
-		
-		return pages;
+		response.put(ServerResponse.REJECT_SUBDOMAIN, new RedirectPageLet(301,
+				"http://" + config.ENFORCE_DOMAIN));
+
+		// bad request
+
+		response.put(ServerResponse.BAD_REQUEST, new PageLet() {
+
+			@Override
+			public HttpResponse getPageLet(HttpExchange exchange)
+					throws IOException {
+				return HttpResponse.createBadRequest();
+			}
+		});
+
+		return response;
 	}
 
 	
