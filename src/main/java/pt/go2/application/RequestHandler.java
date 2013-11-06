@@ -42,6 +42,9 @@ class RequestHandler implements HttpHandler, Closeable {
 	private final KeyValueStore ks;
 	private final BufferedWriter accessLog;
 
+	/**
+	 * Canned responses for certain actions
+	 */
 	enum ServerResponse {
 		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST
 	}
@@ -131,6 +134,12 @@ class RequestHandler implements HttpHandler, Closeable {
 		if (filename.length() == 6) {
 
 			Uri uri = ks.get(filename);
+			
+			if ( uri == null )
+			{
+				return special.get(ServerResponse.PAGE_NOT_FOUND).getPageLet(exchange);
+			}
+			
 			exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, uri.toString());
 
 			return HttpResponse.create("text/plain", "".getBytes(),
