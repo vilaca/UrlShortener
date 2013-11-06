@@ -17,7 +17,6 @@ import pt.go2.fileio.SmartTagParser;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.pagelets.PageLet;
-import pt.go2.pagelets.RedirectPageLet;
 import pt.go2.pagelets.ShortenerPageLet;
 import pt.go2.pagelets.StaticPageLetBuilder;
 
@@ -260,13 +259,22 @@ class RequestHandler implements HttpHandler, Closeable {
 
 		response.put(ServerResponse.PAGE_NOT_FOUND, 
 				new StaticPageLetBuilder()
-				.setContent(fr.read("404.html")).setResponseCode(404).zip()
+				.setContent(fr.read("404.html"))
+				.setResponseCode(404).zip()
 				.build());
 
 		// redirect to domain if a sub-domain is being used
 
-		response.put(ServerResponse.REJECT_SUBDOMAIN, new RedirectPageLet(301,
-				"http://" + config.ENFORCE_DOMAIN));
+		response.put(ServerResponse.REJECT_SUBDOMAIN, new PageLet(){
+
+			@Override
+			public HttpResponse getPageLet(HttpExchange exchange)
+					throws IOException {
+				exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION,
+						"http://" + config.ENFORCE_DOMAIN);
+				return HttpResponse.create("text/html", "".getBytes(), 301);
+			}
+		});
 
 		// bad request
 
