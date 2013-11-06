@@ -7,13 +7,11 @@ import pt.go2.application.HttpResponse;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Redirection response (Http code 301/2). Points to an Hashed URL
+ * 301 status Redirection. Not used to redirec hashes
  */
 public class RedirectPageLet implements PageLet {
 
 	private final HttpResponse response;
-	
-	// Redirect code. Either 301 or 302.
 	
 	private final String redirect;
 	

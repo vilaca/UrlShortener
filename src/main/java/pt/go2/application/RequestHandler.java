@@ -15,6 +15,7 @@ import java.util.Map;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.SmartTagParser;
 import pt.go2.keystore.KeyValueStore;
+import pt.go2.keystore.Uri;
 import pt.go2.pagelets.PageLet;
 import pt.go2.pagelets.RedirectPageLet;
 import pt.go2.pagelets.ShortenerPageLet;
@@ -30,6 +31,7 @@ class RequestHandler implements HttpHandler, Closeable {
 	private static final String RESPONSE_HEADER_CACHE_CONTROL = "Cache-Control";
 	private static final String RESPONSE_HEADER_CONTENT_ENCODING = "Content-Encoding";
 	private static final String RESPONSE_HEADER_CONTENT_TYPE = "Content-Type";
+	private static final String RESPONSE_HEADER_LOCATION = "Location";
 	private static final String RESPONSE_HEADER_SERVER = "Server";
 	
 	// Miscellaneous parameters
@@ -57,7 +59,7 @@ class RequestHandler implements HttpHandler, Closeable {
 		this.accessLog = accessLog;
 
 		// restore URI/hash mappings data
-		this.ks = new KeyValueStore(config.DATABASE_FOLDER, config.REDIRECT);
+		this.ks = new KeyValueStore(config.DATABASE_FOLDER);
 
 		// map static pages to URI part
 		this.pages = Collections.unmodifiableMap(generatePagesDecoder());		
@@ -76,12 +78,7 @@ class RequestHandler implements HttpHandler, Closeable {
 	@Override
 	public void handle(final HttpExchange exchange) throws IOException {
 
-		final PageLet resource = getPageContents(exchange);
-
-		exchange.getResponseHeaders().set(RESPONSE_HEADER_SERVER,
-				CARAPAU_DE_CORRIDA + config.VERSION);
-
-		final HttpResponse response = resource.getPageLet(exchange);
+		final HttpResponse response = getPageContents(exchange);
 
 		final Headers headers = exchange.getResponseHeaders();
 
@@ -89,9 +86,8 @@ class RequestHandler implements HttpHandler, Closeable {
 			headers.set(RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
 		}
 
+		headers.set(RESPONSE_HEADER_SERVER, CARAPAU_DE_CORRIDA + config.VERSION);
 		headers.set(RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
-
-		// cache for a whole day
 		headers.set(RESPONSE_HEADER_CACHE_CONTROL, "max-age=" + 60 * 60 * 24);
 
 		exchange.sendResponseHeaders(response.getHttpErrorCode(),
@@ -113,13 +109,14 @@ class RequestHandler implements HttpHandler, Closeable {
 	 * @param exchange
 	 *            .getRequestURI()
 	 * @return
+	 * @throws IOException 
 	 */
-	private PageLet getPageContents(final HttpExchange exchange) {
+	private HttpResponse getPageContents(final HttpExchange exchange) throws IOException {
 
 		final Headers headers = exchange.getRequestHeaders();
 
 		if (!validRequest(headers)) {
-			return special.get(ServerResponse.REJECT_SUBDOMAIN);
+			return special.get(ServerResponse.REJECT_SUBDOMAIN).getPageLet(exchange);
 		}
 
 		final String filename = getRequestedFilename(exchange.getRequestURI());
@@ -127,18 +124,28 @@ class RequestHandler implements HttpHandler, Closeable {
 		if (filename.equals("/") && config.ENFORCE_DOMAIN != null) {
 
 			if (!correctHost(headers))
-				return special.get(ServerResponse.REJECT_SUBDOMAIN);
+			{
+				return special.get(ServerResponse.REJECT_SUBDOMAIN).getPageLet(exchange);
+			}
 		}
-
-		final PageLet page;
 
 		if (filename.length() == 6) {
-			page = ks.get(filename);
-		} else {
-			page = pages.get(filename);
-		}
 
-		return page != null ? page : special.get(ServerResponse.PAGE_NOT_FOUND);
+			Uri uri = ks.get(filename);
+			exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, uri.toString());
+
+			return HttpResponse.create("text/plain", "".getBytes(),
+					config.REDIRECT);
+
+		}
+		
+		PageLet page;
+
+		page = pages.get(filename);
+		if (page == null)
+			page = special.get(ServerResponse.PAGE_NOT_FOUND);
+
+		return page.getPageLet(exchange);
 	}
 
 	/**
@@ -251,7 +258,8 @@ class RequestHandler implements HttpHandler, Closeable {
 
 		// page not found
 
-		response.put(ServerResponse.PAGE_NOT_FOUND, new StaticPageLetBuilder()
+		response.put(ServerResponse.PAGE_NOT_FOUND, 
+				new StaticPageLetBuilder()
 				.setContent(fr.read("404.html")).setResponseCode(404).zip()
 				.build());
 

@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import pt.go2.fileio.Backup;
 import pt.go2.fileio.Restore;
 import pt.go2.fileio.Restore.RestoreItem;
-import pt.go2.pagelets.RedirectPageLet;
 
 /**
  * Handle mappings on URLs to HASHED keys and vice versa
@@ -18,18 +17,13 @@ public class KeyValueStore {
 
 	static final Logger logger = LogManager.getLogger(KeyValueStore.class);
 
-	final private BidiMap map = BidiMap.create();
-	
-	// configurable redirect code
-	final private int redirectCode;
+	final private BidiMap<HashKey, Uri> map = new BidiMap<HashKey,Uri>();
 
-	// configurable redirect code
+	// log for restoring hash->url
 	final private Backup backupFile;
 
-	public KeyValueStore(final String resumeFolder, final int redirectCode)
-			throws IOException {
+	public KeyValueStore(final String resumeFolder) throws IOException {
 
-		this.redirectCode = redirectCode;
 		this.backupFile = new Backup(resumeFolder);
 
 		final List<RestoreItem> restoredItems = Restore.start(resumeFolder);
@@ -38,7 +32,7 @@ public class KeyValueStore {
 			final HashKey hk = new HashKey(item.Key);
 			final Uri uri = new Uri(item.Value);
 
-			storeHash(hk, uri, false);
+			storeHash(hk, uri);
 		}
 
 	}
@@ -54,12 +48,9 @@ public class KeyValueStore {
 	 *
 	 * @return
 	 */
-	private boolean storeHash(final HashKey hk, final Uri uri, boolean sync) {
+	private void storeHash(final HashKey hk, final Uri uri) {
 
-		RedirectPageLet redirect = new RedirectPageLet(redirectCode,
-				uri.toString());
-
-		return map.put(hk, uri, redirect);
+		map.put(hk, uri);
 	}
 
 	/**
@@ -84,7 +75,7 @@ public class KeyValueStore {
 
 		// loop if hash already being used
 
-		while (map.contains(hk) || !storeHash(hk, uri, true)) {
+		while (map.contains(hk)) {
 
 			retries++;
 			if (retries > 10) {
@@ -98,6 +89,8 @@ public class KeyValueStore {
 			hk = new HashKey();
 		}
 
+		 storeHash(hk, uri);
+		
 		try {
 
 			backupFile.write(hk, uri);
@@ -124,7 +117,7 @@ public class KeyValueStore {
 	 * @param filename
 	 * @return
 	 */
-	public RedirectPageLet get(final String filename) {
+	public Uri get(final String filename) {
 
 		return map.get(new HashKey(filename));
 	}
