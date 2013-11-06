@@ -11,23 +11,31 @@ public class Configuration {
 	// resource file locations on JAR
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
-	
-	public final InetSocketAddress HOST;
-	
-	public final int BACKLOG;
-	
+
+	// apache style access log
 	public final String ACCESS_LOG;
 	
-	public final String VERSION;
+	// server listener backlog
+	public final int BACKLOG;
 	
-	public final int REDIRECT;
-	
+	// hash->uri restore folder
 	public final String DATABASE_FOLDER;
-
-	public final String GOOGLE_VALIDATION;
-
+	
+	// site domain
 	public final String ENFORCE_DOMAIN;
 	
+	// Google validation for webmaster tools site
+	public final String GOOGLE_VALIDATION;
+	
+	// listener host
+	public final InetSocketAddress HOST;
+	
+	// redirect status code to be used for short Urls
+	public final int REDIRECT;
+	
+	// server version
+	public final String VERSION;
+		
 	/**
 	 * Read configuration from file
 	 */
