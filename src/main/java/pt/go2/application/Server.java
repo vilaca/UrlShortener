@@ -32,7 +32,7 @@ class Server {
 
 		// create listener
 
-		logger.trace("Server now starting....");
+		logger.trace("Creating listener.");
 
 		final HttpServer listener;
 		try {
@@ -44,6 +44,8 @@ class Server {
 			return;
 		}
 
+		logger.trace("Appending to access log.");
+		
 		// start access log
 		BufferedWriter accessLog = null;
 
@@ -54,6 +56,8 @@ class Server {
 		} catch (IOException e) {
 			System.out.println("Access log redirected to console.");
 		}
+
+		logger.trace("Starting virtual file system.");
 
 		// Generate VFS
 
@@ -77,6 +81,8 @@ class Server {
 
 			listener.start();
 
+			logger.trace("Listener is Started.");
+			
 			System.out.println("Server Running. Press [k] to kill listener.");
 			boolean running = true;
 			do {
