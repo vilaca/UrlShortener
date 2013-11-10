@@ -11,6 +11,9 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+/**
+ * Handles server requests 
+ */
 class RequestHandler implements HttpHandler {
 
 	private final Configuration config;
@@ -108,7 +111,7 @@ class RequestHandler implements HttpHandler {
 			final Headers headers) {
 
 		headers.set(AbstractResponse.RESPONSE_HEADER_SERVER,
-				"Carapau de corrida" + config.VERSION);
+				"Carapau de corrida " + config.VERSION);
 
 		headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE,
 				response.getMimeType());
