@@ -17,7 +17,7 @@ public class KeyValueStore {
 
 	static final Logger logger = LogManager.getLogger(KeyValueStore.class);
 
-	final private BidiMap<HashKey, Uri> map = new BidiMap<HashKey,Uri>();
+	final private BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
 
 	// log for restoring hash->url
 	final private Backup backupFile;
@@ -30,22 +30,21 @@ public class KeyValueStore {
 
 		for (RestoreItem item : restoredItems) {
 			final HashKey hk = new HashKey(item.Key);
-			final Uri uri = new Uri(item.Value);
+			final Uri uri = Uri.create(item.Value, false);
 
 			storeHash(hk, uri);
 		}
-
 	}
 
 	/**
 	 * Add to key store
 	 * 
-	 * @param hk Hash identifier for link
+	 * @param hk
+	 *            Hash identifier for link
 	 * 
-	 * @param uri new Uri
+	 * @param uri
+	 *            new Uri
 	 * 
-	 * @param sync true - add synchronized, false - normal  
-	 *
 	 * @return
 	 */
 	private void storeHash(final HashKey hk, final Uri uri) {
@@ -89,8 +88,8 @@ public class KeyValueStore {
 			hk = new HashKey();
 		}
 
-		 storeHash(hk, uri);
-		
+		storeHash(hk, uri);
+
 		try {
 
 			backupFile.write(hk, uri);
@@ -99,7 +98,7 @@ public class KeyValueStore {
 
 			logger.error("Could not write to the resume log :(");
 
-			map.remove(hk,uri);
+			map.remove(hk, uri);
 
 			return null;
 		}
@@ -107,6 +106,11 @@ public class KeyValueStore {
 		return hk.getBytes();
 	}
 
+	/**
+	 * Close Backup
+	 * 
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
 		backupFile.close();
 	}
@@ -117,9 +121,8 @@ public class KeyValueStore {
 	 * @param filename
 	 * @return
 	 */
-	public Uri get(final String filename) {
+	public Uri get(final String haskey) {
 
-		return map.get(new HashKey(filename));
+		return map.get(new HashKey(haskey));
 	}
-
 }

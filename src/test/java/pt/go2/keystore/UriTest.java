@@ -16,9 +16,9 @@ public class UriTest {
 	@Test
 	public void testEqual() {
 		
-		final Uri u1 = Uri.create("http://abcdefghij.ws/123");
-		final Uri u2 = Uri.create("http://ABCDEFGHIJ.ws/123");
-		final Uri u3 = Uri.create("http://ABCDEFGHIJ.WS/123");
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123", false);
+		final Uri u2 = Uri.create("http://ABCDEFGHIJ.ws/123", false);
+		final Uri u3 = Uri.create("http://ABCDEFGHIJ.WS/123", false);
 
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);
@@ -33,8 +33,8 @@ public class UriTest {
 	@Test
 	public void testEqualHttp() {
 		
-		final Uri u1 = Uri.create("http://abcdefghij.ws/123");
-		final Uri u2 = Uri.create("ABCDEFGHIJ.ws/123");
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123", false);
+		final Uri u2 = Uri.create("ABCDEFGHIJ.ws/123", false);
 
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);
@@ -45,9 +45,9 @@ public class UriTest {
 	@Test
 	public void testTrim() {
 		
-		final Uri u1 = Uri.create(" http://abcdefghij.ws/123");
-		final Uri u2 = Uri.create("http://abcdefghij.ws/123 ");
-		final Uri u3 = Uri.create(" http://abcdefghij.ws/123 ");
+		final Uri u1 = Uri.create(" http://abcdefghij.ws/123", false);
+		final Uri u2 = Uri.create("http://abcdefghij.ws/123 ", false);
+		final Uri u3 = Uri.create(" http://abcdefghij.ws/123 ", false);
 		
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);
@@ -61,8 +61,8 @@ public class UriTest {
 	@Test
 	public void testDifferentScheme() {
 		
-		final Uri u1 = Uri.create("http://abcdefghij.ws/123");
-		final Uri u2 = Uri.create("https://ABCDEFGHIJ.ws/123");
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123", false);
+		final Uri u2 = Uri.create("https://ABCDEFGHIJ.ws/123", false);
 		
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);
@@ -73,8 +73,8 @@ public class UriTest {
 	@Test
 	public void testDifferentCaseInPath() {
 		
-		final Uri u1 = Uri.create("http://abcdefghij.ws/123A");
-		final Uri u2 = Uri.create("http://abcdefghij.ws/123a");
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123A", false);
+		final Uri u2 = Uri.create("http://abcdefghij.ws/123a", false);
 		
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);
@@ -85,8 +85,8 @@ public class UriTest {
 	@Test
 	public void testDifferentPaths() {
 		
-		final Uri u1 = Uri.create("http://abcdefghij.ws/123A");
-		final Uri u2 = Uri.create("http://abcdefghij.ws/____");
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123A", false);
+		final Uri u2 = Uri.create("http://abcdefghij.ws/____", false);
 		
 		Assert.assertNotNull(u1);
 		Assert.assertNotNull(u2);

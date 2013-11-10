@@ -20,11 +20,11 @@ public class Uri {
 	private final byte[] inner;
 	private final int hashcode;
 
-	public static Uri create(String str) {
+	public static Uri create(String str, final boolean validate) {
 
 		str = normalizeUrl(str);
 
-		if (!new UrlValidator(SCHEMES).isValid(str)) {
+		if (validate && !new UrlValidator(SCHEMES).isValid(str)) {
 			return null;
 		}
 
@@ -36,7 +36,7 @@ public class Uri {
 	 * 
 	 * @param str
 	 */
-	Uri(final String str) {
+	private Uri(final String str) {
 		inner = str.getBytes();
 		hashcode = Arrays.hashCode(inner);
 	}
