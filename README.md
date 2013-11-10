@@ -8,6 +8,19 @@ Use java -server -jar UrlShortener.jar to run.
 Try it on-line at [http://go2.pt/](http://go2.pt/) or download the [latest version jar](http://vilaca.eu/Download/UrlShortener.jar).
 
 
+Features
+========
+
+- Single Jar Application - no Application server or Database dependencies;
+- Refuses abusive Phishing Urls;
+- Easily customized with PHP-like smart tags;
+- Apache style logging for compatibility with existing tools;
+- Integration with Google webmaster tools and PhishTank API;
+- Configurable status redirects;
+- Light footprint, can run on very constrained systems;
+- and more.
+
+
 Get the latest version
 ======================
 
@@ -60,19 +73,23 @@ They control what is displayed in the Url Shortener html.
 Further customizations
 ----------------------
 
-Ths following files can be edited for a deeper costumization:
+The following files can be edited for a deeper customization:
 
 | File | Type | Contents |
 |------|:----:|----------|
-| src / main / resources / index.html | HTML | Aplication main page. |
-| src / main / resources / screen.css | CSS | Aplication sytle and layout. |
-| src / main / resources / 404.html | HTML | Error page for invalid links |
+| src / main / resources / index.html | HTML | Application main page. |
+| src / main / resources / screen.css | CSS | Application style and layout. |
+| src / main / resources / 404.html | HTML | Error page for invalid links. |
+| src / main / resources / ajax.js | JS | Client side ajax script. |
+| src / main / resources / robots.txt | Text | Robots file. |
 
 
 Dependencies
 ============
 
 Apache Commons Validator 1.4.0 - http://commons.apache.org/proper/commons-validator/
+
+Apache Http-Components - http://hc.apache.org/
 
 Log4j2 - http://logging.apache.org/log4j/2.x/
 
