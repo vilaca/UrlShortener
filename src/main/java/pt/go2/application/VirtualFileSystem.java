@@ -55,18 +55,30 @@ class VirtualFileSystem {
 		try {
 			ks = new KeyValueStore(config.DATABASE_FOLDER);
 		} catch (IOException e) {
+			logger.fatal("Could not read backup.");
 			return null;
 		}
 
+		final PhishTankInterface pi = PhishTankInterface.create(config);
+		
+		if (pi == null)
+		{
+			logger.warn("Could init PhishTank API Interface.");
+		}
+		
+		pi.start();
+		
 		final VirtualFileSystem vfs = new VirtualFileSystem(ks);
 
 		final SmartTagParser fr = new SmartTagParser("/");
 
 		if (!createErrorPages(config, vfs, fr)) {
+			logger.fatal("Could not create error pages.");
 			return null;
 		}
 
-		if (!createEmbeddedPages(config, vfs, fr, ks)) {
+		if (!createEmbeddedPages(config, vfs, fr, pi, ks)) {
+			logger.fatal("Could not create embedded pages.");
 			return null;
 		}
 
@@ -113,12 +125,13 @@ class VirtualFileSystem {
 	 * @param config
 	 * @param vfs
 	 * @param fr
+	 * @param pi
 	 * @param ks
 	 * @return
 	 */
 	private static boolean createEmbeddedPages(final Configuration config,
 			final VirtualFileSystem vfs, final SmartTagParser fr,
-			final KeyValueStore ks) {
+			PhishTankInterface pi, final KeyValueStore ks) {
 
 		final byte[] index, ajax, robots, map, css;
 
@@ -146,7 +159,7 @@ class VirtualFileSystem {
 		vfs.put("screen.css", new StaticResponse(css,
 				AbstractResponse.MIME_TEXT_CSS));
 
-		vfs.put("new", new HashResponse(ks));
+		vfs.put("new", new HashResponse(pi, ks));
 
 		if (!config.GOOGLE_VALIDATION.isEmpty()) {
 			vfs.put(config.GOOGLE_VALIDATION,
@@ -178,9 +191,8 @@ class VirtualFileSystem {
 			return false;
 		}
 
-		vfs.put(Error.PAGE_NOT_FOUND,
-				new ErrorResponse("Bad request.".getBytes(), 400,
-						AbstractResponse.MIME_TEXT_PLAIN));
+		vfs.put(Error.BAD_REQUEST, new ErrorResponse("Bad request.".getBytes(),
+				400, AbstractResponse.MIME_TEXT_PLAIN));
 
 		// redirect to domain if a sub-domain is being used
 

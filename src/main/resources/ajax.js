@@ -25,6 +25,12 @@ function inputError()
 	error.innerHTML = 'Invalid URL!'
 }
 
+function inputForbidden()
+{
+	f.v.style.borderColor = 'red'
+	error.innerHTML = 'Forbidden URL - Phishing'
+}
+
 function inputDisable()
 {
 	f.v.enabled = false;
@@ -103,6 +109,10 @@ window.onload = function () {
                     else if ( http.status == 400)
                    	{
 				        inputError()
+                   	}
+                    else if ( http.status == 403)
+                   	{
+				        inputForbidden()
                    	}
                    	else
                    	{

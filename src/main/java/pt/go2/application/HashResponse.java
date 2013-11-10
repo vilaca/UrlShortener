@@ -15,12 +15,14 @@ import com.sun.net.httpserver.HttpExchange;
  */
 class HashResponse extends AbstractResponse {
 
-	final KeyValueStore ks;
+	final PhishTankInterface bannedList;
+	final KeyValueStore store;
 	byte[] body;
 	int status;
 
-	HashResponse(final KeyValueStore ks) {
-		this.ks = ks;
+	HashResponse(final PhishTankInterface pi, final KeyValueStore ks) {
+		this.bannedList = pi;
+		this.store = ks;
 	}
 
 	@Override
@@ -50,7 +52,7 @@ class HashResponse extends AbstractResponse {
 			if (idx == -1 || postBody.length() - idx < 3) {
 				return badRequest();
 			}
-
+			
 			// Parse string into Uri
 			
 			final Uri uri = Uri.create(postBody.substring(idx), true);
@@ -59,9 +61,16 @@ class HashResponse extends AbstractResponse {
 				return badRequest();
 			}
 
+			// Refuse banned
+			
+			if (bannedList.isBanned(uri))
+			{
+				return forbidden();
+			}
+			
 			// hash Uri
 			
-			final byte[] hashedUri = ks.add(uri);
+			final byte[] hashedUri = store.add(uri);
 
 			if (hashedUri == null) {
 				return badRequest();
@@ -78,5 +87,10 @@ class HashResponse extends AbstractResponse {
 	private byte[] badRequest() {
 		status = 400;
 		return "".getBytes();
+	}
+
+	private byte[] forbidden () {
+		status = 403;
+		return "Suspected phishing".getBytes();
 	}
 }

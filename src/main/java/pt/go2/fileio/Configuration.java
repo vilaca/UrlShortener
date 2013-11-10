@@ -30,6 +30,9 @@ public class Configuration {
 	// listener host
 	public final InetSocketAddress HOST;
 	
+	// phishing urls database
+	public final String PHISHTANK_API_KEY;
+	
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 	
@@ -70,6 +73,8 @@ public class Configuration {
 		GOOGLE_VALIDATION = getProperty("google-site-verification", "");
 		
 		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
+		
+		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
 	}
 	
 	/**
