@@ -13,16 +13,14 @@ import com.sun.net.httpserver.HttpServer;
 
 class Server {
 
-	static private final Configuration config = new Configuration();
-	
 	static private final Logger logger = LogManager.getLogger(Server.class);
-
-	static private BufferedWriter accessLog = null;
 
 	/**
 	 * Process initial method
 	 */
 	public static void main(final String[] args) {
+
+		final Configuration config = new Configuration();
 
 		logger.trace("Starting server...");
 
@@ -47,17 +45,30 @@ class Server {
 		}
 
 		// start access log
+		BufferedWriter accessLog = null;
 
 		try {
+
 			final FileWriter file = new FileWriter(config.ACCESS_LOG, true);
 			accessLog = new BufferedWriter(file);
 		} catch (IOException e) {
 			System.out.println("Access log redirected to console.");
 		}
 
-		// instantiate the almighty RequestHandler
-		
-		try ( final RequestHandler requestHandler = new RequestHandler(config, accessLog);) {
+		// Generate VFS
+
+		final VirtualFileSystem vfs = VirtualFileSystem.create(config);
+
+		if (vfs == null) {
+			return;
+		}
+
+		// RequestHandler
+
+		final RequestHandler requestHandler;
+		requestHandler = new RequestHandler(config, vfs, accessLog);
+
+		try {
 
 			listener.createContext("/", requestHandler);
 			listener.setExecutor(null);
@@ -80,10 +91,6 @@ class Server {
 			logger.trace("Server stopping.");
 
 			listener.stop(1);
-
-		} catch (IOException ex) {
-			logger.fatal("Error reading resources from file." + ex.getMessage());
-			return;
 
 		} finally {
 			try {
