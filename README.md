@@ -17,14 +17,14 @@ Features
 - Apache style logging for compatibility with existing tools;
 - Integration with Google webmaster tools and PhishTank API;
 - Configurable status redirects;
-- Light footprint, can run on very constrained systems;
-- and more.
+- Light footprint, can run on very constrained systems.
+- Included Eclipse Java project;
 
 
 Get the latest version
 ======================
 
-The current latest stable version is at [r9](https://github.com/vilaca/UrlShortener/releases/tag/r9).
+The current latest stable version is at [r10](https://github.com/vilaca/UrlShortener/releases/tag/r10).
 
 You can build the Jar or edit the code in an Java IDE. An Eclipse project is included.
 
