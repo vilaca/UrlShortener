@@ -3,7 +3,7 @@ package pt.go2.keystore;
 import java.util.HashMap;
 import java.util.Map;
 
-public class BidiMap<H,U> {
+class BidiMap<H,U> {
 
 	// hash to URL
 	protected final Map<H, U> hash2Url;
