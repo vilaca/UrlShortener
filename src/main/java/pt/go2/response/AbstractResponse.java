@@ -1,11 +1,11 @@
-package pt.go2.application;
+package pt.go2.response;
 
 import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Abstract class for server response
  */
-abstract class AbstractResponse {
+public abstract class AbstractResponse {
 
 	// Request headers
 	public static final String REQUEST_HEADER_ACCEPT_ENCODING = "Accept-encoding";
@@ -15,6 +15,7 @@ abstract class AbstractResponse {
 	public static final String RESPONSE_HEADER_CACHE_CONTROL = "Cache-Control";
 	public static final String RESPONSE_HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String RESPONSE_HEADER_CONTENT_TYPE = "Content-Type";
+	public static final String RESPONSE_HEADER_EXPIRES = "Expires";
 	public static final String RESPONSE_HEADER_LOCATION = "Location";
 	public static final String RESPONSE_HEADER_SERVER = "Server";
 
@@ -38,7 +39,7 @@ abstract class AbstractResponse {
 	 * @param exchange
 	 * @return
 	 */
-	abstract byte[] run(final HttpExchange exchange);
+	public abstract byte[] run(final HttpExchange exchange);
 
 	/**
 	 * Implementations should override mime type when necessary

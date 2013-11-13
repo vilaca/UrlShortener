@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -12,7 +12,7 @@ import com.sun.net.httpserver.HttpExchange;
  * @author vilaca
  * 
  */
-class StaticResponse extends AbstractResponse {
+public class StaticResponse extends AbstractResponse {
 
 	final byte[] body;
 	final byte[] zipBody;
@@ -25,7 +25,7 @@ class StaticResponse extends AbstractResponse {
 	 * @param body
 	 * @param mime
 	 */
-	StaticResponse(byte[] body, String mime) {
+	public StaticResponse(byte[] body, String mime) {
 
 		this.body = body;
 		this.zipBody = zipBody(body);
@@ -76,14 +76,13 @@ class StaticResponse extends AbstractResponse {
 	 * )
 	 */
 	@Override
-	byte[] run(HttpExchange exchange) {
-		
-		if ( this.zipBody != null && clientAcceptsZip(exchange))
-		{
+	public byte[] run(HttpExchange exchange) {
+
+		if (this.zipBody != null && clientAcceptsZip(exchange)) {
 			zipped = true;
 			return zipBody;
 		}
-		
+
 		zipped = false;
 		return body;
 	}
@@ -106,13 +105,13 @@ class StaticResponse extends AbstractResponse {
 	 * @return
 	 */
 	private boolean clientAcceptsZip(final HttpExchange exchange) {
-		
+
 		final Headers headers;
 		final List<String> values;
-		
+
 		headers = exchange.getRequestHeaders();
 		values = headers.get(REQUEST_HEADER_ACCEPT_ENCODING);
-		
+
 		return values.size() > 0 && values.get(0).indexOf("gzip") != -1;
 	}
 }

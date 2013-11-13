@@ -1,11 +1,11 @@
-package pt.go2.application;
+package pt.go2.response;
 
 import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Error response - Http status 400, 404, etc
  */
-class ErrorResponse extends AbstractResponse {
+public class ErrorResponse extends AbstractResponse {
 
 	final byte[] body;
 	final int status;
@@ -18,7 +18,7 @@ class ErrorResponse extends AbstractResponse {
 	 * @param status
 	 * @param mime
 	 */
-	ErrorResponse(byte[] body, int status, String mime) {
+	public ErrorResponse(byte[] body, int status, String mime) {
 
 		this.body = body;
 		this.status = status;
@@ -47,7 +47,7 @@ class ErrorResponse extends AbstractResponse {
 	}
 
 	@Override
-	byte[] run(HttpExchange exchange) {
+	public byte[] run(HttpExchange exchange) {
 		return body;
 	}
 }

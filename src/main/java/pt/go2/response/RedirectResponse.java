@@ -1,16 +1,16 @@
-package pt.go2.application;
+package pt.go2.response;
 
 import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Http Redirect
  */
-class RedirectResponse extends AbstractResponse {
+public class RedirectResponse extends AbstractResponse {
 
 	final String redirect;
 	final int status;
 
-	RedirectResponse(final String redirect, final int status) {
+	public RedirectResponse(final String redirect, final int status) {
 
 		this.redirect = redirect;
 		this.status = status;
@@ -22,7 +22,7 @@ class RedirectResponse extends AbstractResponse {
 	}
 
 	@Override
-	byte[] run(HttpExchange exchange) {
+	public byte[] run(HttpExchange exchange) {
 		exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, redirect);
 		return "".getBytes();
 	}
