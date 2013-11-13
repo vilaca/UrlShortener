@@ -114,4 +114,11 @@ public class StaticResponse extends AbstractResponse {
 
 		return values.size() > 0 && values.get(0).indexOf("gzip") != -1;
 	}
+	
+	@Override
+	public boolean isCacheable()
+	{
+		return true;
+	}
+
 }

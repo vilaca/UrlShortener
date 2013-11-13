@@ -7,12 +7,14 @@ import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import pt.go2.fileio.Configuration;
+import pt.go2.response.AbstractResponse;
+
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
 /**
- * Handles server requests 
+ * Handles server requests
  */
 class RequestHandler implements HttpHandler {
 
@@ -116,8 +118,18 @@ class RequestHandler implements HttpHandler {
 		headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE,
 				response.getMimeType());
 
-		headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
-				"max-age=" + 60 * 60 * 24);
+		// TODO only static files should be cached
+		if (response.isCacheable()) {
+
+			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
+					"max-age=" + 60 * 60 * 24);
+
+		} else {
+			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
+					"no-cache, no-store, must-revalidate");
+
+			headers.set(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
+		}
 
 		if (response.isZipped()) {
 			headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING,

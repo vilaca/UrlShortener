@@ -93,4 +93,11 @@ public class HashResponse extends AbstractResponse {
 		status = 403;
 		return "Suspected phishing".getBytes();
 	}
+	
+	@Override
+	public boolean isCacheable()
+	{
+		return false;
+	}
+
 }

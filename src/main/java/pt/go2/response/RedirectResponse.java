@@ -26,4 +26,10 @@ public class RedirectResponse extends AbstractResponse {
 		exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, redirect);
 		return "".getBytes();
 	}
+	
+	@Override
+	public boolean isCacheable()
+	{
+		return false;
+	}
 }

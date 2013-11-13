@@ -59,4 +59,10 @@ public class StatsResponse extends AbstractResponse {
 		return MIME_TEXT_HTML;
 	}
 
+	@Override
+	public boolean isCacheable()
+	{
+		return false;
+	}
+
 }
