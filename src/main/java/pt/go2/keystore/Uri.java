@@ -16,11 +16,21 @@ import org.apache.commons.validator.routines.UrlValidator;
  */
 public class Uri {
 
+	enum State {
+		OK, OFFLINE, FORBIDEN_PHISHING, FORBIDDEN_MALWARE
+	}
+
 	private final static String[] SCHEMES = new String[] { "http", "https", "" };
 	private final byte[] inner;
 	private final int hashcode;
 
-	public static Uri create(String str, final boolean validate) {
+	private State state;
+
+	public static Uri create(final String str, final boolean validate) {
+		return create ( str, validate, State.OK );
+	}
+
+	public static Uri create(String str, final boolean validate, State state) {
 
 		str = normalizeUrl(str);
 
@@ -28,17 +38,19 @@ public class Uri {
 			return null;
 		}
 
-		return new Uri(str);
+		return new Uri(str, state);
 	}
 
 	/**
 	 * User create method instead
 	 * 
 	 * @param str
+	 * @param state
 	 */
-	private Uri(final String str) {
+	private Uri(final String str, final State state) {
 		inner = str.getBytes();
 		hashcode = Arrays.hashCode(inner);
+		this.state = state;
 	}
 
 	@Override
@@ -114,5 +126,13 @@ public class Uri {
 		// add http:// scheme if needed
 
 		return input;
+	}
+
+	public State getState() {
+		return state;
+	}
+
+	public void setState(State state) {
+		this.state = state;
 	}
 }
