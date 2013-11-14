@@ -50,11 +50,4 @@ public class ErrorResponse extends AbstractResponse {
 	public byte[] run(HttpExchange exchange) {
 		return body;
 	}
-	
-	@Override
-	public boolean isCacheable()
-	{
-		return false;
-	}
-
 }

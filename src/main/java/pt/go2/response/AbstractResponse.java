@@ -58,11 +58,4 @@ public abstract class AbstractResponse {
 	public boolean isZipped() {
 		return false;
 	}
-	
-	/**
-	 * Should response be cached?
-	 * 
-	 * @return
-	 */
-	public abstract boolean isCacheable();
 }
