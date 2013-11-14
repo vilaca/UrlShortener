@@ -1,6 +1,7 @@
 package pt.go2.keystore;
 
 import java.util.Arrays;
+import java.util.Date;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
@@ -16,7 +17,7 @@ import org.apache.commons.validator.routines.UrlValidator;
  */
 public class Uri {
 
-	enum State {
+	public enum State {
 		OK, OFFLINE, FORBIDEN_PHISHING, FORBIDDEN_MALWARE
 	}
 
@@ -25,9 +26,10 @@ public class Uri {
 	private final int hashcode;
 
 	private State state;
+	private Date updated;
 
 	public static Uri create(final String str, final boolean validate) {
-		return create ( str, validate, State.OK );
+		return create(str, validate, State.OK);
 	}
 
 	public static Uri create(String str, final boolean validate, State state) {
@@ -132,7 +134,12 @@ public class Uri {
 		return state;
 	}
 
-	public void setState(State state) {
+	public Date getLastUpdated() {
+		return updated;
+	}
+
+	public void setState(final State state, final Date updated) {
 		this.state = state;
+		this.updated = updated;
 	}
 }
