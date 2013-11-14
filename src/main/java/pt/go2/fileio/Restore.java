@@ -9,6 +9,9 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Restore Urls and their Hashes
+ */
 public class Restore {
 
 	private static final Logger logger = LogManager.getLogger(Restore.class);

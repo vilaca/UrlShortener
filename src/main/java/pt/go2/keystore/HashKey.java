@@ -1,5 +1,8 @@
 package pt.go2.keystore;
 
+/**
+ * Each Hashkey unequivocally identifies an Url
+ */
 public class HashKey {
 
 	private final long MAX_HASH = 68719476735l;

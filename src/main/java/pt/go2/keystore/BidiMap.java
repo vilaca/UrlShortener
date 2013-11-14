@@ -3,6 +3,12 @@ package pt.go2.keystore;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Bidirectional Map class
+ *
+ * @param <H>
+ * @param <U>
+ */
 class BidiMap<H,U> {
 
 	// hash to URL

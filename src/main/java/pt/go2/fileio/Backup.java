@@ -9,12 +9,15 @@ import java.util.Calendar;
 import pt.go2.keystore.HashKey;
 import pt.go2.keystore.Uri;
 
+/**
+ * Persist Urls and their Hashes so they can be later restored w/ the Restore
+ * class
+ */
 public class Backup {
 
 	private final Calendar cal = Calendar.getInstance();
 
 	private final BufferedWriter resumeLog;
-
 
 	public Backup(final String resumeFolder) throws IOException {
 

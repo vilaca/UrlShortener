@@ -9,6 +9,9 @@ import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Parse files w/ smart tags
+ */
 public final class SmartTagParser {
 
 	private final String base;
