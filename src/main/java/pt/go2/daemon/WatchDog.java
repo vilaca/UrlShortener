@@ -12,7 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /*
- * Triggers download
+ * Check watch and execute timed tasks
  */
 public class WatchDog extends TimerTask {
 
@@ -65,7 +65,6 @@ public class WatchDog extends TimerTask {
 				wt.refresh();
 			}
 		}
-
 	}
 
 	/**

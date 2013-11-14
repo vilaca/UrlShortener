@@ -3,11 +3,9 @@ package pt.go2.daemon;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import org.apache.http.TruncatedChunkException;
 import org.apache.http.client.ClientProtocolException;
@@ -22,7 +20,7 @@ import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
 
 /**
- * Downloads file from PhishTank API
+ * Downloads file from PhishTank API for Phishing Url detection
  */
 public class PhishTankInterface implements WatchDogTask {
 
@@ -40,7 +38,6 @@ public class PhishTankInterface implements WatchDogTask {
 	// keep the ids off all known entries - supplied by PhishTank
 	// and all the banned Uris
 
-	private Set<Integer> ids = new HashSet<>(0);
 	private volatile Set<Uri> banned = new HashSet<>(0);
 
 	// last time the list was refreshed successfully
@@ -73,26 +70,24 @@ public class PhishTankInterface implements WatchDogTask {
 	 * @return
 	 */
 	public boolean isBanned(final Uri uri) {
-		return banned.contains(uri);
+
+		final Date pivot = uri.getLastUpdated();
+
+		if (pivot == null || uri.getLastUpdated().before(lastDownload)) {
+
+			return banned.contains(uri);
+		}
+
+		return false;
 	}
 
 	/**
 	 * Refresh banned list
-	 * 
-	 * TODO: check existing URLS against updated list
 	 */
 	@Override
 	public void refresh() {
 
-		List<Uri> updated = null;
-
-		try {
-			updated = download();
-		} catch (IOException e) {
-			logger.warn("Issues found when using remote FishTank API.");
-		}
-
-		if (updated != null) {
+		if (download()) {
 			lastDownload = Calendar.getInstance().getTime();
 		}
 	}
@@ -106,8 +101,7 @@ public class PhishTankInterface implements WatchDogTask {
 	 * @throws IOException
 	 * @throws TruncatedChunkException
 	 */
-	private List<Uri> download() throws ClientProtocolException, IOException,
-			TruncatedChunkException {
+	private boolean download() {
 
 		logger.info("Download starting");
 
@@ -115,21 +109,21 @@ public class PhishTankInterface implements WatchDogTask {
 
 		final HttpGet httpGet = new HttpGet(API_URL);
 
-		final CloseableHttpResponse response = httpclient.execute(httpGet);
-
-		final Set<Integer> ids = new HashSet<>(EXPECTED_ENTRIES);
 		final Set<Uri> banned = new HashSet<>(EXPECTED_ENTRIES);
-		final List<Uri> update = new ArrayList<>();
 
 		long refused = 0;
 
+		CloseableHttpResponse response = null;
+
 		try {
+
+			response = httpclient.execute(httpGet);
 
 			final int statusCode = response.getStatusLine().getStatusCode();
 
 			if (statusCode != 200) {
 				logger.error("Error on download: " + statusCode);
-				return null;
+				return false;
 			}
 
 			final BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -139,17 +133,7 @@ public class PhishTankInterface implements WatchDogTask {
 			br.readLine(); // skip header
 			while ((entry = br.readLine()) != null) {
 
-				final int i = entry.indexOf(',');
-
-				final int urlId;
-				try {
-					urlId = Integer.parseInt(entry.substring(0, i));
-				} catch (NumberFormatException nfe) {
-					logger.error("Error parsing: " + entry);
-					continue;
-				}
-
-				int idx = i + 1, end;
+				int idx = entry.indexOf(',') + 1, end;
 
 				if (entry.charAt(idx) == '"') {
 					idx++;
@@ -158,37 +142,31 @@ public class PhishTankInterface implements WatchDogTask {
 					end = entry.indexOf(',', idx);
 				}
 
-				final Uri uri;				
+				final Uri uri;
 				uri = Uri.create(entry.substring(idx, end), false);
 
-				if (banned.add(uri)) {
-
-					if (!this.ids.contains(urlId)) {
-
-						update.add(uri);
-					}
-					ids.add(urlId);
-
-				} else {
+				if (!banned.add(uri)) {
 					refused++;
 				}
 			}
 
-			logger.info("Stats - Old: " + this.banned.size() + " Now: "
-					+ banned.size() + " New: " + update.size() + " Refused: "
-					+ refused);
+			logger.info("Stats - Old: " + this.banned.size() + " New: "
+					+ banned.size() + " Refused: " + refused);
 
 			this.banned = banned;
-			this.ids = ids;
 
-			
+		} catch (IOException e) {
+			return false;
 		} finally {
-			response.close();
+			try {
+				response.close();
+			} catch (IOException e) {
+			}
 		}
 
 		logger.info("Download exiting");
 
-		return update;
+		return true;
 	}
 
 	/**
