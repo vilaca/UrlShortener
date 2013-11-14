@@ -5,11 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 /**
  * Used when the client asks to hash an Url
  */
-public class HashResponse extends AbstractResponse {
+public class NormalResponse extends AbstractResponse {
 
 	final byte[] body;
 
-	public HashResponse(final byte[] body) {
+	public NormalResponse(final byte[] body) {
 		this.body = body;
 	}
 
@@ -22,10 +22,10 @@ public class HashResponse extends AbstractResponse {
 	public byte[] run(HttpExchange exchange) {
 		return body;
 	}
-
+	
 	@Override
-	public boolean isCacheable() {
-		return false;
+	public String getMimeType() {
+		// TODO hash return is not really HTML
+		return MIME_TEXT_HTML;
 	}
-
 }

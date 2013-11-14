@@ -3,9 +3,10 @@ package pt.go2.application;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 
@@ -13,63 +14,26 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-/**
- * Handles server requests
- */
-class RequestHandler implements HttpHandler {
+public abstract class AbstractHandler implements HttpHandler {
 
+	protected final VirtualFileSystem vfs;
 	private final Configuration config;
 	private final BufferedWriter accessLog;
-	private final VirtualFileSystem vfs;
 
 	/**
 	 * C'tor
 	 * 
+	 * @param accessLog
 	 * @param config
-	 * @param vfs
+	 * @param accessLog
 	 * @throws IOException
 	 */
-	public RequestHandler(final Configuration config,
+	public AbstractHandler(final Configuration config,
 			final VirtualFileSystem vfs, final BufferedWriter accessLog) {
 
+		this.accessLog = accessLog;
 		this.config = config;
 		this.vfs = vfs;
-		this.accessLog = accessLog;
-	}
-
-	/**
-	 * Handle request, parse URI filename from request into page resource
-	 * 
-	 * @param
-	 * 
-	 * @exception IOException
-	 */
-	@Override
-	public void handle(final HttpExchange exchange) throws IOException {
-
-		final Headers request = exchange.getRequestHeaders();
-
-		// we need a host header to continue
-
-		if (!validRequest(request)) {
-
-			reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST));
-			return;
-		}
-
-		// redirect to out domain if host header is not correct
-
-		if (!correctHost(request)) {
-
-			reply(exchange, vfs.get(VirtualFileSystem.Error.REJECT_SUBDOMAIN));
-			return;
-		}
-
-		final String requested = getRequestedFilename(exchange.getRequestURI());
-
-		final AbstractResponse response = vfs.getPage(requested);
-
-		reply(exchange, response);
 	}
 
 	/**
@@ -79,8 +43,9 @@ class RequestHandler implements HttpHandler {
 	 * @param response
 	 * @throws IOException
 	 */
-	private void reply(final HttpExchange exchange,
-			final AbstractResponse response) throws IOException {
+	protected void reply(final HttpExchange exchange,
+			final AbstractResponse response, final boolean cache)
+			throws IOException {
 
 		final Headers headers = exchange.getResponseHeaders();
 
@@ -89,7 +54,7 @@ class RequestHandler implements HttpHandler {
 		final int size = body.length;
 		final int status = response.getHttpStatus();
 
-		setHeaders(response, headers);
+		setHeaders(response, headers, cache);
 
 		exchange.sendResponseHeaders(status, size);
 
@@ -110,7 +75,7 @@ class RequestHandler implements HttpHandler {
 	 * @param headers
 	 */
 	private void setHeaders(final AbstractResponse response,
-			final Headers headers) {
+			final Headers headers, final boolean cache) {
 
 		headers.set(AbstractResponse.RESPONSE_HEADER_SERVER,
 				"Carapau de corrida " + config.VERSION);
@@ -119,10 +84,10 @@ class RequestHandler implements HttpHandler {
 				response.getMimeType());
 
 		// TODO only static files should be cached
-		if (response.isCacheable()) {
+		if (cache) {
 
 			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
-					"max-age=" + 60 * 60 * 24);
+					"max-age=" + TimeUnit.HOURS.toSeconds(config.CACHE_HINT));
 
 		} else {
 			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
@@ -138,16 +103,6 @@ class RequestHandler implements HttpHandler {
 	}
 
 	/**
-	 * Server needs a Host header
-	 * 
-	 * @param headers
-	 * @return
-	 */
-	private boolean validRequest(final Headers headers) {
-		return headers.get(AbstractResponse.REQUEST_HEADER_HOST).size() > 0;
-	}
-
-	/**
 	 * Is the request for this domain?
 	 * 
 	 * (Used to redirect from www.go2.pt to go2.pt)
@@ -155,31 +110,9 @@ class RequestHandler implements HttpHandler {
 	 * @param headers
 	 * @return
 	 */
-	private boolean correctHost(final Headers headers) {
+	protected boolean correctHost(final Headers headers) {
 		return headers.getFirst(AbstractResponse.REQUEST_HEADER_HOST)
 				.startsWith(config.ENFORCE_DOMAIN);
-	}
-
-	/**
-	 * Parse requested filename from URI
-	 * 
-	 * @param request
-	 * 
-	 * @return Requested filename
-	 */
-	private String getRequestedFilename(final URI request) {
-
-		// split into tokens
-
-		final String path = request.getRawPath();
-
-		if (path.equals("/")) {
-			return path;
-		}
-
-		final int idx = path.indexOf('/', 1);
-
-		return idx == -1 ? path.substring(1) : path.substring(1, idx);
 	}
 
 	/**
@@ -188,7 +121,7 @@ class RequestHandler implements HttpHandler {
 	 * @param params
 	 * @param response
 	 */
-	void printLogMessage(final HttpExchange params,
+	protected void printLogMessage(final HttpExchange params,
 			final AbstractResponse response, final int size) {
 
 		final StringBuilder sb = new StringBuilder();
@@ -231,4 +164,5 @@ class RequestHandler implements HttpHandler {
 		} catch (IOException e) {
 		}
 	}
+
 }
