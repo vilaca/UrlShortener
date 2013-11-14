@@ -9,6 +9,8 @@ import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
 
+import com.sun.net.httpserver.BasicAuthenticator;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 class Server {
@@ -47,6 +49,7 @@ class Server {
 		logger.trace("Appending to access log.");
 		
 		// start access log
+
 		BufferedWriter accessLog = null;
 
 		try {
@@ -69,13 +72,27 @@ class Server {
 
 		// RequestHandler
 
-		final RequestHandler requestHandler;
-		requestHandler = new RequestHandler(config, vfs, accessLog);
+		final HttpHandler root = new StaticPages(config, vfs, accessLog);
+		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
+		final HttpHandler stats = new Statistics(config, vfs, accessLog);
 
+		listener.createContext("/", root);
+
+		listener.createContext("/new", novo);
+		
+		listener.createContext("/stats", stats).setAuthenticator(
+				new BasicAuthenticator("null") {
+
+					@Override
+					public boolean checkCredentials(String user, String pass) {
+						// TODO get from config file
+						return !(user.isEmpty() && pass.isEmpty());
+					}
+				});
+
+		listener.setExecutor(null);
+		
 		try {
-
-			listener.createContext("/", requestHandler);
-			listener.setExecutor(null);
 
 			// start server
 
