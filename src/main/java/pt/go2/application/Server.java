@@ -74,7 +74,7 @@ class Server {
 
 		final HttpHandler root = new StaticPages(config, vfs, accessLog);
 		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
-		final HttpHandler stats = new Statistics(config, vfs, accessLog);
+		final HttpHandler stats = new Analytics(config, vfs, accessLog);
 
 		listener.createContext("/", root);
 

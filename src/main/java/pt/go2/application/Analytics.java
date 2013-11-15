@@ -8,9 +8,9 @@ import pt.go2.response.NormalResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class Statistics extends AbstractHandler {
+public class Analytics extends AbstractHandler {
 
-	public Statistics(Configuration config, VirtualFileSystem vfs,
+	public Analytics(Configuration config, VirtualFileSystem vfs,
 			BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
 	}
