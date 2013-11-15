@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import com.sun.net.httpserver.HttpExchange;
 import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
@@ -13,6 +16,8 @@ import pt.go2.response.NormalResponse;
 
 class UrlHashing extends AbstractHandler {
 
+	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
+	
 	private final VirtualFileSystem vfs;
 
 	/**
@@ -69,6 +74,7 @@ class UrlHashing extends AbstractHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true);
 
 			if (uri == null) {
+				logger.warn("banned: " + uri + " - " + exchange.getRemoteAddress().getHostName());
 				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
 						false);
 				return;
