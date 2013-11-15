@@ -100,8 +100,8 @@ class VirtualFileSystem {
 		return vfs;
 	}
 
-	private void register(WatchDogTask pi2) {
-		watchdog.register(pi, true);
+	private void register(WatchDogTask task) {
+		watchdog.register(task, true);
 	}
 
 	private void set(PhishTankInterface pi) {
