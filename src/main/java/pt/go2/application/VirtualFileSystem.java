@@ -21,14 +21,14 @@ import pt.go2.response.StaticResponse;
 
 /**
  * Virtualize file resources
- *  
+ * 
  */
 class VirtualFileSystem {
 
 	/**
 	 * Canned responses for errors
 	 */
-	
+
 	enum Error {
 		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING
 	}
@@ -48,7 +48,7 @@ class VirtualFileSystem {
 	private final KeyValueStore ks;
 
 	private PhishTankInterface pi;
-	
+
 	/**
 	 * C'tor
 	 * 
@@ -130,12 +130,18 @@ class VirtualFileSystem {
 
 			final Uri uri = ks.get(requested);
 
-			if (uri != null) {
-				return new RedirectResponse(uri.toString(), 301);
+			if (uri == null) {
+				return errors.get(Error.PAGE_NOT_FOUND);
 			}
 
-			return errors.get(Error.PAGE_NOT_FOUND);
+			if (isBanned(uri)) {
 
+				logger.warn("banned: " + uri);
+
+				return errors.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING);
+			}
+
+			return new RedirectResponse(uri.toString(), 301);
 		}
 
 		final AbstractResponse response = pages.get(requested);
@@ -251,13 +257,12 @@ class VirtualFileSystem {
 		errors.put(response, page);
 	}
 
-	public boolean isBanned(Uri uri) { 
-		
-		if ( uri.getState() != Uri.State.OK )
-		{
+	public boolean isBanned(Uri uri) {
+
+		if (uri.getState() != Uri.State.OK) {
 			return true;
 		}
-		
+
 		return pi.isBanned(uri);
 	}
 
