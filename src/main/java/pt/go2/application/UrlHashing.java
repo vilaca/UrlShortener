@@ -74,7 +74,6 @@ class UrlHashing extends AbstractHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true);
 
 			if (uri == null) {
-				logger.warn("banned: " + uri + " - " + exchange.getRemoteAddress().getHostName());
 				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
 						false);
 				return;
@@ -83,6 +82,7 @@ class UrlHashing extends AbstractHandler {
 			// Refuse banned
 
 			if (vfs.isBanned(uri)) {
+				logger.warn("banned: " + uri + " - " + exchange.getRemoteAddress().getHostName());
 				reply(exchange,
 						vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING),
 						false);
