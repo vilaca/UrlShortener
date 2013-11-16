@@ -17,10 +17,10 @@ public class KeyValueStore {
 
 	static final Logger logger = LogManager.getLogger(KeyValueStore.class);
 
-	final private BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
+	private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
 
 	// log for restoring hash->url
-	final private Backup backupFile;
+	private final Backup backupFile;
 
 	public KeyValueStore(final String resumeFolder) throws IOException {
 
@@ -59,7 +59,7 @@ public class KeyValueStore {
 	 * 
 	 * @return
 	 */
-	public byte[] add(Uri uri) {
+	public byte[] add(final Uri uri) {
 
 		// lookup database to see if URL is already there
 
@@ -80,7 +80,7 @@ public class KeyValueStore {
 			if (retries > 10) {
 				// give up
 				logger.warn("Giving up rehashing " + uri);
-				return null;
+				return new byte[0];
 			} else if (retries > 1) {
 				logger.warn("Rehashing " + uri + " / " + retries + "try.");
 			}
@@ -100,7 +100,7 @@ public class KeyValueStore {
 
 			map.remove(hk, uri);
 
-			return null;
+			return new byte[0];
 		}
 
 		return hk.getBytes();
