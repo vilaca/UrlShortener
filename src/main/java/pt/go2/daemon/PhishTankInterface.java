@@ -24,16 +24,16 @@ import pt.go2.keystore.Uri;
  */
 public class PhishTankInterface implements WatchDogTask {
 
-	private final static Logger logger = LogManager
+	private static final Logger logger = LogManager
 			.getLogger(PhishTankInterface.class);
 
 	// watchdog sleep time
 
-	private final long WATCHDOG_SLEEP_MINUTES = 16;
+	private static final long WATCHDOG_SLEEP_MINUTES = 16;
 
 	// expected entries on API - used to avoid resizing in loop
 
-	private final int EXPECTED_ENTRIES = 15000;
+	private static final int EXPECTED_ENTRIES = 15000;
 
 	// keep the ids off all known entries - supplied by PhishTank
 	// and all the banned Uris
@@ -127,10 +127,13 @@ public class PhishTankInterface implements WatchDogTask {
 			}
 
 			final BufferedReader br = new BufferedReader(new InputStreamReader(
-					(response.getEntity().getContent())));
+					response.getEntity().getContent()));
 
 			String entry;
-			br.readLine(); // skip header
+			
+			 // skip header
+			br.readLine();
+			
 			while ((entry = br.readLine()) != null) {
 
 				int idx = entry.indexOf(',') + 1, end;
