@@ -121,8 +121,8 @@ public class KeyValueStore {
 	 * @param filename
 	 * @return
 	 */
-	public Uri get(final String haskey) {
+	public Uri get(final HashKey haskey) {
 
-		return map.get(new HashKey(haskey));
+		return map.get(haskey);
 	}
 }
