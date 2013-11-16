@@ -5,7 +5,7 @@ package pt.go2.keystore;
  */
 public class HashKey {
 
-	private final long MAX_HASH = 68719476735l;
+	private static final long MAX_HASH = 68719476735L;
 
 	// hash key as Base10
 	private long hash;
@@ -27,7 +27,7 @@ public class HashKey {
 	 *            base64 key/hash
 	 */
 	public HashKey(final String key) {
-		
+
 		this.key = key.getBytes();
 
 		long hash = 0;
@@ -80,14 +80,17 @@ public class HashKey {
 	@Override
 	public boolean equals(final Object obj) {
 
-		if (obj == null)
+		if (obj == null) {
 			return false;
+		}
 
-		if (obj == this)
+		if (obj == this) {
 			return true;
+		}
 
-		if (obj.getClass() != getClass())
+		if (obj.getClass() != getClass()) {
 			return false;
+		}
 
 		// internal hash is long, while hashCode() is int
 
