@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import com.sun.net.httpserver.HttpExchange;
 import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
-import pt.go2.response.NormalResponse;
+import pt.go2.response.HtmlResponse;
 
 class UrlHashing extends AbstractHandler {
 
@@ -99,7 +99,7 @@ class UrlHashing extends AbstractHandler {
 				return;
 			}
 
-			reply(exchange, new NormalResponse(hashedUri), false);
+			reply(exchange, new HtmlResponse(hashedUri), false);
 
 		} catch (IOException e) {
 			reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST), false);
