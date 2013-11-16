@@ -10,7 +10,9 @@ public abstract class AbstractResponse {
 	// Request headers
 	public static final String REQUEST_HEADER_ACCEPT_ENCODING = "Accept-encoding";
 	public static final String REQUEST_HEADER_HOST = "Host";
-	
+	public static final String REQUEST_HEADER_REFERER = "Referer";
+	public static final String REQUEST_HEADER_USER_AGENT = "User-Agent";
+
 	// Response headers
 	public static final String RESPONSE_HEADER_CACHE_CONTROL = "Cache-Control";
 	public static final String RESPONSE_HEADER_CONTENT_ENCODING = "Content-Encoding";
@@ -21,6 +23,7 @@ public abstract class AbstractResponse {
 
 	// mime types
 	public static final String MIME_APP_JAVASCRIPT = "application/javascript";
+	public static final String MIME_APP_JSON = "application/json";
 	public static final String MIME_TEXT_CSS = "text/css";
 	public static final String MIME_TEXT_HTML = "text/html";
 	public static final String MIME_TEXT_PLAIN = "text/plain";
