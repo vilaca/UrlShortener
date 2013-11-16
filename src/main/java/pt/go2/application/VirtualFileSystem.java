@@ -12,12 +12,13 @@ import pt.go2.daemon.WatchDog;
 import pt.go2.daemon.WatchDogTask;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.SmartTagParser;
+import pt.go2.keystore.HashKey;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.ErrorResponse;
 import pt.go2.response.RedirectResponse;
-import pt.go2.response.StaticResponse;
+import pt.go2.response.GzipResponse;
 
 /**
  * Virtualize file resources
@@ -119,37 +120,6 @@ class VirtualFileSystem {
 	}
 
 	/**
-	 * Get page or hash
-	 * 
-	 * @param requested
-	 * @return
-	 */
-	public AbstractResponse getPage(String requested) {
-
-		if (requested.length() == 6) {
-
-			final Uri uri = ks.get(requested);
-
-			if (uri == null) {
-				return errors.get(Error.PAGE_NOT_FOUND);
-			}
-
-			if (isBanned(uri)) {
-
-				logger.warn("banned: " + uri);
-
-				return errors.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING);
-			}
-
-			return new RedirectResponse(uri.toString(), 301);
-		}
-
-		final AbstractResponse response = pages.get(requested);
-
-		return response != null ? response : errors.get(Error.PAGE_NOT_FOUND);
-	}
-
-	/**
 	 * Read pages from JAR
 	 * 
 	 * @param config
@@ -173,22 +143,22 @@ class VirtualFileSystem {
 			return false;
 		}
 
-		vfs.put("/", new StaticResponse(index, AbstractResponse.MIME_TEXT_HTML));
-		vfs.put("ajax.js", new StaticResponse(ajax,
+		vfs.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
+		vfs.put("ajax.js", new GzipResponse(ajax,
 				AbstractResponse.MIME_APP_JAVASCRIPT));
 
-		vfs.put("robots.txt", new StaticResponse(robots,
+		vfs.put("robots.txt", new GzipResponse(robots,
 				AbstractResponse.MIME_TEXT_PLAIN));
 
-		vfs.put("sitemap.xml", new StaticResponse(map,
+		vfs.put("sitemap.xml", new GzipResponse(map,
 				AbstractResponse.MIME_TEXT_XML));
 
-		vfs.put("screen.css", new StaticResponse(css,
+		vfs.put("screen.css", new GzipResponse(css,
 				AbstractResponse.MIME_TEXT_CSS));
 
 		if (!config.GOOGLE_VERIFICATION.isEmpty()) {
 			vfs.put(config.GOOGLE_VERIFICATION,
-					new StaticResponse(
+					new GzipResponse(
 							("google-site-verification: " + config.GOOGLE_VERIFICATION)
 									.getBytes(),
 							AbstractResponse.MIME_TEXT_PLAIN));
@@ -268,5 +238,13 @@ class VirtualFileSystem {
 
 	public byte[] add(Uri uri) {
 		return ks.add(uri);
+	}
+
+	public Uri get(HashKey haskey) {
+		return ks.get(haskey);
+	}
+
+	public AbstractResponse get(String requested) {
+		return pages.get(requested);
 	}
 }
