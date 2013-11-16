@@ -21,6 +21,9 @@ public class Configuration {
 	// server listener backlog
 	public final int BACKLOG;
 
+	// Amount of time static pages should be cached
+	public final int CACHE_HINT;
+
 	// hash->uri restore folder
 	public final String DATABASE_FOLDER;
 
@@ -39,9 +42,6 @@ public class Configuration {
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
-	// Amount of time static pages should be cached
-	public final int CACHE_HINT;
-	
 	// server version
 	public final String VERSION;
 
@@ -66,21 +66,16 @@ public class Configuration {
 		} catch (IOException e) {
 		}
 
+		ACCESS_LOG = getProperty("server.accessLog", "access_log");
+		BACKLOG = getPropertyAsInt("server.backlog", 100);
+		CACHE_HINT = getPropertyAsInt("server.cache", 2);
+		DATABASE_FOLDER = getResumeFolder();
+		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
+		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
 		HOST = createInetSocketAddress();
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
-		DATABASE_FOLDER = getResumeFolder();
-
-		CACHE_HINT = getPropertyAsInt("server.cache", 2);
-
-		BACKLOG = getPropertyAsInt("server.backlog", 100);
-		ACCESS_LOG = getProperty("server.accessLog", "access_log");
-		VERSION = getProperty("server.version", "beta");
-
-		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
-
-		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
-
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
+		VERSION = getProperty("server.version", "beta");
 	}
 
 	/**
