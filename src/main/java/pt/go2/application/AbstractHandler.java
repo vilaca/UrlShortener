@@ -17,7 +17,7 @@ import com.sun.net.httpserver.HttpHandler;
 public abstract class AbstractHandler implements HttpHandler {
 
 	protected final VirtualFileSystem vfs;
-	private final Configuration config;
+	protected final Configuration config;
 	private final BufferedWriter accessLog;
 
 	/**
@@ -143,8 +143,12 @@ public abstract class AbstractHandler implements HttpHandler {
 		sb.append(" \"");
 
 		final Headers headers = params.getRequestHeaders();
-		final String referer = headers.getFirst("Referer");
-		final String agent = headers.getFirst("User-Agent");
+		
+		final String referer = headers
+				.getFirst(AbstractResponse.REQUEST_HEADER_REFERER);
+
+		final String agent = headers
+				.getFirst(AbstractResponse.REQUEST_HEADER_USER_AGENT);
 
 		sb.append(referer == null ? "-" : referer);
 
