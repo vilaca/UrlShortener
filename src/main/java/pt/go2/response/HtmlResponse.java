@@ -5,11 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 /**
  * Used when the client asks to hash an Url
  */
-public class NormalResponse extends AbstractResponse {
+public class HtmlResponse extends AbstractResponse {
 
 	final byte[] body;
 
-	public NormalResponse(final byte[] body) {
+	public HtmlResponse(final byte[] body) {
 		this.body = body;
 	}
 

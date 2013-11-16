@@ -12,7 +12,7 @@ import com.sun.net.httpserver.HttpExchange;
  * @author vilaca
  * 
  */
-public class StaticResponse extends AbstractResponse {
+public class GzipResponse extends AbstractResponse {
 
 	final byte[] body;
 	final byte[] zipBody;
@@ -25,7 +25,7 @@ public class StaticResponse extends AbstractResponse {
 	 * @param body
 	 * @param mime
 	 */
-	public StaticResponse(byte[] body, String mime) {
+	public GzipResponse(byte[] body, String mime) {
 
 		this.body = body;
 		this.zipBody = zipBody(body);
