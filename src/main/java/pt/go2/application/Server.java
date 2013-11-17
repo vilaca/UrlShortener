@@ -3,12 +3,10 @@ package pt.go2.application;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
-
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -47,7 +45,7 @@ class Server {
 		}
 
 		logger.trace("Appending to access log.");
-		
+
 		// start access log
 
 		BufferedWriter accessLog = null;
@@ -64,34 +62,46 @@ class Server {
 
 		// Generate VFS
 
-		final VirtualFileSystem vfs = VirtualFileSystem.create(config);
+		final VirtualFileSystem vfs = new VirtualFileSystem();
 
-		if (vfs == null) {
+		if (!vfs.start(config)) {
+			return;
+		}
+
+		Statistics statistics;
+		try {
+			statistics = new Statistics(config.STATISTICS_FOLDER);
+		} catch (IOException e1) {
+			logger.fatal("Can't collect statistics.");
 			return;
 		}
 
 		// RequestHandler
 
-		final HttpHandler root = new StaticPages(config, vfs, accessLog);
+		final HttpHandler root = new StaticPages(config, vfs, statistics,
+				accessLog);
 		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
-		final HttpHandler stats = new Analytics(config, vfs, accessLog);
+		
+		final HttpHandler stats = new Analytics(config, vfs, statistics,
+				accessLog);
 
 		listener.createContext("/", root);
 
 		listener.createContext("/new", novo);
-		
+
 		listener.createContext("/stats", stats).setAuthenticator(
 				new BasicAuthenticator("null") {
 
 					@Override
-					public boolean checkCredentials(String user, String pass) {
-						// TODO get from config file
-						return !(user.isEmpty() && pass.isEmpty());
+					public boolean checkCredentials(final String user,
+							final String pass) {
+						return user.equals(config.STATISTICS_USERNAME)
+								&& pass.equals(config.STATISTICS_PASSWORD);
 					}
 				});
 
 		listener.setExecutor(null);
-		
+
 		try {
 
 			// start server
@@ -99,7 +109,7 @@ class Server {
 			listener.start();
 
 			logger.trace("Listener is Started.");
-			
+
 			System.out.println("Server Running. Press [k] to kill listener.");
 			boolean running = true;
 			do {
