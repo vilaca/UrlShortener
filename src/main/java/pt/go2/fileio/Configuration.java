@@ -42,8 +42,16 @@ public class Configuration {
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
+	// folder for statistics backup/Restore 
+	public final String STATISTICS_FOLDER;
+
+	// statics login 
+	public final String STATISTICS_USERNAME; 
+	public final String STATISTICS_PASSWORD;
+
 	// server version
 	public final String VERSION;
+	
 
 	/**
 	 * Read configuration from file
@@ -73,8 +81,11 @@ public class Configuration {
 		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
 		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
 		HOST = createInetSocketAddress();
-		REDIRECT = getPropertyAsInt("server.redirect", 301);
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
+		REDIRECT = getPropertyAsInt("server.redirect", 301);
+		STATISTICS_FOLDER = getProperty("statistics.folder", "");
+		STATISTICS_USERNAME = getProperty("statistics.username", "statistics");
+		STATISTICS_PASSWORD = getProperty("statistics.password", "secret");
 		VERSION = getProperty("server.version", "beta");
 	}
 
