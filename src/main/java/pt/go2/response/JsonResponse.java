@@ -6,7 +6,7 @@ public class JsonResponse extends AbstractResponse {
 
 	final byte[] body;
 	
-	JsonResponse ( final String body )
+	public JsonResponse ( final String body )
 	{
 		this.body = body.getBytes();
 	}
