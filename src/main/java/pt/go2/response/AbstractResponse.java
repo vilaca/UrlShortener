@@ -24,6 +24,11 @@ public abstract class AbstractResponse {
 	// mime types
 	public static final String MIME_APP_JAVASCRIPT = "application/javascript";
 	public static final String MIME_APP_JSON = "application/json";
+
+	public static final String MIME_IMG_JPEG = "image/jpeg";
+	public static final String MIME_IMG_GIF = "image/gif";
+	public static final String MIME_IMG_PNG = "image/png";
+	
 	public static final String MIME_TEXT_CSS = "text/css";
 	public static final String MIME_TEXT_HTML = "text/html";
 	public static final String MIME_TEXT_PLAIN = "text/plain";
