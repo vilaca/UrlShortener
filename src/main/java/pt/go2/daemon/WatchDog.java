@@ -47,10 +47,11 @@ public class WatchDog extends TimerTask {
 
 	synchronized public void register(final WatchDogTask task,
 			final boolean runNow) {
-		tasks.add(task);
+		
+		//tasks.add(task);
 
 		if (runNow) {
-			task.refresh();
+		//	task.refresh();
 		}
 	}
 
