@@ -4,15 +4,19 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 import pt.go2.fileio.Configuration;
-import pt.go2.response.NormalResponse;
+import pt.go2.response.JsonResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
 public class Analytics extends AbstractHandler {
 
+	private final Statistics statistics;
+	
 	public Analytics(Configuration config, VirtualFileSystem vfs,
-			BufferedWriter accessLog) {
+			Statistics statistics, BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
+		
+		this.statistics = statistics;
 	}
 
 	/**
@@ -22,19 +26,9 @@ public class Analytics extends AbstractHandler {
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 
-		final StringBuffer sb = new StringBuffer();
+		final String output = statistics.getLast24Hours();
 
-		sb.append("<html>");
-		sb.append("<head><title>Go2.pt - Stats</title></head>");
-		sb.append("<body>");
-
-		sb.append("<h1>Uptime</h1>");
-		sb.append("<p>" + "uptime()" + "</p>");
-
-		sb.append("</body>");
-		sb.append("</html>");
-
-		reply(exchange, new NormalResponse(sb.toString().getBytes()), false);
+		reply(exchange, new JsonResponse(output), false);
 	}
 
 }
