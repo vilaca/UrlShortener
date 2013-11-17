@@ -21,7 +21,7 @@ public class Uri {
 		OK, OFFLINE, FORBIDEN_PHISHING, FORBIDDEN_MALWARE
 	}
 
-	private final static String[] SCHEMES = new String[] { "http", "https", "" };
+	private static final String[] SCHEMES = new String[] { "http", "https", "" };
 	private final byte[] inner;
 	private final int hashcode;
 
@@ -63,14 +63,17 @@ public class Uri {
 	@Override
 	public boolean equals(Object obj) {
 
-		if (obj == null)
+		if (obj == null) {
 			return false;
+		}
 
-		if (obj == this)
+		if (obj == this) {
 			return true;
+		}
 
-		if (obj.getClass() != getClass())
+		if (obj.getClass() != getClass()) {
 			return false;
+		}
 
 		byte[] inner = ((Uri) obj).inner;
 
