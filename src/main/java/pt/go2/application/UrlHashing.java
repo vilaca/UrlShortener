@@ -17,7 +17,7 @@ import pt.go2.response.HtmlResponse;
 class UrlHashing extends AbstractHandler {
 
 	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
-	
+
 	private final VirtualFileSystem vfs;
 
 	/**
@@ -32,6 +32,7 @@ class UrlHashing extends AbstractHandler {
 	 */
 	public UrlHashing(Configuration config, final VirtualFileSystem vfs,
 			BufferedWriter accessLog) {
+		
 		super(config, vfs, accessLog);
 		this.vfs = vfs;
 	}
@@ -82,7 +83,8 @@ class UrlHashing extends AbstractHandler {
 			// Refuse banned
 
 			if (vfs.isBanned(uri)) {
-				logger.warn("banned: " + uri + " - " + exchange.getRemoteAddress().getHostName());
+				logger.warn("banned: " + uri + " - "
+						+ exchange.getRemoteAddress().getHostName());
 				reply(exchange,
 						vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING),
 						false);
@@ -93,7 +95,7 @@ class UrlHashing extends AbstractHandler {
 
 			final byte[] hashedUri = vfs.add(uri);
 
-			if (hashedUri == null) {
+			if (hashedUri.length == 0) {
 				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
 						false);
 				return;
