@@ -32,10 +32,10 @@ import pt.go2.response.GzipResponse;
 import pt.go2.response.RedirectResponse;
 
 /**
- * Virtualize file resources
+ * Virtualized file resources
  * 
  */
-public class VirtualFileSystem {
+public class VirtualFileSystem implements Runnable {
 
 	/**
 	 * Canned responses for errors
@@ -64,6 +64,8 @@ public class VirtualFileSystem {
 	private volatile boolean running;
 	private WatchService watchService;
 
+	private int trim;
+
 	/**
 	 * C'tor
 	 * 
@@ -74,6 +76,8 @@ public class VirtualFileSystem {
 
 	public boolean start(final Configuration config) {
 
+		this.trim = config.PUBLIC.length() + 1;
+		
 		try {
 			this.ks = new KeyValueStore(config.DATABASE_FOLDER);
 		} catch (IOException e) {
@@ -81,18 +85,16 @@ public class VirtualFileSystem {
 			return false;
 		}
 
-		final SmartTagParser fr = new SmartTagParser("/");
-
-		if (!createErrorPages(config, fr)) {
+		if (!createErrorPages(config)) {
 			logger.fatal("Could not create error pages.");
 			return false;
 		}
 
-		if (config.STATISTICS_FOLDER.isEmpty()) {
+		if (config.PUBLIC.isEmpty()) {
 
 			this.pages = new HashMap<>();
 
-			if (!createEmbeddedPages(config, fr)) {
+			if (!createEmbeddedPages(config)) {
 				logger.fatal("Could not create embedded pages.");
 				return false;
 			}
@@ -113,7 +115,7 @@ public class VirtualFileSystem {
 			final List<Path> directories = new ArrayList<>();
 
 			try {
-				FileCrawler.crawl(config.STATISTICS_FOLDER, directories, files);
+				FileCrawler.crawl(config.PUBLIC, directories, files);
 			} catch (IOException e) {
 
 				logger.fatal("Could not load static pages.");
@@ -122,7 +124,7 @@ public class VirtualFileSystem {
 
 			for (Path path : files) {
 
-				addStaticPage(fr, path);
+				addStaticPage(path);
 			}
 
 			for (Path path : directories) {
@@ -145,10 +147,11 @@ public class VirtualFileSystem {
 		} else {
 			watchdog.register(pi, true);
 		}
+
 		return true;
 	}
 
-	private void addStaticPage(final SmartTagParser fr, final Path path) {
+	private void addStaticPage(final Path path) {
 
 		final String filename = path.toString();
 
@@ -194,8 +197,8 @@ public class VirtualFileSystem {
 
 		try {
 
-			this.pages.put(filename, new GzipResponse(fr.read(filename),
-					mimeType));
+			this.pages.put(filename.substring(trim), new GzipResponse(
+					SmartTagParser.read(filename), mimeType));
 
 		} catch (IOException e) {
 
@@ -203,7 +206,8 @@ public class VirtualFileSystem {
 		}
 	}
 
-	private void listen() {
+	@Override
+	public void run() {
 
 		running = true;
 		while (running) {
@@ -230,7 +234,7 @@ public class VirtualFileSystem {
 
 				if (kind == StandardWatchEventKinds.ENTRY_CREATE
 						|| kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-					addStaticPage(new SmartTagParser(""), filename);
+					addStaticPage(filename);
 				}
 
 				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
@@ -256,20 +260,28 @@ public class VirtualFileSystem {
 	 * Read pages from JAR
 	 * 
 	 * @param config
-	 * @param fr
 	 * @return
 	 */
-	private boolean createEmbeddedPages(final Configuration config,
-			final SmartTagParser fr) {
+	private boolean createEmbeddedPages(final Configuration config) {
 
 		final byte[] index, ajax, robots, map, css;
 
 		try {
-			index = fr.read("index.html");
-			ajax = fr.read("ajax.js");
-			robots = fr.read("robots.txt");
-			map = fr.read("map.txt");
-			css = fr.read("screen.css");
+			index = SmartTagParser.read(VirtualFileSystem.class
+					.getResourceAsStream("/index.html"));
+
+			ajax = SmartTagParser.read(VirtualFileSystem.class
+					.getResourceAsStream("/ajax.js"));
+
+			robots = SmartTagParser.read(VirtualFileSystem.class
+					.getResourceAsStream("/robots.txt"));
+
+			map = SmartTagParser.read(VirtualFileSystem.class
+					.getResourceAsStream("/map.txt"));
+
+			css = SmartTagParser.read(VirtualFileSystem.class
+					.getResourceAsStream("/screen.css"));
+
 		} catch (IOException e) {
 			logger.fatal("Can't read embedded page.");
 			return false;
@@ -305,25 +317,28 @@ public class VirtualFileSystem {
 	 * Cache error responses
 	 * 
 	 * @param config
-	 * @param fr
 	 * @return
 	 */
-	private boolean createErrorPages(final Configuration config,
-			final SmartTagParser fr) {
+	private boolean createErrorPages(final Configuration config) {
 
 		try {
-			this.errors.put(Error.PAGE_NOT_FOUND,
-					new ErrorResponse(fr.read("404.html"), 404,
+			this.errors.put(
+					Error.PAGE_NOT_FOUND,
+					new ErrorResponse(SmartTagParser
+							.read(VirtualFileSystem.class
+									.getResourceAsStream("/404.html")), 404,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			logger.fatal("Cannot read 404 page.");
 			return false;
 		}
 
-		// TODO are you sure this is a good message ??
 		try {
-			this.errors.put(Error.FORBIDDEN_PHISHING,
-					new ErrorResponse(fr.read("403.html"), 403,
+			this.errors.put(
+					Error.FORBIDDEN_PHISHING,
+					new ErrorResponse(SmartTagParser
+							.read(VirtualFileSystem.class
+									.getResourceAsStream("/403.html")), 403,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			logger.fatal("Cannot read 403 page.");
