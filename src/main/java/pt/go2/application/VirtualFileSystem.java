@@ -76,8 +76,6 @@ public class VirtualFileSystem implements Runnable {
 
 	public boolean start(final Configuration config) {
 
-		this.trim = config.PUBLIC.length() + 1;
-		
 		try {
 			this.ks = new KeyValueStore(config.DATABASE_FOLDER);
 		} catch (IOException e) {
@@ -90,7 +88,7 @@ public class VirtualFileSystem implements Runnable {
 			return false;
 		}
 
-		if (config.PUBLIC.isEmpty()) {
+		if (config.PUBLIC == null) {
 
 			this.pages = new HashMap<>();
 
@@ -101,6 +99,8 @@ public class VirtualFileSystem implements Runnable {
 
 			this.watchService = null;
 		} else {
+
+			this.trim = config.PUBLIC.length() + 1;
 
 			try {
 				this.watchService = FileSystems.getDefault().newWatchService();
