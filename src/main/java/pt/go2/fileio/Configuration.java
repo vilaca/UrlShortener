@@ -14,7 +14,6 @@ public class Configuration {
 	// resource file locations on JAR
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
-
 	// apache style access log
 	public final String ACCESS_LOG;
 
@@ -39,19 +38,21 @@ public class Configuration {
 	// phishing urls database
 	public final String PHISHTANK_API_KEY;
 
+	public final String PUBLIC;
+	public final String PUBLIC_ROOT;
+
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
-	// folder for statistics backup/Restore 
+	// folder for statistics backup/Restore
 	public final String STATISTICS_FOLDER;
 
-	// statics login 
-	public final String STATISTICS_USERNAME; 
+	// statics login
+	public final String STATISTICS_USERNAME;
 	public final String STATISTICS_PASSWORD;
 
 	// server version
 	public final String VERSION;
-	
 
 	/**
 	 * Read configuration from file
@@ -82,6 +83,8 @@ public class Configuration {
 		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
 		HOST = createInetSocketAddress();
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
+		PUBLIC = getProperty("server.public");
+		PUBLIC_ROOT = getProperty("server.public-root");
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
 		STATISTICS_FOLDER = getProperty("statistics.folder", "");
 		STATISTICS_USERNAME = getProperty("statistics.username", "statistics");
