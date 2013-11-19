@@ -69,7 +69,7 @@ public class Statistics {
 		final Calendar date = Calendar.getInstance();
 
 		final String filename = folder + File.separator
-				+ new SimpleDateFormat("yyyyMMdd").format(date);
+				+ new SimpleDateFormat("yyyyMMdd").format(date.getTime());
 
 		if (new File(filename).exists()) {
 			restore(hits, filename);
