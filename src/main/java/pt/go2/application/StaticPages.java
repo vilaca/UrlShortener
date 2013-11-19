@@ -97,7 +97,16 @@ class StaticPages extends AbstractHandler {
 			return;
 		}
 
-		AbstractResponse response = vfs.get(requested);
+		AbstractResponse response;
+		
+		if (requested.equals("/") && !config.PUBLIC.isEmpty() )
+		{
+			response  = vfs.get(config.PUBLIC_ROOT);
+		}
+		else
+		{
+			response = vfs.get(requested);
+		}
 
 		if ( response == null ) response = vfs.get(VirtualFileSystem.Error.PAGE_NOT_FOUND);
 				
