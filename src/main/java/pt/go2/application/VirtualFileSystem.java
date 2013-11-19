@@ -98,6 +98,7 @@ public class VirtualFileSystem implements Runnable {
 			}
 
 			this.watchService = null;
+
 		} else {
 
 			this.trim = config.PUBLIC.length() + 1;
@@ -210,7 +211,7 @@ public class VirtualFileSystem implements Runnable {
 	public void run() {
 
 		running = true;
-		while (running) {
+		while (watchService != null && running) {
 
 			final WatchKey key = watchService.poll();
 

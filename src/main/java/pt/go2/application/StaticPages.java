@@ -99,7 +99,7 @@ class StaticPages extends AbstractHandler {
 
 		AbstractResponse response;
 		
-		if (requested.equals("/") && !config.PUBLIC.isEmpty() )
+		if (requested.equals("/") && config.PUBLIC!= null )
 		{
 			response  = vfs.get(config.PUBLIC_ROOT);
 		}
