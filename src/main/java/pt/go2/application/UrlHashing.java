@@ -86,7 +86,7 @@ class UrlHashing extends AbstractHandler {
 				logger.warn("banned: " + uri + " - "
 						+ exchange.getRemoteAddress().getHostName());
 				reply(exchange,
-						vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING),
+						vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING_AJAX),
 						false);
 				return;
 			}

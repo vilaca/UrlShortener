@@ -42,7 +42,7 @@ public class VirtualFileSystem implements Runnable {
 	 */
 
 	enum Error {
-		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING
+		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX
 	}
 
 	static final Logger logger = LogManager.getLogger(VirtualFileSystem.class);
@@ -345,6 +345,10 @@ public class VirtualFileSystem implements Runnable {
 			logger.fatal("Cannot read 403 page.");
 			return false;
 		}
+
+		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, 
+				new ErrorResponse(
+				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
 
 		this.errors.put(Error.BAD_REQUEST,
 				new ErrorResponse("Bad request.".getBytes(), 400,
