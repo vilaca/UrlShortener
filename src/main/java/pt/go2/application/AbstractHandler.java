@@ -16,7 +16,7 @@ import com.sun.net.httpserver.HttpHandler;
 
 public abstract class AbstractHandler implements HttpHandler {
 
-	protected final VirtualFileSystem vfs;
+	protected final Resources vfs;
 	protected final Configuration config;
 	private final BufferedWriter accessLog;
 
@@ -29,7 +29,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	 * @throws IOException
 	 */
 	public AbstractHandler(final Configuration config,
-			final VirtualFileSystem vfs, final BufferedWriter accessLog) {
+			final Resources vfs, final BufferedWriter accessLog) {
 
 		this.accessLog = accessLog;
 		this.config = config;

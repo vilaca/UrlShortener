@@ -62,7 +62,7 @@ class Server {
 
 		// Generate VFS
 
-		final VirtualFileSystem vfs = new VirtualFileSystem();
+		final Resources vfs = new Resources();
 
 		if (!vfs.start(config)) {
 			return;

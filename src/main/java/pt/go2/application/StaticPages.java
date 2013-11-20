@@ -37,7 +37,7 @@ class StaticPages extends AbstractHandler {
 	 * @param statistics 
 	 * @throws IOException
 	 */
-	public StaticPages(final Configuration config, final VirtualFileSystem vfs,
+	public StaticPages(final Configuration config, final Resources vfs,
 			Statistics statistics, final BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
 		
@@ -60,7 +60,7 @@ class StaticPages extends AbstractHandler {
 
 		if (!validRequest(request)) {
 
-			reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST), false);
+			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 			return;
 		}
 
@@ -68,7 +68,7 @@ class StaticPages extends AbstractHandler {
 
 		if (!correctHost(request)) {
 
-			reply(exchange, vfs.get(VirtualFileSystem.Error.REJECT_SUBDOMAIN), false);
+			reply(exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN), false);
 			return;
 		}
 
@@ -83,13 +83,13 @@ class StaticPages extends AbstractHandler {
 			final Uri uri = vfs.get(new HashKey(requested));
 
 			if (uri == null) {
-				reply(exchange, vfs.get(VirtualFileSystem.Error.PAGE_NOT_FOUND), true);
+				reply(exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
 				return;
 			}
 
 			if (vfs.isBanned(uri)) {
 				logger.warn("banned: " + uri);
-				reply(exchange, vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING), true);
+				reply(exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING), true);
 				return;
 			}
 			
@@ -108,7 +108,7 @@ class StaticPages extends AbstractHandler {
 			response = vfs.get(requested);
 		}
 
-		if ( response == null ) response = vfs.get(VirtualFileSystem.Error.PAGE_NOT_FOUND);
+		if ( response == null ) response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
 				
 		reply(exchange, response, true);
 	}

@@ -18,7 +18,7 @@ class UrlHashing extends AbstractHandler {
 
 	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
 
-	private final VirtualFileSystem vfs;
+	private final Resources vfs;
 
 	/**
 	 * C'tor
@@ -30,7 +30,7 @@ class UrlHashing extends AbstractHandler {
 	 * @param accessLog
 	 * @throws IOException
 	 */
-	public UrlHashing(Configuration config, final VirtualFileSystem vfs,
+	public UrlHashing(Configuration config, final Resources vfs,
 			BufferedWriter accessLog) {
 		
 		super(config, vfs, accessLog);
@@ -55,7 +55,7 @@ class UrlHashing extends AbstractHandler {
 			final String postBody = br.readLine();
 
 			if (postBody == null) {
-				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
 						false);
 				return;
 			}
@@ -65,7 +65,7 @@ class UrlHashing extends AbstractHandler {
 			final int idx = postBody.indexOf('=') + 1;
 
 			if (idx == -1 || postBody.length() - idx < 3) {
-				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
 						false);
 				return;
 			}
@@ -75,7 +75,7 @@ class UrlHashing extends AbstractHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true);
 
 			if (uri == null) {
-				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
 						false);
 				return;
 			}
@@ -86,7 +86,7 @@ class UrlHashing extends AbstractHandler {
 				logger.warn("banned: " + uri + " - "
 						+ exchange.getRemoteAddress().getHostName());
 				reply(exchange,
-						vfs.get(VirtualFileSystem.Error.FORBIDDEN_PHISHING_AJAX),
+						vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX),
 						false);
 				return;
 			}
@@ -96,7 +96,7 @@ class UrlHashing extends AbstractHandler {
 			final byte[] hashedUri = vfs.add(uri);
 
 			if (hashedUri.length == 0) {
-				reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST),
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
 						false);
 				return;
 			}
@@ -104,7 +104,7 @@ class UrlHashing extends AbstractHandler {
 			reply(exchange, new HtmlResponse(hashedUri), false);
 
 		} catch (IOException e) {
-			reply(exchange, vfs.get(VirtualFileSystem.Error.BAD_REQUEST), false);
+			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 			return;
 		}
 	}

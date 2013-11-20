@@ -12,7 +12,7 @@ public class Analytics extends AbstractHandler {
 
 	private final Statistics statistics;
 	
-	public Analytics(Configuration config, VirtualFileSystem vfs,
+	public Analytics(Configuration config, Resources vfs,
 			Statistics statistics, BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
 		
