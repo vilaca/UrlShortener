@@ -69,7 +69,7 @@ class Server {
 		}
 
 		new Thread(vfs).start();
-		
+
 		Statistics statistics;
 		try {
 			statistics = new Statistics(config.STATISTICS_FOLDER);
@@ -83,7 +83,7 @@ class Server {
 		final HttpHandler root = new StaticPages(config, vfs, statistics,
 				accessLog);
 		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
-		
+
 		final HttpHandler stats = new Analytics(config, vfs, statistics,
 				accessLog);
 
@@ -92,13 +92,20 @@ class Server {
 		listener.createContext("/new", novo);
 
 		listener.createContext("/stats", stats).setAuthenticator(
-				new BasicAuthenticator("null") {
+				new BasicAuthenticator("Statistics") {
 
 					@Override
 					public boolean checkCredentials(final String user,
 							final String pass) {
+
+						logger.info("login: [" + user + "] | [" + pass + "]");
+
+						logger.info("required: [" + config.STATISTICS_USERNAME
+								+ "] | [" + config.STATISTICS_PASSWORD + "]");
+
 						return user.equals(config.STATISTICS_USERNAME)
-								&& pass.equals(config.STATISTICS_PASSWORD);
+								&& pass.equals(config.STATISTICS_PASSWORD
+										.trim());
 					}
 				});
 
