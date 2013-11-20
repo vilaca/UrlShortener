@@ -99,8 +99,19 @@ public class Configuration {
 	 * 
 	 * @return
 	 */
-	public static String getProperty(String string) {
-		return prop.getProperty(string);
+	public static String getProperty(String key) {
+		String value = prop.getProperty(key);
+		if (value != null)
+		{
+			value = value.trim();
+		}
+
+		if ( value.isEmpty())
+		{
+			return null;
+		}
+		
+		return value;
 	}
 
 	private int getPropertyAsInt(final String key, final int defaultValue) {
@@ -120,9 +131,9 @@ public class Configuration {
 
 	private String getProperty(final String key, final String defaultValue) {
 
-		final String value = prop.getProperty(key);
+		final String value = getProperty(key);
 
-		if (value == null) {
+		if (value == null || value.isEmpty()) {
 
 			return defaultValue;
 		}
