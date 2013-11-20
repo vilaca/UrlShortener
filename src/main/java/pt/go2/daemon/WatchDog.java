@@ -47,11 +47,11 @@ public class WatchDog extends TimerTask {
 
 	synchronized public void register(final WatchDogTask task,
 			final boolean runNow) {
-		
-		//tasks.add(task);
+
+		tasks.add(task);
 
 		if (runNow) {
-		//	task.refresh();
+			task.refresh();
 		}
 	}
 
@@ -76,7 +76,7 @@ public class WatchDog extends TimerTask {
 	private boolean trigger(final WatchDogTask wt) {
 
 		final Date lastRun = wt.lastRun();
-		
+
 		if (wt.lastRun() == null) {
 			return true;
 		}
