@@ -101,16 +101,13 @@ public class Configuration {
 	 */
 	public static String getProperty(String key) {
 		String value = prop.getProperty(key);
-		if (value != null)
-		{
+		if (value != null) {
 			value = value.trim();
-		}
 
-		if ( value.isEmpty())
-		{
-			return null;
+			if (value.isEmpty()) {
+				return null;
+			}
 		}
-		
 		return value;
 	}
 
