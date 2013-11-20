@@ -115,6 +115,7 @@ public class Statistics {
 		sb.append(longDate.format(date));
 		sb.append(" ");
 		sb.append(referer);
+		sb.append(System.getProperty("line.separator"));
 
 		try {
 			file.write(sb.toString());
