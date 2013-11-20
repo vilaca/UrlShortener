@@ -1,16 +1,18 @@
 *.class
 
 # Package Files #
-#*.jar - comments out because of external dependencies jars - TODO use submodules?
 *.war
 *.ear
 
-#bin folder
+# bin folder
 bin/*
 
-#database restore folder
+# database restore folder
 go2db/*
 
-#dont commit logs
+# don't commit logs
 *.log
 access_log
+
+# sonarqube files
+.sonar/*
