@@ -14,6 +14,7 @@ public class Configuration {
 	// resource file locations on JAR
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
+
 	// apache style access log
 	public final String ACCESS_LOG;
 
@@ -54,6 +55,9 @@ public class Configuration {
 	// server version
 	public final String VERSION;
 
+	// watchdog sleep interval
+	public final long WATCHDOG_INTERVAL;
+
 	/**
 	 * Read configuration from file
 	 */
@@ -90,6 +94,7 @@ public class Configuration {
 		STATISTICS_USERNAME = getProperty("statistics.username", "statistics");
 		STATISTICS_PASSWORD = getProperty("statistics.password", "secret");
 		VERSION = getProperty("server.version", "beta");
+		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
 
 	/**

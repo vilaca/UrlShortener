@@ -94,8 +94,9 @@ public class Resources {
 			logger.warn("Could init PhishTank API Interface.");
 		} else {
 			watchdog.register(pi, true);
+			watchdog.start(config.WATCHDOG_INTERVAL);
 		}
-
+		
 		return true;
 	}
 
