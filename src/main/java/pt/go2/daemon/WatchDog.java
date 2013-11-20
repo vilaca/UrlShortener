@@ -34,7 +34,7 @@ public class WatchDog extends TimerTask {
 
 		final long millis = TimeUnit.MINUTES.toMillis(refresh);
 
-		watchdog.schedule(new WatchDog(), millis, millis);
+		watchdog.schedule(this, millis, millis);
 	}
 
 	/**
@@ -47,14 +47,14 @@ public class WatchDog extends TimerTask {
 
 	synchronized public void register(final WatchDogTask task,
 			final boolean runNow) {
-		
+
 		tasks.add(task);
 
 		if (runNow) {
 			task.refresh();
 		}
-		
-		logger.info("Registering. Total tasks: " + tasks.size() );
+
+		logger.info("Registering. Total tasks: " + tasks.size());
 	}
 
 	/**
@@ -78,7 +78,7 @@ public class WatchDog extends TimerTask {
 	private boolean trigger(final WatchDogTask wt) {
 
 		final Date lastRun = wt.lastRun();
-		
+
 		if (wt.lastRun() == null) {
 			return true;
 		}
