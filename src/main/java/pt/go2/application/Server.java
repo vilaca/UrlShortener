@@ -68,8 +68,6 @@ class Server {
 			return;
 		}
 
-		new Thread(vfs).start();
-
 		Statistics statistics;
 		try {
 			statistics = new Statistics(config.STATISTICS_FOLDER);
