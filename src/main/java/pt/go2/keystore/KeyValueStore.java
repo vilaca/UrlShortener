@@ -29,8 +29,8 @@ public class KeyValueStore {
 		final List<RestoreItem> restoredItems = Restore.start(resumeFolder);
 
 		for (RestoreItem item : restoredItems) {
-			final HashKey hk = new HashKey(item.Key);
-			final Uri uri = Uri.create(item.Value, false);
+			final HashKey hk = new HashKey(item.key);
+			final Uri uri = Uri.create(item.value, false);
 
 			storeHash(hk, uri);
 		}
