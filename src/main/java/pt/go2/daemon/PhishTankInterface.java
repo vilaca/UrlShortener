@@ -29,7 +29,7 @@ public class PhishTankInterface implements WatchDogTask {
 
 	// watchdog sleep time
 
-	private static final long WATCHDOG_SLEEP_MINUTES = 16;
+	private static final long UPDATE_INTERVAL = 60;
 
 	// expected entries on API - used to avoid resizing in loop
 
@@ -190,6 +190,6 @@ public class PhishTankInterface implements WatchDogTask {
 
 	@Override
 	public long interval() {
-		return WATCHDOG_SLEEP_MINUTES;
+		return UPDATE_INTERVAL;
 	}
 }
