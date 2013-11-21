@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,19 +15,21 @@ import org.apache.logging.log4j.Logger;
  */
 public class Restore {
 
-	private static final Logger logger = LogManager.getLogger(Restore.class);
+	private static final Logger LOG = LogManager.getLogger(Restore.class);
 
+	private Restore () {}
+	
 	/**
 	 * Class to hold data records from restore files
 	 */
 	public static class RestoreItem {
 
-		public final String Key;
-		public final String Value;
+		public final String key;
+		public final String value;
 
-		public RestoreItem(final String Key, final String Value) {
-			this.Key = Key;
-			this.Value = Value;
+		public RestoreItem(final String _key, final String _value) {
+			this.key = _key;
+			this.value = _value;
 		}
 	}
 
@@ -41,10 +44,10 @@ public class Restore {
 		final File[] files = new File(folder).listFiles();
 
 		if (files == null || files.length == 0) {
-			return null;
+			return Collections.emptyList();
 		}
 
-		logger.trace("Found " + files.length + " restore files.");
+		LOG.trace("Found " + files.length + " restore files.");
 
 		List<RestoreItem> items = new ArrayList<RestoreItem>();
 
@@ -55,7 +58,7 @@ public class Restore {
 			try (final FileReader fr = new FileReader(file.getAbsolutePath());
 					final BufferedReader br = new BufferedReader(fr);) {
 
-				logger.trace("Reading from Resume file: " + file.getName());
+				LOG.trace("Reading from Resume file: " + file.getName());
 
 				// read all lines in file
 
@@ -77,8 +80,7 @@ public class Restore {
 
 			} catch (IOException e) {
 
-				logger.error("Error reading: " + file.getAbsolutePath());
-				
+				LOG.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
 		
