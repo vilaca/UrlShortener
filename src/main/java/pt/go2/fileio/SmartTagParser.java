@@ -17,10 +17,16 @@ import java.util.regex.Pattern;
  */
 public final class SmartTagParser {
 
-	private static final Pattern tagPattern = Pattern.compile("\\[\\$\\w*\\$\\]");
-	private static final Pattern tagFuncPattern = Pattern.compile("\\[\\$\\w*(.*)\\$\\]");
-	private static final Pattern tagFuncNamePattern = Pattern.compile("^\\w*");
-	private static final Pattern tagFuncParamPattern = Pattern.compile("\\(.*\\)");
+	private static final Pattern PATTERN = Pattern.compile("\\[\\$\\w*\\$\\]");
+	private static final Pattern FUNCPATTERN = Pattern.compile("\\[\\$\\w*(.*)\\$\\]");
+	private static final Pattern TAGFUNCNAMEPATTERN = Pattern.compile("^\\w*");
+	private static final Pattern TAGFUNCPARAMPATTERN = Pattern.compile("\\(.*\\)");
+
+	/**
+	 * private c'tor to forbid instantiation
+	 */
+	private SmartTagParser() {
+	}
 
 	public static byte[] read(final InputStream file) throws IOException {
 		try (final BufferedReader br = new BufferedReader(
@@ -44,7 +50,7 @@ public final class SmartTagParser {
 				continue;
 			}
 
-			final Matcher tagMatcher = tagPattern.matcher(line);
+			final Matcher tagMatcher = PATTERN.matcher(line);
 
 			while (tagMatcher.find()) {
 
@@ -57,14 +63,14 @@ public final class SmartTagParser {
 					line = tagMatcher.replaceFirst(value);
 			}
 
-			final Matcher tagFuncMatcher = tagFuncPattern.matcher(line);
+			final Matcher tagFuncMatcher = FUNCPATTERN.matcher(line);
 
 			while (tagFuncMatcher.find()) {
 
 				String tag = tagFuncMatcher.group();
 				tag = tag.substring(2, tag.length() - 2);
 
-				final Matcher tagFuncNameMatcher = tagFuncNamePattern
+				final Matcher tagFuncNameMatcher = TAGFUNCNAMEPATTERN
 						.matcher(tag);
 
 				if (!tagFuncNameMatcher.find())
@@ -74,7 +80,7 @@ public final class SmartTagParser {
 
 				// add more keywords later?
 				if (name.equals("date")) {
-					final Matcher tagFuncParamMatcher = tagFuncParamPattern
+					final Matcher tagFuncParamMatcher = TAGFUNCPARAMPATTERN
 							.matcher(tag);
 
 					if (!tagFuncParamMatcher.find())
@@ -103,7 +109,7 @@ public final class SmartTagParser {
 
 	public static byte[] read(String filename) throws FileNotFoundException,
 			IOException {
-		
+
 		try (final InputStream br = new FileInputStream(filename);) {
 			return read(br);
 		}
