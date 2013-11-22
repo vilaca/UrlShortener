@@ -5,12 +5,11 @@ import com.sun.net.httpserver.HttpExchange;
 public class JsonResponse extends AbstractResponse {
 
 	final byte[] body;
-	
-	public JsonResponse ( final String body )
-	{
+
+	public JsonResponse(final String body) {
 		this.body = body.getBytes();
 	}
-	
+
 	@Override
 	public int getHttpStatus() {
 		return 200;
@@ -20,7 +19,7 @@ public class JsonResponse extends AbstractResponse {
 	public byte[] run(HttpExchange exchange) {
 		return body;
 	}
-	
+
 	@Override
 	public String getMimeType() {
 		return MIME_APP_JSON;

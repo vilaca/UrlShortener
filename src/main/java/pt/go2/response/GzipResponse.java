@@ -24,15 +24,16 @@ public class GzipResponse extends AbstractResponse {
 	 * 
 	 * @param body
 	 * @param mime
+	 * @throws IOException
 	 */
-	public GzipResponse(byte[] body, String mime) {
+	public GzipResponse(byte[] body, String mime) throws IOException {
 
 		this.body = body;
 		this.zipBody = zipBody(body);
 		this.mime = mime;
 	}
 
-	private byte[] zipBody(byte[] body) {
+	private byte[] zipBody(byte[] body) throws IOException {
 
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				GZIPOutputStream zip = new GZIPOutputStream(baos);) {
@@ -43,8 +44,6 @@ public class GzipResponse extends AbstractResponse {
 
 			return baos.toByteArray();
 
-		} catch (IOException e) {
-			return null;
 		}
 	}
 
@@ -112,6 +111,6 @@ public class GzipResponse extends AbstractResponse {
 		headers = exchange.getRequestHeaders();
 		values = headers.get(REQUEST_HEADER_ACCEPT_ENCODING);
 
-		return values.size() > 0 && values.get(0).indexOf("gzip") != -1;
+		return !values.isEmpty() && values.get(0).indexOf("gzip") != -1;
 	}
 }

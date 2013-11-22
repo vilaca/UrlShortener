@@ -24,6 +24,6 @@ public class RedirectResponse extends AbstractResponse {
 	@Override
 	public byte[] run(HttpExchange exchange) {
 		exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, redirect);
-		return "".getBytes();
+		return new byte[] {};
 	}
 }

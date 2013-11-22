@@ -33,7 +33,7 @@ public class ErrorResponse extends AbstractResponse {
 	 */
 	ErrorResponse(int status, String mime) {
 
-		this("".getBytes(), status, mime);
+		this(new byte[] {}, status, mime);
 	}
 
 	@Override

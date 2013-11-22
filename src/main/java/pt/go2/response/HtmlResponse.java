@@ -25,7 +25,6 @@ public class HtmlResponse extends AbstractResponse {
 	
 	@Override
 	public String getMimeType() {
-		// TODO hash return is not really HTML
 		return MIME_TEXT_HTML;
 	}
 }
