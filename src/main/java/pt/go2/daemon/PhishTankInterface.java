@@ -113,11 +113,7 @@ public class PhishTankInterface implements WatchDogTask {
 
 		long refused = 0;
 
-		CloseableHttpResponse response = null;
-
-		try {
-
-			response = httpclient.execute(httpGet);
+		try (final CloseableHttpResponse response = httpclient.execute(httpGet);) {
 
 			final int statusCode = response.getStatusLine().getStatusCode();
 
@@ -126,31 +122,34 @@ public class PhishTankInterface implements WatchDogTask {
 				return false;
 			}
 
-			final BufferedReader br = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
+			try (final BufferedReader br = new BufferedReader(
+					new InputStreamReader(response.getEntity().getContent()));) {
 
-			String entry;
-			
-			 // skip header
-			br.readLine();
-			
-			while ((entry = br.readLine()) != null) {
+				String entry;
 
-				int idx = entry.indexOf(',') + 1, end;
+				// skip header
+				br.readLine();
 
-				if (entry.charAt(idx) == '"') {
-					idx++;
-					end = entry.indexOf('"', idx);
-				} else {
-					end = entry.indexOf(',', idx);
+				while ((entry = br.readLine()) != null) {
+
+					int idx = entry.indexOf(',') + 1, end;
+
+					if (entry.charAt(idx) == '"') {
+						idx++;
+						end = entry.indexOf('"', idx);
+					} else {
+						end = entry.indexOf(',', idx);
+					}
+
+					final Uri uri;
+					uri = Uri.create(entry.substring(idx, end), false);
+
+					if (!banned.add(uri)) {
+						refused++;
+					}
 				}
-
-				final Uri uri;
-				uri = Uri.create(entry.substring(idx, end), false);
-
-				if (!banned.add(uri)) {
-					refused++;
-				}
+			} catch (IOException e) {
+				return false;
 			}
 
 			logger.info("Stats - Old: " + this.banned.size() + " New: "
@@ -160,13 +159,7 @@ public class PhishTankInterface implements WatchDogTask {
 
 		} catch (IOException e) {
 			return false;
-		} finally {
-			try {
-				response.close();
-			} catch (IOException e) {
-			}
 		}
-
 		logger.info("Download exiting");
 
 		return true;
