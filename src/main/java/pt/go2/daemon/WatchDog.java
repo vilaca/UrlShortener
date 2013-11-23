@@ -45,7 +45,7 @@ public class WatchDog extends TimerTask {
 		watchdog.purge();
 	}
 
-	synchronized public void register(final WatchDogTask task,
+	public synchronized void register(final WatchDogTask task,
 			final boolean runNow) {
 
 		tasks.add(task);
@@ -61,7 +61,7 @@ public class WatchDog extends TimerTask {
 	 * Trigger download
 	 */
 	@Override
-	synchronized public void run() {
+	public synchronized void run() {
 
 		for (WatchDogTask wt : tasks) {
 			if (trigger(wt)) {
