@@ -28,19 +28,18 @@ class StaticPages extends AbstractHandler {
 
 	private final Statistics statistics;
 
-	
 	/**
 	 * C'tor
 	 * 
 	 * @param config
 	 * @param vfs
-	 * @param statistics 
+	 * @param statistics
 	 * @throws IOException
 	 */
 	public StaticPages(final Configuration config, final Resources vfs,
 			Statistics statistics, final BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
-		
+
 		this.statistics = statistics;
 	}
 
@@ -76,10 +75,11 @@ class StaticPages extends AbstractHandler {
 
 		if (requested.length() == 6) {
 
-			final String referer = exchange.getRequestHeaders().getFirst(AbstractResponse.REQUEST_HEADER_REFERER);
-			
-			statistics.add( requested, referer, calendar.getTime() );
-			
+			final String referer = exchange.getRequestHeaders().getFirst(
+					AbstractResponse.REQUEST_HEADER_REFERER);
+
+			statistics.add(requested, referer, calendar.getTime());
+
 			final Uri uri = vfs.get(new HashKey(requested));
 
 			if (uri == null) {
@@ -89,27 +89,20 @@ class StaticPages extends AbstractHandler {
 
 			if (vfs.isBanned(uri)) {
 				logger.warn("banned: " + uri);
-				reply(exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING), true);
+				reply(exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING),
+						true);
 				return;
 			}
-			
+
 			reply(exchange, new RedirectResponse(uri.toString(), 301), true);
 			return;
 		}
 
-		AbstractResponse response;
-		
-		if (requested.equals("/") && config.PUBLIC!= null )
-		{
-			response  = vfs.get(config.PUBLIC_ROOT);
-		}
-		else
-		{
-			response = vfs.get(requested);
-		}
+		AbstractResponse response = vfs.get(requested);
 
-		if ( response == null ) response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
-				
+		if (response == null)
+			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
+
 		reply(exchange, response, true);
 	}
 
@@ -140,8 +133,6 @@ class StaticPages extends AbstractHandler {
 			return path;
 		}
 
-		final int idx = path.indexOf('/', 1);
-
-		return idx == -1 ? path.substring(1) : path.substring(1, idx);
+		return path.substring(1);
 	}
 }
