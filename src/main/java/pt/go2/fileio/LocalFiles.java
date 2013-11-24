@@ -31,7 +31,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 			.getLogger(FileSystemInterface.class);
 
 	private final Map<String, AbstractResponse> pages = new ConcurrentHashMap<>();
-	private final Map<WatchKey, String> keys = new HashMap<>();
+	private final Map<WatchKey, Path> keys = new HashMap<>();
 	private final Set<String> directories = new HashSet<>();
 
 	private final int trim;
@@ -63,7 +63,6 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 		for (Path path : directories) {
 			try {
 				register(path);
-				this.directories.add(path.toString());
 			} catch (IOException e) {
 				logger.warn("Could not registed directory: " + path.toString());
 			}
@@ -73,10 +72,10 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 	private void register(Path path) throws IOException {
 		final WatchKey key = path.register(watchService,
 				StandardWatchEventKinds.ENTRY_CREATE,
-				StandardWatchEventKinds.ENTRY_MODIFY,
 				StandardWatchEventKinds.ENTRY_DELETE);
 
-		keys.put(key, path.toString());
+		keys.put(key, path);
+		this.directories.add(path.toString());
 	}
 
 	@Override
@@ -146,42 +145,55 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 				@SuppressWarnings("unchecked")
 				final WatchEvent<Path> watchEventPath = (WatchEvent<Path>) watchEvent;
 
-				final Path path = watchEventPath.context();
-				final String child = path.getFileName().toString();
+				final Path parent = keys.get(key);
 
-				final String parent = keys.get(key);
+				if (parent == null) {
+					logger.error("No parent for key: " + key.toString());
+					continue;
+				}
 
-				final String filename = parent + File.separator + child;
+				final Path entry = parent.resolve(watchEventPath.context()
+						.getFileName());
+
+				final String filename = entry.toString();
+
+				logger.info("KIND: " + kind.name() + " file:" + filename);
 
 				if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
-
-					if (new File(filename).isDirectory()) {
-						try {
-							register(path);
-						} catch (IOException e) {
+					try {
+						if (entry.toFile().isDirectory()) {
+							logger.info("REG: " + filename);
+							register(entry);
+						} else {
+							logger.info("ADD: " + filename);
+							addStaticPage(entry);
 						}
-					} else {
-						addStaticPage(filename);
+					} catch (IOException e) {
+						logger.error("Exception on add/reg.");
 					}
 					continue;
 				}
 
-				if (pages.containsKey(child)) {
-					// file action
-
-					if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
-						pages.remove(child);
-					}
-					continue;
+				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+					removePage(filename);
 				}
-
 			}
 
 			if (!key.reset()) {
-				keys.remove(key);
+				Path filename = keys.remove(key);
 				key.cancel();
+				logger.info("Removing: " + filename);
+				if (directories.remove(filename.toString())) {
+					logger.info("Removed: " + filename);
+				}
 			}
 		}
+	}
+
+	private void removePage(String filename) {
+		filename = filename.substring(trim);
+		boolean removed = pages.remove(filename) != null;
+		logger.info("Removed " + filename + " " + (removed ? "Y" : "N"));
 	}
 
 	private void addStaticPage(final Path path) {
