@@ -1,7 +1,9 @@
 package pt.go2.fileio;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import pt.go2.application.Resources;
@@ -31,27 +33,21 @@ public class EmbeddedFiles implements FileSystemInterface {
 		css = SmartTagParser.read(Resources.class
 				.getResourceAsStream("/screen.css"));
 
-		this.pages.put("/", new GzipResponse(index,
-				AbstractResponse.MIME_TEXT_HTML));
-		this.pages.put("ajax.js", new GzipResponse(ajax,
-				AbstractResponse.MIME_APP_JAVASCRIPT));
+		this.pages.put("/", new GzipResponse(index, ".html"));
+		this.pages.put("ajax.js", new GzipResponse(ajax, ".js"));
 
-		this.pages.put("robots.txt", new GzipResponse(robots,
-				AbstractResponse.MIME_TEXT_PLAIN));
+		this.pages.put("robots.txt", new GzipResponse(robots, ".txt"));
 
-		this.pages.put("sitemap.xml", new GzipResponse(map,
-				AbstractResponse.MIME_TEXT_XML));
+		this.pages.put("sitemap.xml", new GzipResponse(map, ".xml"));
 
-		this.pages.put("screen.css", new GzipResponse(css,
-				AbstractResponse.MIME_TEXT_CSS));
+		this.pages.put("screen.css", new GzipResponse(css, ".css"));
 
 		if (!config.GOOGLE_VERIFICATION.isEmpty()) {
 			this.pages
 					.put(config.GOOGLE_VERIFICATION,
 							new GzipResponse(
 									("google-site-verification: " + config.GOOGLE_VERIFICATION)
-											.getBytes(),
-									AbstractResponse.MIME_TEXT_PLAIN));
+											.getBytes(), ".html"));
 		}
 	}
 
@@ -66,6 +62,13 @@ public class EmbeddedFiles implements FileSystemInterface {
 	@Override
 	public AbstractResponse getFile(String filename) {
 		return pages.get(filename);
+	}
+
+	@Override
+	public List<String> browse() {
+		List<String> result = new ArrayList<>(pages.size());
+		result.addAll(pages.keySet());
+		return result;
 	}
 
 }

@@ -80,6 +80,24 @@ class Server {
 
 			// RequestHandler
 
+			final BasicAuthenticator ba = new BasicAuthenticator("Statistics") {
+
+				@Override
+				public boolean checkCredentials(final String user,
+						final String pass) {
+
+					LOG.info("login: [" + user + "] | [" + pass + "]");
+
+					LOG.info("required: [" + config.STATISTICS_USERNAME
+							+ "] | [" + config.STATISTICS_PASSWORD
+							+ "]");
+
+					return user.equals(config.STATISTICS_USERNAME)
+							&& pass.equals(config.STATISTICS_PASSWORD
+									.trim());
+				}
+			};
+			
 			final HttpHandler root = new StaticPages(config, vfs, statistics,
 					accessLog);
 			final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
@@ -87,28 +105,14 @@ class Server {
 			final HttpHandler stats = new Analytics(config, vfs, statistics,
 					accessLog);
 
+			final HttpHandler browse = new Browse(config, vfs, accessLog);
+
 			listener.createContext("/", root);
 
 			listener.createContext("/new", novo);
 
-			listener.createContext("/stats", stats).setAuthenticator(
-					new BasicAuthenticator("Statistics") {
-
-						@Override
-						public boolean checkCredentials(final String user,
-								final String pass) {
-
-							LOG.info("login: [" + user + "] | [" + pass + "]");
-
-							LOG.info("required: [" + config.STATISTICS_USERNAME
-									+ "] | [" + config.STATISTICS_PASSWORD
-									+ "]");
-
-							return user.equals(config.STATISTICS_USERNAME)
-									&& pass.equals(config.STATISTICS_PASSWORD
-											.trim());
-						}
-					});
+			listener.createContext("/stats", stats).setAuthenticator(ba);
+			listener.createContext("/browse", browse).setAuthenticator(ba);
 
 			listener.setExecutor(null);
 

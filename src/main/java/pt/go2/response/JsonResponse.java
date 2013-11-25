@@ -7,7 +7,11 @@ public class JsonResponse extends AbstractResponse {
 	final byte[] body;
 
 	public JsonResponse(final String body) {
-		this.body = body.getBytes();
+		this(body.getBytes());
+	}
+
+	public JsonResponse(final byte[] body) {
+		this.body = body;
 	}
 
 	@Override
@@ -16,7 +20,7 @@ public class JsonResponse extends AbstractResponse {
 	}
 
 	@Override
-	public byte[] run(HttpExchange exchange) {
+	public byte[] run(final HttpExchange exchange) {
 		return body;
 	}
 

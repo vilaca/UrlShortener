@@ -2,6 +2,7 @@ package pt.go2.application;
 
 import java.io.IOException;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,7 +97,7 @@ public class Resources {
 			watchdog.register(pi, true);
 			watchdog.start(config.WATCHDOG_INTERVAL);
 		}
-		
+
 		return true;
 	}
 
@@ -174,5 +175,9 @@ public class Resources {
 
 	public AbstractResponse get(String requested) {
 		return pages.getFile(requested);
+	}
+
+	public List<String> browse() {
+		return pages.browse();
 	}
 }

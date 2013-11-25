@@ -26,14 +26,54 @@ public class GzipResponse extends AbstractResponse {
 	 * @param mime
 	 * @throws IOException
 	 */
-	public GzipResponse(byte[] body, String mime) throws IOException {
+	public GzipResponse(final byte[] body, final String filename) throws IOException {
+		
+		final int idx = filename.lastIndexOf('.');
 
+		final String mimeType;
+
+		if (idx == -1) {
+			mimeType = AbstractResponse.MIME_TEXT_PLAIN;
+		} else {
+
+			final String extension = filename.substring(idx);
+
+			switch (extension) {
+			case ".css":
+				mimeType = AbstractResponse.MIME_TEXT_CSS;
+				break;
+			case ".gif":
+				mimeType = AbstractResponse.MIME_IMG_GIF;
+				break;
+			case ".html":
+			case ".htm":
+				mimeType = AbstractResponse.MIME_TEXT_HTML;
+				break;
+			case ".jpeg":
+			case ".jpg":
+				mimeType = AbstractResponse.MIME_IMG_JPEG;
+				break;
+			case ".js":
+				mimeType = AbstractResponse.MIME_APP_JAVASCRIPT;
+				break;
+			case ".png":
+				mimeType = AbstractResponse.MIME_IMG_PNG;
+				break;
+			case ".xml":
+				mimeType = AbstractResponse.MIME_TEXT_XML;
+				break;
+			default:
+				mimeType = AbstractResponse.MIME_TEXT_PLAIN;
+				break;
+			}
+		}
+		
 		this.body = body;
 		this.zipBody = zipBody(body);
-		this.mime = mime;
+		this.mime = mimeType;
 	}
 
-	private byte[] zipBody(byte[] body) throws IOException {
+	private byte[] zipBody(final byte[] body) throws IOException {
 
 		try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
 				GZIPOutputStream zip = new GZIPOutputStream(baos);) {

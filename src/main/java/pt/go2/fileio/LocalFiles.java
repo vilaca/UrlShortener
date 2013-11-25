@@ -69,6 +69,15 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 		}
 	}
 
+	public List<String> browse() {
+		List<String> result = new ArrayList<>(directories.size() + pages.size());
+
+		result.addAll(directories);
+		result.addAll(pages.keySet());
+
+		return result;
+	}
+
 	private void register(Path path) throws IOException {
 		final WatchKey key = path.register(watchService,
 				StandardWatchEventKinds.ENTRY_CREATE,
@@ -203,50 +212,10 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 	private void addStaticPage(final String filename) {
 
-		final int idx = filename.lastIndexOf('.');
-
-		final String mimeType;
-
-		if (idx == -1) {
-			mimeType = AbstractResponse.MIME_TEXT_PLAIN;
-		} else {
-
-			final String extension = filename.substring(idx);
-
-			switch (extension) {
-			case ".css":
-				mimeType = AbstractResponse.MIME_TEXT_CSS;
-				break;
-			case ".gif":
-				mimeType = AbstractResponse.MIME_IMG_GIF;
-				break;
-			case ".html":
-			case ".htm":
-				mimeType = AbstractResponse.MIME_TEXT_HTML;
-				break;
-			case ".jpeg":
-			case ".jpg":
-				mimeType = AbstractResponse.MIME_IMG_JPEG;
-				break;
-			case ".js":
-				mimeType = AbstractResponse.MIME_APP_JAVASCRIPT;
-				break;
-			case ".png":
-				mimeType = AbstractResponse.MIME_IMG_PNG;
-				break;
-			case ".xml":
-				mimeType = AbstractResponse.MIME_TEXT_XML;
-				break;
-			default:
-				mimeType = AbstractResponse.MIME_TEXT_PLAIN;
-				break;
-			}
-		}
-
 		try {
 
 			this.pages.put(filename.substring(trim), new GzipResponse(
-					SmartTagParser.read(filename), mimeType));
+					SmartTagParser.read(filename), filename));
 
 		} catch (IOException e) {
 
