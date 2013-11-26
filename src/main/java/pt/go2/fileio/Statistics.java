@@ -22,16 +22,51 @@ public class Statistics {
 
 	static class Hit {
 
-		public final String ip;
-		public final String requested;
-		public final String referer;
-		public final Date date;
+		private String ip;
+		private String requested;
+		private String referer;
+		private String date;
 
-		Hit(String ip, String requested, String referer, Date date) {
+		public Hit() {
+		}
 
+		public Hit(String ip, String requested, String referer, String date) {
+
+			this.setIp(ip);
+			this.setRequested(requested);
+			this.setReferer(referer);
+			this.setDate(date);
+		}
+
+		public String getIp() {
+			return ip;
+		}
+
+		public void setIp(String ip) {
 			this.ip = ip;
+		}
+
+		public String getRequested() {
+			return requested;
+		}
+
+		public void setRequested(String requested) {
 			this.requested = requested;
+		}
+
+		public String getReferer() {
+			return referer;
+		}
+
+		public void setReferer(String referer) {
 			this.referer = referer;
+		}
+
+		public String getDate() {
+			return date;
+		}
+
+		public void setDate(String date) {
 			this.date = date;
 		}
 	}
@@ -50,7 +85,7 @@ public class Statistics {
 
 		final Calendar date = Calendar.getInstance();
 
-		final String filename = config + File.separator
+		final String filename = config.STATISTICS_FOLDER + File.separator
 				+ new SimpleDateFormat(FILENAME_MASK).format(date.getTime());
 
 		if (new File(filename).exists()) {
@@ -64,9 +99,16 @@ public class Statistics {
 
 	public void add(String ip, String requested, String referer, Date date) {
 
+		final String dateString = new SimpleDateFormat(
+				"yyyy-MM-dd HH:mm:ss,SSS Z").format(date);
+
+		if (referer == null) {
+			referer = "";
+		}
+
 		final ObjectMapper mapper = new ObjectMapper();
 
-		final Hit hit = new Hit(ip, requested, referer, date);
+		final Hit hit = new Hit(ip, requested, referer, dateString);
 
 		hits.add(hit);
 
@@ -75,7 +117,9 @@ public class Statistics {
 		nextFile(date, dayOfWeek);
 
 		try {
-			file.write(mapper.writeValueAsString(hit));
+			final String line = mapper.writeValueAsString(hit);
+			file.write(line);
+			file.write(System.getProperty("line.separator"));
 			file.flush();
 		} catch (IOException e) {
 			LOG.warn("Error writing statistics to disk.", e);
@@ -89,8 +133,6 @@ public class Statistics {
 			return;
 		}
 
-		this.dayOfWeek = dayOfWeek;
-
 		final String filename = this.config.STATISTICS_FOLDER + File.separator
 				+ new SimpleDateFormat(FILENAME_MASK).format(date);
 
@@ -101,18 +143,19 @@ public class Statistics {
 		}
 
 		try {
-			this.file.close();
 			this.file = new FileWriter(filename, true);
 		} catch (IOException e) {
-			LOG.error("Error on write.", e);
+			LOG.error("Error on file creation.", e);
+			return;
 		}
 
 		try {
 			this.file.close();
-			this.file = new FileWriter(filename, true);
 		} catch (IOException e) {
 			LOG.error("Error on close.", e);
 		}
+
+		this.dayOfWeek = dayOfWeek;
 	}
 
 	static private void restore(final List<Hit> hits, final String filename) {
@@ -130,7 +173,12 @@ public class Statistics {
 
 			while (line != null) {
 
-				mapper.readValue(line, Hit.class);
+				try {
+					Hit hit = mapper.readValue(line, Hit.class);
+					hits.add(hit);
+				} catch (IOException e) {
+					LOG.error("Statistics entry problem.", e);
+				}
 				line = br.readLine();
 			}
 
@@ -139,8 +187,7 @@ public class Statistics {
 		}
 	}
 
-	public String getLast24Hours() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<Hit> getLast24Hours() {
+		return hits;
 	}
 }
