@@ -34,19 +34,19 @@ public class EmbeddedFiles implements FileSystemInterface {
 				.getResourceAsStream("/screen.css"));
 
 		this.pages.put("/", new GzipResponse(index, ".html"));
-		this.pages.put("ajax.js", new GzipResponse(ajax, ".js"));
+		this.pages.put("/ajax.js", new GzipResponse(ajax, ".js"));
 
-		this.pages.put("robots.txt", new GzipResponse(robots, ".txt"));
+		this.pages.put("/robots.txt", new GzipResponse(robots, ".txt"));
 
-		this.pages.put("sitemap.xml", new GzipResponse(map, ".xml"));
+		this.pages.put("/sitemap.xml", new GzipResponse(map, ".xml"));
 
-		this.pages.put("screen.css", new GzipResponse(css, ".css"));
+		this.pages.put("/screen.css", new GzipResponse(css, ".css"));
 
 		if (!config.GOOGLE_VERIFICATION.isEmpty()) {
 			this.pages
 					.put(config.GOOGLE_VERIFICATION,
 							new GzipResponse(
-									("google-site-verification: " + config.GOOGLE_VERIFICATION)
+									("/google-site-verification: " + config.GOOGLE_VERIFICATION)
 											.getBytes(), ".html"));
 		}
 	}
