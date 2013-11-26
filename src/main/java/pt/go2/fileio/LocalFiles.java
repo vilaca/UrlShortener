@@ -81,6 +81,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 	private void register(Path path) throws IOException {
 		final WatchKey key = path.register(watchService,
 				StandardWatchEventKinds.ENTRY_CREATE,
+				StandardWatchEventKinds.ENTRY_MODIFY,
 				StandardWatchEventKinds.ENTRY_DELETE);
 
 		keys.put(key, path);
@@ -183,6 +184,12 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 					continue;
 				}
 
+				if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+					logger.info("CHG: " + filename);
+					addStaticPage(entry);
+					continue;
+				}
+				
 				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
 					removePage(filename);
 				}
