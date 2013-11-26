@@ -12,11 +12,11 @@ import com.sun.net.httpserver.HttpExchange;
 public class Analytics extends AbstractHandler {
 
 	private final Statistics statistics;
-	
+
 	public Analytics(Configuration config, Resources vfs,
 			Statistics statistics, BufferedWriter accessLog) {
+
 		super(config, vfs, accessLog);
-		
 		this.statistics = statistics;
 	}
 
@@ -26,10 +26,6 @@ public class Analytics extends AbstractHandler {
 	 */
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
-
-		final String output = statistics.getLast24Hours();
-
-		reply(exchange, new JsonResponse(output), false);
+		reply(exchange, new JsonResponse(statistics.getLast24Hours()), false);
 	}
-
 }
