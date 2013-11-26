@@ -27,8 +27,7 @@ import pt.go2.response.RedirectResponse;
 
 public class LocalFiles implements FileSystemInterface, Runnable {
 
-	static final Logger logger = LogManager
-			.getLogger(FileSystemInterface.class);
+	static final Logger LOG = LogManager.getLogger(FileSystemInterface.class);
 
 	private final Map<String, AbstractResponse> pages = new ConcurrentHashMap<>();
 	private final Map<WatchKey, Path> keys = new HashMap<>();
@@ -51,20 +50,21 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 		this.watchService = FileSystems.getDefault().newWatchService();
 
 		final List<Path> files = new ArrayList<>();
-		final Set<Path> directories = new HashSet<>();
+		final Set<Path> dir = new HashSet<>();
 
-		FileCrawler.crawl(config.PUBLIC, directories, files);
+		FileCrawler.crawl(config.PUBLIC, dir, files);
 
 		for (Path path : files) {
 
 			addStaticPage(path);
 		}
 
-		for (Path path : directories) {
+		for (Path path : dir) {
 			try {
 				register(path);
 			} catch (IOException e) {
-				logger.warn("Could not registed directory: " + path.toString());
+				LOG.warn("Could not register directory: " + path.toString()
+						+ ".", e);
 			}
 		}
 	}
@@ -101,7 +101,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 	@Override
 	public AbstractResponse getFile(String filename) {
 
-		if (filename.equals("/") && config.PUBLIC != null) {
+		if ("/".equals(filename) && config.PUBLIC != null) {
 			filename += config.PUBLIC_ROOT;
 		}
 
@@ -135,7 +135,8 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 			WatchKey key;
 			try {
 				key = watchService.poll(5, TimeUnit.SECONDS);
-			} catch (InterruptedException e1) {
+			} catch (InterruptedException e) {
+				LOG.warn("Interrupted.", e);
 				continue;
 			}
 
@@ -158,7 +159,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 				final Path parent = keys.get(key);
 
 				if (parent == null) {
-					logger.error("No parent for key: " + key.toString());
+					LOG.error("No parent for key: " + key.toString());
 					continue;
 				}
 
@@ -167,30 +168,26 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 				final String filename = entry.toString();
 
-				logger.info("KIND: " + kind.name() + " file:" + filename);
+				LOG.info("KIND: " + kind.name() + " file:" + filename);
 
 				if (kind == StandardWatchEventKinds.ENTRY_CREATE) {
 					try {
 						if (entry.toFile().isDirectory()) {
-							logger.info("REG: " + filename);
+							LOG.info("REG: " + filename);
 							register(entry);
 						} else {
-							logger.info("ADD: " + filename);
+							LOG.info("ADD: " + filename);
 							addStaticPage(entry);
 						}
 					} catch (IOException e) {
-						logger.error("Exception on add/reg.");
+						LOG.error("Exception on add/reg.", e);
 					}
-					continue;
-				}
+				} else if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 
-				if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
-					logger.info("CHG: " + filename);
+					LOG.info("CHG: " + filename);
 					addStaticPage(entry);
-					continue;
-				}
-				
-				if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+				} else if (kind == StandardWatchEventKinds.ENTRY_DELETE) {
+
 					removePage(filename);
 				}
 			}
@@ -198,9 +195,9 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 			if (!key.reset()) {
 				Path filename = keys.remove(key);
 				key.cancel();
-				logger.info("Removing: " + filename);
+				LOG.info("Removing: " + filename);
 				if (directories.remove(filename.toString())) {
-					logger.info("Removed: " + filename);
+					LOG.info("Removed: " + filename);
 				}
 			}
 		}
@@ -209,7 +206,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 	private void removePage(String filename) {
 		filename = filename.substring(trim);
 		boolean removed = pages.remove(filename) != null;
-		logger.info("Removed " + filename + " " + (removed ? "Y" : "N"));
+		LOG.info("Removed " + filename + " " + (removed ? "Y" : "N"));
 	}
 
 	private void addStaticPage(final Path path) {
@@ -226,8 +223,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 		} catch (IOException e) {
 
-			logger.error("Failed loading: " + filename);
+			LOG.error("Failed loading: " + filename + ".", e);
 		}
 	}
-
 }
