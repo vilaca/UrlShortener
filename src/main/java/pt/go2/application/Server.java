@@ -107,7 +107,7 @@ class Server {
 			final HttpHandler stats = new Analytics(config, vfs, statistics,
 					accessLog);
 
-			final HttpHandler browse = new Browse(config, vfs, accessLog);
+			final HttpHandler browse = new View(config, vfs, accessLog);
 
 			listener.createContext("/", root);
 

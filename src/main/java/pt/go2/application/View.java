@@ -8,9 +8,9 @@ import pt.go2.response.JsonResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
-public class Browse extends AbstractHandler {
+public class View extends AbstractHandler {
 
-	public Browse(Configuration config, Resources vfs, BufferedWriter accessLog) {
+	public View(Configuration config, Resources vfs, BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
 	}
 
