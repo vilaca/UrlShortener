@@ -46,7 +46,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 		this.config = config;
 
-		this.trim = config.PUBLIC.length() + 1;
+		this.trim = config.PUBLIC.length();
 
 		this.watchService = FileSystems.getDefault().newWatchService();
 
@@ -100,7 +100,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 	@Override
 	public AbstractResponse getFile(String filename) {
 
-		if (filename.endsWith("/") && config.PUBLIC != null) {
+		if (filename.equals("/") && config.PUBLIC != null) {
 			filename += config.PUBLIC_ROOT;
 		}
 

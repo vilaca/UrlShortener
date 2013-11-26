@@ -2,7 +2,6 @@ package pt.go2.application;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
@@ -72,9 +71,11 @@ class StaticPages extends AbstractHandler {
 			return;
 		}
 
-		final String requested = getRequestedFilename(exchange.getRequestURI());
+		String requested = exchange.getRequestURI().getRawPath();
 
-		if (requested.length() == 6) {
+		if (requested.length() == 7) {
+
+			requested = requested.substring(1);
 
 			final String referer = exchange.getRequestHeaders().getFirst(
 					AbstractResponse.REQUEST_HEADER_REFERER);
@@ -84,7 +85,7 @@ class StaticPages extends AbstractHandler {
 
 			statistics.add(ip, requested, referer, calendar.getTime());
 
-			final Uri uri = vfs.get(new HashKey(requested));
+			final Uri uri = vfs.get(new HashKey(requested.substring(1)));
 
 			if (uri == null) {
 				reply(exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
@@ -118,25 +119,5 @@ class StaticPages extends AbstractHandler {
 	 */
 	private boolean validRequest(final Headers headers) {
 		return headers.get(AbstractResponse.REQUEST_HEADER_HOST).size() > 0;
-	}
-
-	/**
-	 * Parse requested filename from URI
-	 * 
-	 * @param request
-	 * 
-	 * @return Requested filename
-	 */
-	private String getRequestedFilename(final URI request) {
-
-		// split into tokens
-
-		final String path = request.getRawPath();
-
-		if (path.equals("/")) {
-			return path;
-		}
-
-		return path.substring(1);
 	}
 }
