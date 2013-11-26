@@ -9,6 +9,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.Statistics;
 import pt.go2.keystore.HashKey;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
@@ -78,7 +79,10 @@ class StaticPages extends AbstractHandler {
 			final String referer = exchange.getRequestHeaders().getFirst(
 					AbstractResponse.REQUEST_HEADER_REFERER);
 
-			statistics.add(requested, referer, calendar.getTime());
+			final String ip = exchange.getRemoteAddress().getAddress()
+					.getHostAddress();
+
+			statistics.add(ip, requested, referer, calendar.getTime());
 
 			final Uri uri = vfs.get(new HashKey(requested));
 

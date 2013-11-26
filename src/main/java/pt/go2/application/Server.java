@@ -7,6 +7,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.Statistics;
+
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -56,9 +58,9 @@ class Server {
 			return;
 		}
 
-		Statistics statistics;
+		final Statistics statistics;
 		try {
-			statistics = new Statistics(config.STATISTICS_FOLDER);
+			statistics = new Statistics(config);
 		} catch (IOException e1) {
 			LOG.fatal("Can't collect statistics.");
 			return;

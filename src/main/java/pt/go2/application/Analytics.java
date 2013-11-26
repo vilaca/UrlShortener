@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.Statistics;
 import pt.go2.response.JsonResponse;
 
 import com.sun.net.httpserver.HttpExchange;
