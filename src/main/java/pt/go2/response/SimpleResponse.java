@@ -31,7 +31,7 @@ public class SimpleResponse extends AbstractResponse {
 	 * @param status
 	 * @param mime
 	 */
-	SimpleResponse(int status, String mime) {
+	public SimpleResponse(int status, String mime) {
 
 		this(new byte[] {}, status, mime);
 	}
