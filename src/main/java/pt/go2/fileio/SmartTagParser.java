@@ -36,6 +36,14 @@ public final class SmartTagParser {
 		}
 	}
 
+	public static byte[] read(String filename) throws FileNotFoundException,
+			IOException {
+
+		try (final InputStream br = new FileInputStream(filename);) {
+			return read(br);
+		}
+	}
+
 	private static byte[] readFromFile(final BufferedReader br)
 			throws IOException {
 
@@ -105,13 +113,5 @@ public final class SmartTagParser {
 		}
 
 		return sb.toString().getBytes();
-	}
-
-	public static byte[] read(String filename) throws FileNotFoundException,
-			IOException {
-
-		try (final InputStream br = new FileInputStream(filename);) {
-			return read(br);
-		}
 	}
 }

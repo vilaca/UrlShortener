@@ -32,7 +32,7 @@ class UrlHashing extends AbstractHandler {
 	 */
 	public UrlHashing(Configuration config, final Resources vfs,
 			BufferedWriter accessLog) {
-		
+
 		super(config, vfs, accessLog);
 		this.vfs = vfs;
 	}
@@ -55,8 +55,7 @@ class UrlHashing extends AbstractHandler {
 			final String postBody = br.readLine();
 
 			if (postBody == null) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 				return;
 			}
 
@@ -65,8 +64,7 @@ class UrlHashing extends AbstractHandler {
 			final int idx = postBody.indexOf('=') + 1;
 
 			if (idx == -1 || postBody.length() - idx < 3) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 				return;
 			}
 
@@ -75,8 +73,7 @@ class UrlHashing extends AbstractHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true);
 
 			if (uri == null) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 				return;
 			}
 
@@ -86,8 +83,7 @@ class UrlHashing extends AbstractHandler {
 				logger.warn("banned: " + uri + " - "
 						+ exchange.getRemoteAddress().getHostName());
 				reply(exchange,
-						vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX),
-						false);
+						vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX), false);
 				return;
 			}
 
@@ -96,8 +92,7 @@ class UrlHashing extends AbstractHandler {
 			final byte[] hashedUri = vfs.add(uri);
 
 			if (hashedUri.length == 0) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
+				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 				return;
 			}
 
