@@ -165,13 +165,16 @@ class Server {
 			final HttpHandler enforcer = new HttpsEnforcer(config, vfs,
 					accessLog);
 
+			final HttpHandler reportUrl = new ReportUrl(config, vfs, accessLog,
+					vfs);
+
 			final HttpHandler browse = new View(config, vfs, accessLog);
 
 			if (!"no".equals(config.HTTPS_ENABLED) || https == null) {
 
 				http.createContext("/", root);
 				http.createContext("/new", novo);
-
+				http.createContext("/report", reportUrl);
 				http.createContext("/stats", stats).setAuthenticator(ba);
 				http.createContext("/browse", browse).setAuthenticator(ba);
 
@@ -181,11 +184,13 @@ class Server {
 				http.createContext("/new", novo);
 				https.createContext("/stats", enforcer);
 				https.createContext("/browse", enforcer);
+				http.createContext("/report", reportUrl);
 
 				https.createContext("/", root);
 				https.createContext("/new", novo);
 				https.createContext("/stats", stats).setAuthenticator(ba);
 				https.createContext("/browse", browse).setAuthenticator(ba);
+				https.createContext("/report", reportUrl);
 
 			} else {
 
