@@ -90,7 +90,7 @@ public class Configuration {
 		ACCESS_LOG = getProperty("server.accessLog", "access_log");
 		BACKLOG = getPropertyAsInt("server.backlog", 100);
 		CACHE_HINT = getPropertyAsInt("server.cache", 2);
-		CERT_PASSWORD = getProperty("server.cert.pass").toCharArray();
+		CERT_PASSWORD = getProperty("server.cert.pass", "").toCharArray();
 		DATABASE_FOLDER = getResumeFolder();
 		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
 		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
@@ -98,7 +98,7 @@ public class Configuration {
 		HOST_HTTPS = createInetSocketAddressHttps();
 		HTTPS_ENABLED = getProperty("server.https-enabled", "no").toLowerCase();
 		KS_FILENAME = getProperty("server.keystore.filename");
-		KS_PASSWORD = getProperty("server.keystore.password").toCharArray();
+		KS_PASSWORD = getProperty("server.keystore.password", "").toCharArray();
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
