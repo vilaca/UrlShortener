@@ -3,9 +3,9 @@ package pt.go2.response;
 import com.sun.net.httpserver.HttpExchange;
 
 /**
- * Error response - Http status 400, 404, etc
+ * Simple response - Any status, mime and content
  */
-public class ErrorResponse extends AbstractResponse {
+public class SimpleResponse extends AbstractResponse {
 
 	final byte[] body;
 	final int status;
@@ -18,7 +18,7 @@ public class ErrorResponse extends AbstractResponse {
 	 * @param status
 	 * @param mime
 	 */
-	public ErrorResponse(byte[] body, int status, String mime) {
+	public SimpleResponse(byte[] body, int status, String mime) {
 
 		this.body = body;
 		this.status = status;
@@ -31,7 +31,7 @@ public class ErrorResponse extends AbstractResponse {
 	 * @param status
 	 * @param mime
 	 */
-	ErrorResponse(int status, String mime) {
+	SimpleResponse(int status, String mime) {
 
 		this(new byte[] {}, status, mime);
 	}

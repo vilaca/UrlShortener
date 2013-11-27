@@ -18,7 +18,7 @@ import pt.go2.keystore.HashKey;
 import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
-import pt.go2.response.ErrorResponse;
+import pt.go2.response.SimpleResponse;
 import pt.go2.response.RedirectResponse;
 
 /**
@@ -122,7 +122,7 @@ public class Resources {
 		try {
 			this.errors.put(
 					Error.PAGE_NOT_FOUND,
-					new ErrorResponse(SmartTagParser.read(Resources.class
+					new SimpleResponse(SmartTagParser.read(Resources.class
 							.getResourceAsStream("/404.html")), 404,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
@@ -133,7 +133,7 @@ public class Resources {
 		try {
 			this.errors.put(
 					Error.FORBIDDEN_PHISHING,
-					new ErrorResponse(SmartTagParser.read(Resources.class
+					new SimpleResponse(SmartTagParser.read(Resources.class
 							.getResourceAsStream("/403.html")), 403,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
@@ -141,11 +141,11 @@ public class Resources {
 			return false;
 		}
 
-		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new ErrorResponse(
+		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new SimpleResponse(
 				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
 
 		this.errors.put(Error.BAD_REQUEST,
-				new ErrorResponse("Bad request.".getBytes(), 400,
+				new SimpleResponse("Bad request.".getBytes(), 400,
 						AbstractResponse.MIME_TEXT_PLAIN));
 
 		// redirect to domain if a sub-domain is being used
