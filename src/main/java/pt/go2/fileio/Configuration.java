@@ -15,7 +15,7 @@ public class Configuration {
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
 
-	// apache style access log
+	// Apache style access log
 	public final String ACCESS_LOG;
 
 	// server listener backlog
@@ -35,6 +35,9 @@ public class Configuration {
 
 	// listener host
 	public final InetSocketAddress HOST;
+	public final InetSocketAddress HOST_HTTPS;
+
+	public final String HTTPS_ENABLED;
 
 	// phishing urls database
 	public final String PHISHTANK_API_KEY;
@@ -57,6 +60,11 @@ public class Configuration {
 
 	// watchdog sleep interval
 	public final long WATCHDOG_INTERVAL;
+
+	public final String KS_FILENAME;
+	public final char[] KS_PASSWORD;
+
+	public final char[] CERT_PASSWORD;
 
 	/**
 	 * Read configuration from file
@@ -82,10 +90,15 @@ public class Configuration {
 		ACCESS_LOG = getProperty("server.accessLog", "access_log");
 		BACKLOG = getPropertyAsInt("server.backlog", 100);
 		CACHE_HINT = getPropertyAsInt("server.cache", 2);
+		CERT_PASSWORD = getProperty("server.cert.pass").toCharArray();
 		DATABASE_FOLDER = getResumeFolder();
 		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
 		GOOGLE_VERIFICATION = getProperty("google-site-verification", "");
 		HOST = createInetSocketAddress();
+		HOST_HTTPS = createInetSocketAddressHttps();
+		HTTPS_ENABLED = getProperty("server.https-enabled", "no").toLowerCase();
+		KS_FILENAME = getProperty("server.keystore.filename");
+		KS_PASSWORD = getProperty("server.keystore.password").toCharArray();
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
@@ -156,6 +169,23 @@ public class Configuration {
 		}
 
 		return resumeFolder + System.getProperty("file.separator");
+	}
+
+	private InetSocketAddress createInetSocketAddressHttps() {
+
+		if ("no".equals(prop.getProperty("server.https-enabled", "no")
+				.toLowerCase())) {
+			return null;
+		}
+
+		final String host = prop.getProperty("server.host");
+		final int port = 443;
+
+		if (host == null) {
+			return new InetSocketAddress(port);
+		} else {
+			return new InetSocketAddress(host, port);
+		}
 	}
 
 	private InetSocketAddress createInetSocketAddress() {

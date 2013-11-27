@@ -1,8 +1,20 @@
 package pt.go2.application;
 
 import java.io.BufferedWriter;
+import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStore;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.UnrecoverableKeyException;
+import java.security.cert.CertificateException;
+import java.util.concurrent.Executor;
+
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -12,6 +24,8 @@ import pt.go2.fileio.Statistics;
 import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsServer;
 
 class Server {
 
@@ -36,17 +50,59 @@ class Server {
 
 		LOG.trace("Creating listener.");
 
-		final HttpServer listener;
+		final HttpServer http;
 		try {
 
-			listener = HttpServer.create(config.HOST, config.BACKLOG);
-
+			http = HttpServer.create(config.HOST, config.BACKLOG);
 		} catch (IOException e) {
 			LOG.fatal("Could not create listener.");
 			return;
 		}
 
-		LOG.trace("Appending to access log.");
+		// Process continues even if Https Listener failed to initialize
+
+		HttpsServer https = null;
+		if (config.HOST_HTTPS != null) {
+			try {
+
+				final String ksFilename = config.KS_FILENAME;
+
+				final char[] ksPassword = config.KS_PASSWORD;
+				final char[] certPassword = config.CERT_PASSWORD;
+
+				final KeyStore ks = KeyStore.getInstance("JKS");
+				final SSLContext context = SSLContext.getInstance("TLS");
+				final KeyManagerFactory kmf = KeyManagerFactory
+						.getInstance("SunX509");
+
+				ks.load(new FileInputStream(ksFilename), ksPassword);
+				kmf.init(ks, certPassword);
+				context.init(kmf.getKeyManagers(), null, null);
+
+				https = HttpsServer.create(config.HOST_HTTPS, config.BACKLOG);
+				https.setHttpsConfigurator(new HttpsConfigurator(context));
+
+			} catch (IOException | KeyStoreException | NoSuchAlgorithmException
+					| CertificateException | UnrecoverableKeyException
+					| KeyManagementException e) {
+				LOG.error("Could not create HTTPS listener.", e);
+			}
+		}
+
+		// Single Threaded Executor
+
+		final Executor exec = new Executor() {
+			@Override
+			public void execute(Runnable task) {
+				task.run();
+			}
+		};
+
+		http.setExecutor(exec);
+
+		if (https != null) {
+			https.setExecutor(exec);
+		}
 
 		LOG.trace("Starting virtual file system.");
 
@@ -69,7 +125,6 @@ class Server {
 		BufferedWriter accessLog = null;
 
 		try {
-
 			// start access log
 
 			try {
@@ -79,6 +134,8 @@ class Server {
 			} catch (IOException e) {
 				System.out.println("Access log redirected to console.");
 			}
+
+			LOG.trace("Appending to access log.");
 
 			// RequestHandler
 
@@ -91,15 +148,13 @@ class Server {
 					LOG.info("login: [" + user + "] | [" + pass + "]");
 
 					LOG.info("required: [" + config.STATISTICS_USERNAME
-							+ "] | [" + config.STATISTICS_PASSWORD
-							+ "]");
+							+ "] | [" + config.STATISTICS_PASSWORD + "]");
 
 					return user.equals(config.STATISTICS_USERNAME)
-							&& pass.equals(config.STATISTICS_PASSWORD
-									.trim());
+							&& pass.equals(config.STATISTICS_PASSWORD.trim());
 				}
 			};
-			
+
 			final HttpHandler root = new StaticPages(config, vfs, statistics,
 					accessLog);
 			final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
@@ -107,20 +162,43 @@ class Server {
 			final HttpHandler stats = new Analytics(config, vfs, statistics,
 					accessLog);
 
+			final HttpHandler enforcer = new HttpsEnforcer(config, vfs,
+					accessLog);
+
 			final HttpHandler browse = new View(config, vfs, accessLog);
 
-			listener.createContext("/", root);
+			if (!"no".equals(config.HTTPS_ENABLED) || https == null) {
 
-			listener.createContext("/new", novo);
+				http.createContext("/", root);
+				http.createContext("/new", novo);
 
-			listener.createContext("/stats", stats).setAuthenticator(ba);
-			listener.createContext("/browse", browse).setAuthenticator(ba);
+				http.createContext("/stats", stats).setAuthenticator(ba);
+				http.createContext("/browse", browse).setAuthenticator(ba);
 
-			listener.setExecutor(null);
+			} else if ("yes".equals(config.HTTPS_ENABLED)) {
+
+				http.createContext("/", root);
+				http.createContext("/new", novo);
+				https.createContext("/stats", enforcer);
+				https.createContext("/browse", enforcer);
+
+				https.createContext("/", root);
+				https.createContext("/new", novo);
+				https.createContext("/stats", stats).setAuthenticator(ba);
+				https.createContext("/browse", browse).setAuthenticator(ba);
+
+			} else {
+
+				LOG.fatal("Bad parameter in HTTPS config.");
+				return;
+			}
 
 			// start server
 
-			listener.start();
+			http.start();
+			if (https != null) {
+				http.start();
+			}
 
 			LOG.trace("Listener is Started.");
 
@@ -137,7 +215,10 @@ class Server {
 
 			LOG.trace("Server stopping.");
 
-			listener.stop(1);
+			http.stop(1);
+			if (https != null) {
+				http.stop(1);
+			}
 
 		} finally {
 			try {
