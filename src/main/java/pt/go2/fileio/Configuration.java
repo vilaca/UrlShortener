@@ -39,6 +39,9 @@ public class Configuration {
 
 	public final String HTTPS_ENABLED;
 
+	public final String MAIL_LINK_URL;
+	public final String MAIL_SITE_NAME;
+
 	// phishing urls database
 	public final String PHISHTANK_API_KEY;
 
@@ -54,6 +57,14 @@ public class Configuration {
 	// statics login
 	public final String STATISTICS_USERNAME;
 	public final String STATISTICS_PASSWORD;
+
+	public final String SMTP_OUTBOUND_EMAIL;
+	public final String SMTP_SERVER_HOST;
+	public final int SMTP_SERVER_PORT;
+	public final String SMTP_SERVER_USER;
+	public final String SMTP_SERVER_PASSWORD;
+
+	public final String USERS_FOLDER;
 
 	// server version
 	public final String VERSION;
@@ -99,13 +110,21 @@ public class Configuration {
 		HTTPS_ENABLED = getProperty("server.https-enabled", "no").toLowerCase();
 		KS_FILENAME = getProperty("server.keystore.filename");
 		KS_PASSWORD = getProperty("server.keystore.password", "").toCharArray();
+		MAIL_LINK_URL = getProperty("mail.link.url");
+		MAIL_SITE_NAME = getProperty("mail.site-name");
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
+		SMTP_OUTBOUND_EMAIL = getProperty("mail.smtp.outbound-email");
+		SMTP_SERVER_HOST = getProperty("mail.smtp.server.host");
+		SMTP_SERVER_PORT = getPropertyAsInt("mail.smtp.port", 25);
+		SMTP_SERVER_USER = getProperty("mail.smtp.username");
+		SMTP_SERVER_PASSWORD = getProperty("mail.smtp.password");
 		STATISTICS_FOLDER = getProperty("statistics.folder", "");
 		STATISTICS_USERNAME = getProperty("statistics.username", "statistics");
 		STATISTICS_PASSWORD = getProperty("statistics.password", "secret");
+		USERS_FOLDER = getProperty("users.folder");
 		VERSION = getProperty("server.version", "beta");
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
