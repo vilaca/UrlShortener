@@ -7,10 +7,18 @@ import java.util.Date;
  */
 public interface WatchDogTask {
 
+	/**
+	 * Task to execute
+	 */
 	void refresh();
 	
+	/**
+	 * When was the task last run?
+	 */
 	Date lastRun();
-	
+
+	/**
+	 * How often is the task to be run, in minutes
+	 */
 	long interval();
-	
 }
