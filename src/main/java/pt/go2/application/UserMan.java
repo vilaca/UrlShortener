@@ -111,9 +111,8 @@ public class UserMan {
 	}
 
 	public List<String> getLoginFields() {
-		return Arrays
-				.asList(new String[] { UserMan.USER_EMAIL, UserMan.USER_NAME,
-						UserMan.USER_PASSWORD, UserMan.USER_TIMEZONE });
+		return Arrays.asList(new String[] { UserMan.USER_NAME,
+				UserMan.USER_PASSWORD });
 	}
 
 	private String getUserDataFilename(final String name) {
