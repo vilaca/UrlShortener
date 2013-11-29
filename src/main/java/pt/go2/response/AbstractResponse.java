@@ -14,6 +14,7 @@ public abstract class AbstractResponse {
 	public static final String REQUEST_HEADER_USER_AGENT = "User-Agent";
 
 	// Response headers
+	public static final String RESPONSE_HEADER_AUTHORIZATION = "Authorization";
 	public static final String RESPONSE_HEADER_CACHE_CONTROL = "Cache-Control";
 	public static final String RESPONSE_HEADER_CONTENT_ENCODING = "Content-Encoding";
 	public static final String RESPONSE_HEADER_CONTENT_TYPE = "Content-Type";

@@ -25,14 +25,15 @@ import pt.go2.response.RedirectResponse;
  * Virtualized file resources
  * 
  */
+// TODO move error pages out ?
 public class Resources {
 
 	/**
 	 * Canned responses for errors
 	 */
 
-	enum Error {
-		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX
+	public enum Error {
+		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX, FORBIDDEN_USER_ALREADY_EXISTS, ERROR_CREATING_USER, ERROR_VALIDATING_USER, USER_VALIDATED, FORBIDDEN, USER_LOGIN_SUCESSFUL
 	}
 
 	static final Logger logger = LogManager.getLogger(Resources.class);
@@ -144,9 +145,33 @@ public class Resources {
 		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new SimpleResponse(
 				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
 
+		this.errors.put(Error.FORBIDDEN_USER_ALREADY_EXISTS,
+				new SimpleResponse("User already exists.".getBytes(), 403,
+						AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors.put(Error.FORBIDDEN, new SimpleResponse(
+				"Wrong username or password.".getBytes(), 403,
+				AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors.put(Error.ERROR_CREATING_USER, new SimpleResponse(
+				"Error creating user.".getBytes(), 500,
+				AbstractResponse.MIME_TEXT_PLAIN));
+
 		this.errors.put(Error.BAD_REQUEST,
 				new SimpleResponse("Bad request.".getBytes(), 400,
 						AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors.put(Error.ERROR_VALIDATING_USER, new SimpleResponse(
+				"User can't be validated".getBytes(), 404,
+				AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors.put(Error.USER_VALIDATED, new SimpleResponse(
+				"User validated. Please login to continue.".getBytes(), 200,
+				AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors.put(Error.USER_LOGIN_SUCESSFUL, new SimpleResponse(
+				"Login OK!.".getBytes(), 200,
+				AbstractResponse.MIME_TEXT_PLAIN));
 
 		// redirect to domain if a sub-domain is being used
 

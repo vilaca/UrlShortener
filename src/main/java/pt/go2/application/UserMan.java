@@ -30,21 +30,19 @@ public class UserMan {
 		this.path = Paths.get(config.USERS_FOLDER);
 	}
 
-	public boolean userExists(final String username) {
+	public boolean exist(final String username) {
 		final String filename = getUserDataFilename(username);
 		return new File(filename).exists();
 	}
 
-	public boolean createUser(String username, final Map<String, String> user) {
+	public boolean save(final Map<String, String> user) {
 
-		try (final FileWriter file = new FileWriter(
-				getUserDataFilename(username));) {
+		try (final FileWriter file = new FileWriter(getUserDataFilename(user));) {
 
 			final ObjectMapper mapper = new ObjectMapper();
 			final String line = mapper.writeValueAsString(user);
 
 			file.write(line);
-			file.write(System.getProperty("line.separator"));
 			file.flush();
 
 			return true;
@@ -54,13 +52,7 @@ public class UserMan {
 		}
 	}
 
-	public void login(final String username, final String password) {
-	}
-
-	public void logout() {
-	}
-
-	public Map<String, String> viewUser(final String username) {
+	private Map<String, String> load(final String username) {
 
 		final File f = new File(getUserDataFilename(username));
 		final ObjectMapper mapper = new ObjectMapper();
@@ -76,24 +68,34 @@ public class UserMan {
 		}
 	}
 
-	public boolean updateUser(final String username,
-			final Map<String, String> user) {
+	public boolean validate(final String username, final String validation) {
 
-		try (final FileWriter file = new FileWriter(username);) {
+		final Map<String, String> user = load(username);
 
-			final ObjectMapper mapper = new ObjectMapper();
-			final String line = mapper.writeValueAsString(user);
-			file.write(line);
-			file.write(System.getProperty("line.separator"));
-			file.flush();
-			return true;
-
-		} catch (IOException e) {
+		if (user == null) {
 			return false;
 		}
+
+		if (!validation.equals(user.get(USER_VALIDATION_TOKEN))) {
+			return false;
+		}
+
+		user.remove(USER_VALIDATION_TOKEN);
+		save(user);
+
+		return true;
 	}
 
-	public boolean validate(final String field, final String value) {
+	public boolean login(String username, String password) {
+
+		final Map<String, String> user = load(username);
+		return password.equals(user.get(USER_PASSWORD));
+	}
+
+	public void logout() {
+	}
+
+	public boolean validateUserProperty(final String field, final String value) {
 		switch (field) {
 		case USER_NAME:
 			return value.matches("^[a-zA-Z0-9]4,12$");
@@ -107,8 +109,20 @@ public class UserMan {
 				.asList(new String[] { UserMan.USER_EMAIL, UserMan.USER_NAME,
 						UserMan.USER_PASSWORD, UserMan.USER_TIMEZONE });
 	}
-	
+
+	public List<String> getLoginFields() {
+		return Arrays
+				.asList(new String[] { UserMan.USER_EMAIL, UserMan.USER_NAME,
+						UserMan.USER_PASSWORD, UserMan.USER_TIMEZONE });
+	}
+
 	private String getUserDataFilename(final String name) {
+		final String filename = path.resolve(name).toString();
+		return filename;
+	}
+
+	private String getUserDataFilename(final Map<String, String> user) {
+		final String name = user.get(USER_NAME);
 		final String filename = path.resolve(name).toString();
 		return filename;
 	}

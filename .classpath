@@ -16,5 +16,6 @@
 	<classpathentry kind="lib" path="lib/jackson-databind-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/jackson-annotations-2.2.3.jar"/>
 	<classpathentry kind="lib" path="lib/mail.jar"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
