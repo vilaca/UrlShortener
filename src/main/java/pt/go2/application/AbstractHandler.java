@@ -14,6 +14,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
+// TODO: all methods should do same checks StaticPages does, not all children classes need logging
 public abstract class AbstractHandler implements HttpHandler {
 
 	protected final Resources vfs;
