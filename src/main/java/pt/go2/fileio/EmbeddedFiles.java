@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import pt.go2.application.Resources;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.GzipResponse;
 
@@ -18,19 +17,19 @@ public class EmbeddedFiles implements FileSystemInterface {
 
 		final byte[] index, ajax, robots, map, css;
 
-		index = SmartTagParser.read(Resources.class
+		index = SmartTagParser.read(EmbeddedFiles.class
 				.getResourceAsStream("/index.html"));
 
-		ajax = SmartTagParser.read(Resources.class
+		ajax = SmartTagParser.read(EmbeddedFiles.class
 				.getResourceAsStream("/ajax.js"));
 
-		robots = SmartTagParser.read(Resources.class
+		robots = SmartTagParser.read(EmbeddedFiles.class
 				.getResourceAsStream("/robots.txt"));
 
-		map = SmartTagParser.read(Resources.class
+		map = SmartTagParser.read(EmbeddedFiles.class
 				.getResourceAsStream("/map.txt"));
 
-		css = SmartTagParser.read(Resources.class
+		css = SmartTagParser.read(EmbeddedFiles.class
 				.getResourceAsStream("/screen.css"));
 
 		this.pages.put("/", new GzipResponse(index, ".html"));
