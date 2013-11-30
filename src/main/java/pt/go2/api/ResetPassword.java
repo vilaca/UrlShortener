@@ -55,7 +55,7 @@ public class ResetPassword extends AbstractFormHandler {
 		final String username = values.get(UserMan.USER_NAME);
 		final String newPassword = new String(newb);
 
-		if (users.replacePassword(username, newPassword)) {
+		if (users.changePassword(username, newPassword)) {
 			reply(exchange, vfs.get(Resources.Error.ERROR_VALIDATING_USER),
 					false);
 			return;

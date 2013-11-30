@@ -23,6 +23,7 @@ public class UserMan {
 	public static final String USER_TIMEZONE = "timezone";
 	public static final String USER_VALIDATION_TOKEN = "token";
 	public static final String USER_CREATION_DATE = "date";
+	public static final String USER_NEW_PASSWORD = "newpassword";
 
 	private final Path path;
 
@@ -92,7 +93,20 @@ public class UserMan {
 		return password.equals(user.get(USER_PASSWORD));
 	}
 
-	public boolean replacePassword(final String username,
+	public boolean changePassword(Map<String, String> values) {
+
+		final String username = values.get(UserMan.USER_NAME);
+		final String password = values.get(UserMan.USER_PASSWORD);
+
+		if (!login(username, password)) {
+			return false;
+		}
+		final String newPassword = values.get(UserMan.USER_NEW_PASSWORD);
+		changePassword(username, newPassword);
+		return true;
+	}
+
+	public boolean changePassword(final String username,
 			final String newPassword) {
 
 		final Map<String, String> user = load(username);
@@ -120,6 +134,11 @@ public class UserMan {
 	public List<String> getLoginFields() {
 		return Arrays.asList(new String[] { UserMan.USER_NAME,
 				UserMan.USER_PASSWORD });
+	}
+
+	public List<String> getPasswordChangeFields() {
+		return Arrays.asList(new String[] { UserMan.USER_EMAIL,
+				UserMan.USER_NAME, UserMan.USER_PASSWORD, USER_NEW_PASSWORD });
 	}
 
 	public List<String> getPasswordResetFields() {
