@@ -41,6 +41,7 @@ public class Register extends AbstractFormHandler {
 		final Map<String, String> values = new HashMap<>(fields.size());
 
 		if (!parseForm(exchange, values, fields, this.users)) {
+			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 			return;
 		}
 
