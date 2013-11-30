@@ -92,7 +92,20 @@ public class UserMan {
 		return password.equals(user.get(USER_PASSWORD));
 	}
 
-	public void logout() {
+	public boolean replacePassword(final String username,
+			final String newPassword) {
+
+		final Map<String, String> user = load(username);
+
+		if (user == null) {
+			return false;
+		}
+
+		user.put(USER_PASSWORD, newPassword);
+
+		save(user);
+
+		return true;
 	}
 
 	public boolean validateUserProperty(final String field, final String value) {
@@ -104,15 +117,19 @@ public class UserMan {
 		}
 	}
 
+	public List<String> getLoginFields() {
+		return Arrays.asList(new String[] { UserMan.USER_NAME,
+				UserMan.USER_PASSWORD });
+	}
+
+	public List<String> getPasswordResetFields() {
+		return Arrays.asList(new String[] { UserMan.USER_NAME });
+	}
+
 	public static List<String> getUserFields() {
 		return Arrays
 				.asList(new String[] { UserMan.USER_EMAIL, UserMan.USER_NAME,
 						UserMan.USER_PASSWORD, UserMan.USER_TIMEZONE });
-	}
-
-	public List<String> getLoginFields() {
-		return Arrays.asList(new String[] { UserMan.USER_NAME,
-				UserMan.USER_PASSWORD });
 	}
 
 	private String getUserDataFilename(final String name) {
