@@ -43,6 +43,7 @@ class UrlHashing extends AbstractHandler {
 	 * If Url already exists return hash. If Url wasn't hashed before generate
 	 * hash and add it to value store
 	 */
+	@Deprecated
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 

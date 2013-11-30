@@ -58,7 +58,7 @@ public abstract class AbstractFormHandler extends AbstractHandler {
 
 				final String value = line.substring(idx + 1);
 
-				if (users.validateUserProperty(field, value)) {
+				if (users!=null && !users.validateUserProperty(field, value)) {
 					reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 					return false;
 				}
