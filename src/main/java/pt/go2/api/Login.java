@@ -45,8 +45,8 @@ public class Login extends AbstractFormHandler {
 		}
 
 		final String token = "Basic "
-				+ new String(Base64.encode((username + ":" + password)
-						.getBytes()));
+				+ Base64.encode((username + ":" + password)
+						.getBytes("US-ASCII"));
 
 		exchange.getResponseHeaders().set(
 				AbstractResponse.RESPONSE_HEADER_AUTHORIZATION, token);
