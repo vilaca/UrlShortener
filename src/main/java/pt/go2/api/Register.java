@@ -21,6 +21,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 public class Register extends AbstractFormHandler {
 
+	private static final String PARAGRAPH_END = "\r\n\r\n";
 	private final MailQueue mail;
 	private final UserMan users;
 
@@ -69,15 +70,15 @@ public class Register extends AbstractFormHandler {
 		sb.append("Thank you for registering at "
 				+ config.MAIL_SITE_NAME
 				+ ". Before we can activate your account one last step must be taken to complete your registration.");
-		sb.append("\r\n\r\n");
+		sb.append(PARAGRAPH_END);
 
 		sb.append("To complete your registration, please visit the following link: ");
 		sb.append(config.MAIL_LINK_URL + username + "/" + token);
-		sb.append("\r\n\r\n");
+		sb.append(PARAGRAPH_END);
 
 		sb.append("If you did not register at " + config.MAIL_SITE_NAME
 				+ ", please ignore this message.");
-		sb.append("\r\n\r\n");
+		sb.append(PARAGRAPH_END);
 
 		final String email = values.get(UserMan.USER_EMAIL);
 		mail.addMessage(email,
