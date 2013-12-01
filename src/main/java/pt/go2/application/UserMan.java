@@ -5,10 +5,16 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
 
 import pt.go2.fileio.Configuration;
 
@@ -25,6 +31,9 @@ public class UserMan {
 	public static final String USER_CREATION_DATE = "date";
 	public static final String USER_NEW_PASSWORD = "newpassword";
 
+	private static final int KEY_LENGTH = 160;
+	private static final int HASH_ITERATIONS = 10000;
+	
 	private final Path path;
 
 	public UserMan(final Configuration config) {
@@ -149,6 +158,35 @@ public class UserMan {
 		return Arrays
 				.asList(new String[] { UserMan.USER_EMAIL, UserMan.USER_NAME,
 						UserMan.USER_PASSWORD, UserMan.USER_TIMEZONE });
+	}
+
+	public boolean authenticate(final char[] passwd, byte[] stored, byte[] salt) {
+		final byte[] encrypted = encrypt(passwd, salt);
+		return encrypted == null ? false : Arrays.equals(stored, encrypted);
+	}
+
+	public byte[] encrypt(final char[] passwd, final byte[] salt) {
+
+		try {
+			return SecretKeyFactory
+					.getInstance("PBKDF2WithHmacSHA1")
+					.generateSecret(
+							new PBEKeySpec(passwd, salt, HASH_ITERATIONS,
+									KEY_LENGTH)).getEncoded();
+		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+			return null;
+		}
+	}
+
+	public byte[] salt() {
+		try {
+			final SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
+			final byte[] salt = new byte[8];
+			random.nextBytes(salt);
+			return salt;
+		} catch (NoSuchAlgorithmException e) {
+			return null;
+		}
 	}
 
 	private String getUserDataFilename(final String name) {
