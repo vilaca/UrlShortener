@@ -33,7 +33,7 @@ public class Resources {
 	 */
 
 	public enum Error {
-		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX, FORBIDDEN_USER_ALREADY_EXISTS, ERROR_CREATING_USER, ERROR_VALIDATING_USER, USER_VALIDATED, FORBIDDEN, USER_LOGIN_SUCESSFUL
+		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX, FORBIDDEN_USER_ALREADY_EXISTS, ERROR_CREATING_USER, ERROR_VALIDATING_USER, USER_VALIDATED, FORBIDDEN, USER_LOGIN_SUCESSFUL, HASH_NOT_FOUND
 	}
 
 	static final Logger logger = LogManager.getLogger(Resources.class);
@@ -169,9 +169,14 @@ public class Resources {
 				"User validated. Please login to continue.".getBytes(), 200,
 				AbstractResponse.MIME_TEXT_PLAIN));
 
-		this.errors.put(Error.USER_LOGIN_SUCESSFUL, new SimpleResponse(
-				"Login OK!.".getBytes(), 200,
-				AbstractResponse.MIME_TEXT_PLAIN));
+		this.errors.put(Error.HASH_NOT_FOUND,
+				new SimpleResponse("Not found!.".getBytes(), 404,
+						AbstractResponse.MIME_TEXT_PLAIN));
+
+		this.errors
+				.put(Error.USER_LOGIN_SUCESSFUL, new SimpleResponse(
+						"Login OK!.".getBytes(), 200,
+						AbstractResponse.MIME_TEXT_PLAIN));
 
 		// redirect to domain if a sub-domain is being used
 
