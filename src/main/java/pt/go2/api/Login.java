@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
@@ -15,6 +16,7 @@ import pt.go2.response.AbstractResponse;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.org.apache.xml.internal.security.utils.Base64;
 
+@Page(requireLogin = true, path = "api/user/login/")
 public class Login extends AbstractFormHandler {
 
 	final UserMan users;

@@ -9,6 +9,7 @@ import java.util.Random;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
@@ -17,6 +18,7 @@ import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 
+@Page(requireLogin = true, path = "api/user/resetPassword/")
 public class ResetPassword extends AbstractFormHandler {
 
 	private static final String PARAGRAPH_END = "\r\n\r\n";

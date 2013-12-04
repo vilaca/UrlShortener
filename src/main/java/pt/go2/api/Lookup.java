@@ -5,6 +5,7 @@ import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 
+import pt.go2.annotations.Page;
 import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
@@ -13,6 +14,7 @@ import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 
+@Page(requireLogin = false, path = "api/url/lookup/")
 public class Lookup extends AbstractHandler {
 
 	public Lookup(Configuration config, Resources vfs, BufferedWriter accessLog) {

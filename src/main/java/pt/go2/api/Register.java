@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
@@ -19,6 +20,7 @@ import pt.go2.response.SimpleResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
+@Page(requireLogin = true, path = "api/user/register/")
 public class Register extends AbstractFormHandler {
 
 	private static final String PARAGRAPH_END = "\r\n\r\n";

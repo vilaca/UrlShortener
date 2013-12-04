@@ -10,6 +10,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
@@ -18,6 +19,7 @@ import pt.go2.response.HtmlResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
+@Page(requireLogin = false, path = "api/link/shorten/")
 public class Shorten extends AbstractFormHandler {
 
 	static private final Logger LOG = LogManager.getLogger(Shorten.class);
