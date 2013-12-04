@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.api;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -9,6 +9,9 @@ import java.io.InputStreamReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Page;
+import pt.go2.application.AbstractHandler;
+import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
 import pt.go2.keystore.HashKey;
 import pt.go2.response.AbstractResponse;
@@ -19,6 +22,7 @@ import com.sun.net.httpserver.HttpExchange;
 /**
  * Reported Url handler
  */
+@Page(requireLogin = false, path = "api/report/")
 public class ReportUrl extends AbstractHandler {
 
 	private static final Logger LOG = LogManager.getLogger(ReportUrl.class);

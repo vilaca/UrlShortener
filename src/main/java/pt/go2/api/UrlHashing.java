@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.api;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -10,10 +10,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.sun.net.httpserver.HttpExchange;
+
+import pt.go2.application.AbstractHandler;
+import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;
 
+// replaced by Shorten 
+@Deprecated
 class UrlHashing extends AbstractHandler {
 
 	static private final Logger logger = LogManager.getLogger(UrlHashing.class);

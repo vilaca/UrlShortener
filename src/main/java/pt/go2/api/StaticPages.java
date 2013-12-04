@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.api;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -7,6 +7,9 @@ import java.util.Calendar;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Page;
+import pt.go2.application.AbstractHandler;
+import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Statistics;
 import pt.go2.keystore.HashKey;
@@ -20,6 +23,7 @@ import com.sun.net.httpserver.HttpExchange;
 /**
  * Handles server requests
  */
+@Page(requireLogin = false, path = "/")
 class StaticPages extends AbstractHandler {
 
 	static final Logger logger = LogManager.getLogger(StaticPages.class);
