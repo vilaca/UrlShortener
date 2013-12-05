@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -41,6 +44,8 @@ public class Configuration {
 
 	public final String MAIL_LINK_URL;
 	public final String MAIL_SITE_NAME;
+
+	public final List<String> PAGES_PACKAGES;
 
 	// phishing urls database
 	public final String PHISHTANK_API_KEY;
@@ -112,6 +117,7 @@ public class Configuration {
 		KS_PASSWORD = getProperty("server.keystore.password", "").toCharArray();
 		MAIL_LINK_URL = getProperty("mail.link.url");
 		MAIL_SITE_NAME = getProperty("mail.site-name");
+		PAGES_PACKAGES = getAsList("server.pages");
 		PHISHTANK_API_KEY = getProperty("phishtank-api-key");
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
@@ -129,6 +135,16 @@ public class Configuration {
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
 
+	private List<String> getAsList(final String key) {
+
+		final String value = getProperty(key, "");
+
+		if (value.isEmpty()) {
+			return Collections.emptyList();
+		}
+		return Collections.unmodifiableList(Arrays.asList(value.split(",")));
+	}
+
 	/**
 	 * Use this method only for Smart Tag parsing
 	 * 
@@ -136,7 +152,7 @@ public class Configuration {
 	 * 
 	 * @return
 	 */
-	public static String getProperty(String key) {
+	public static String getProperty(final String key) {
 		String value = prop.getProperty(key);
 		if (value != null) {
 			value = value.trim();
