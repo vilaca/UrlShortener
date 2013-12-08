@@ -1,32 +1,28 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.net.httpserver.HttpExchange;
-
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
-import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
+
+import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/user/changePassword/")
 public class ChangePassword extends AbstractFormHandler {
 
-	private final UserMan users;
-
-	public ChangePassword(Configuration config, Resources vfs,
-			BufferedWriter accessLog, final UserMan users) {
-		super(config, vfs, accessLog);
-
-		this.users = users;
-	}
+	@Injected
+	private Resources vfs;
+	
+	@Injected
+	private UserMan users;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
@@ -48,6 +44,5 @@ public class ChangePassword extends AbstractFormHandler {
 
 		reply(exchange, new SimpleResponse(200,
 				AbstractResponse.MIME_TEXT_PLAIN), false);
-
 	}
 }

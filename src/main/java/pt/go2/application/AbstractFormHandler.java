@@ -1,24 +1,21 @@
 package pt.go2.application;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
-import com.sun.net.httpserver.HttpExchange;
+import pt.go2.annotations.Injected;
 
-import pt.go2.fileio.Configuration;
+import com.sun.net.httpserver.HttpExchange;
 
 public abstract class AbstractFormHandler extends AbstractHandler {
 
-	public AbstractFormHandler(Configuration config, Resources vfs,
-			BufferedWriter accessLog) {
-		super(config, vfs, accessLog);
-	}
-
+	@Injected
+	private Resources vfs;
+	
 	protected boolean parseForm(HttpExchange exchange,
 			final Map<String, String> values, List<String> fields,
 			final UserMan users) throws IOException {

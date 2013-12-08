@@ -7,6 +7,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import pt.go2.annotations.Injected;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 
@@ -17,25 +18,11 @@ import com.sun.net.httpserver.HttpHandler;
 // TODO: all methods should do same checks StaticPages does, not all children classes need logging
 public abstract class AbstractHandler implements HttpHandler {
 
-	protected final Resources vfs;
-	protected final Configuration config;
-	private final BufferedWriter accessLog;
-
-	/**
-	 * C'tor
-	 * 
-	 * @param accessLog
-	 * @param config
-	 * @param accessLog
-	 * @throws IOException
-	 */
-	public AbstractHandler(final Configuration config,
-			final Resources vfs, final BufferedWriter accessLog) {
-
-		this.accessLog = accessLog;
-		this.config = config;
-		this.vfs = vfs;
-	}
+	@Injected
+	protected Configuration config;
+	
+	@Injected
+	private BufferedWriter accessLog;
 
 	/**
 	 * Stream Http Response

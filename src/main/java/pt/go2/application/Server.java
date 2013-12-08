@@ -10,6 +10,8 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.Executor;
 
 import javax.net.ssl.KeyManagerFactory;
@@ -18,10 +20,10 @@ import javax.net.ssl.SSLContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Page;
+import pt.go2.api.HttpsEnforcer;
 import pt.go2.fileio.Configuration;
-import pt.go2.fileio.Statistics;
 
-import com.sun.net.httpserver.BasicAuthenticator;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import com.sun.net.httpserver.HttpsConfigurator;
@@ -114,14 +116,6 @@ class Server {
 			return;
 		}
 
-		final Statistics statistics;
-		try {
-			statistics = new Statistics(config);
-		} catch (IOException e1) {
-			LOG.fatal("Can't collect statistics.");
-			return;
-		}
-
 		BufferedWriter accessLog = null;
 
 		try {
@@ -138,7 +132,7 @@ class Server {
 			LOG.trace("Appending to access log.");
 
 			// RequestHandler
-
+/*
 			final BasicAuthenticator ba = new BasicAuthenticator("Statistics") {
 
 				@Override
@@ -154,48 +148,51 @@ class Server {
 							&& pass.equals(config.STATISTICS_PASSWORD.trim());
 				}
 			};
+*/
+			final List<Class<?>> pages = new ArrayList<>();
+			
+			// scan packages
+			
+			PageClassLoader.load(config.PAGES_PACKAGES, pages);
 
-			final HttpHandler root = new StaticPages(config, vfs, statistics,
-					accessLog);
-			final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
+			final List<Object> pageObjs = new ArrayList<>();
+			
+			// instantiate objects and inject dependencies
+			
+			PageClassLoader.injectDependencies(pages, pageObjs);
 
-			final HttpHandler stats = new Analytics(config, vfs, statistics,
-					accessLog);
+			// create contexts
+			
+			final HttpHandler enforcer = new HttpsEnforcer();
 
-			final HttpHandler enforcer = new HttpsEnforcer(config, vfs,
-					accessLog);
+			final boolean usingHttps = https != null
+					&& !"no".equals(config.HTTPS_ENABLED);
 
-			final HttpHandler reportUrl = new ReportUrl(config, vfs, accessLog,
-					vfs);
+			for (Class<?> pageClass : pages) {
+				
+				LOG.info("Creating context for: " + pageClass.getName());
 
-			final HttpHandler browse = new View(config, vfs, accessLog);
+				final Page page = pageClass.getAnnotation(Page.class);
+				if (page == null) {
+					LOG.info("Missing required Annotations. Skipping");
+					continue;
+				}
 
-			if (!"no".equals(config.HTTPS_ENABLED) || https == null) {
+				final HttpHandler handler;
+				try {
+					handler = (HttpHandler) pageClass.newInstance();
+				} catch (InstantiationException | IllegalAccessException e) {
+					LOG.info("Class is not a handler.");
+					continue;
+				}
 
-				http.createContext("/", root);
-				http.createContext("/new", novo);
-				http.createContext("/report", reportUrl);
-				http.createContext("/stats", stats).setAuthenticator(ba);
-				http.createContext("/browse", browse).setAuthenticator(ba);
-
-			} else if ("yes".equals(config.HTTPS_ENABLED)) {
-
-				http.createContext("/", root);
-				http.createContext("/new", novo);
-				https.createContext("/stats", enforcer);
-				https.createContext("/browse", enforcer);
-				http.createContext("/report", reportUrl);
-
-				https.createContext("/", root);
-				https.createContext("/new", novo);
-				https.createContext("/stats", stats).setAuthenticator(ba);
-				https.createContext("/browse", browse).setAuthenticator(ba);
-				https.createContext("/report", reportUrl);
-
-			} else {
-
-				LOG.fatal("Bad parameter in HTTPS config.");
-				return;
+				if (usingHttps) {
+					https.createContext(page.path(), handler);
+					http.createContext(page.path(),
+							page.requireLogin() ? enforcer : handler);
+				} else {
+					https.createContext(page.path(), handler);
+				}
 			}
 
 			// start server

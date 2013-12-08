@@ -1,16 +1,15 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
-import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Statistics;
 import pt.go2.keystore.HashKey;
 import pt.go2.keystore.Uri;
@@ -30,22 +29,11 @@ class StaticPages extends AbstractHandler {
 
 	final Calendar calendar = Calendar.getInstance();
 
-	private final Statistics statistics;
-
-	/**
-	 * C'tor
-	 * 
-	 * @param config
-	 * @param vfs
-	 * @param statistics
-	 * @throws IOException
-	 */
-	public StaticPages(final Configuration config, final Resources vfs,
-			Statistics statistics, final BufferedWriter accessLog) {
-		super(config, vfs, accessLog);
-
-		this.statistics = statistics;
-	}
+	@Injected
+	protected Resources vfs;
+	
+	@Injected
+	private Statistics statistics;
 
 	/**
 	 * Handle request, parse URI filename from request into page resource

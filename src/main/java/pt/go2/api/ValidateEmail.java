@@ -1,29 +1,24 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 
 import com.sun.net.httpserver.HttpExchange;
 
 import pt.go2.annotations.Page;
+import pt.go2.annotations.Injected;
 import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
-import pt.go2.fileio.Configuration;
 
 @Page(requireLogin = true, path = "api/user/validate/")
 public class ValidateEmail extends AbstractHandler {
 
-	final UserMan users;
+	@Injected
+	private UserMan users;
 
-	public ValidateEmail(final Configuration config, final Resources vfs,
-			final BufferedWriter accessLog, final UserMan users) {
-
-		super(config, vfs, accessLog);
-
-		this.users = users;
-	}
-
+	@Injected
+	protected Resources vfs;
+	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 

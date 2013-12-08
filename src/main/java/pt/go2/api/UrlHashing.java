@@ -23,24 +23,7 @@ class UrlHashing extends AbstractHandler {
 
 	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
 
-	private final Resources vfs;
-
-	/**
-	 * C'tor
-	 * 
-	 * @param config
-	 * 
-	 * @param config
-	 * @param vfs
-	 * @param accessLog
-	 * @throws IOException
-	 */
-	public UrlHashing(Configuration config, final Resources vfs,
-			BufferedWriter accessLog) {
-
-		super(config, vfs, accessLog);
-		this.vfs = vfs;
-	}
+	private Resources vfs;
 
 	/**
 	 * Handle shortening of Urls.

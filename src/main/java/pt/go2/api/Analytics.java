@@ -1,29 +1,24 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractHandler;
-import pt.go2.application.Resources;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Statistics;
 import pt.go2.response.JsonResponse;
-
+import pt.go2.application.AbstractHandler;
 import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/statistics/")
 public class Analytics extends AbstractHandler {
 
-	private final Statistics statistics;
+	@Injected
+	private Configuration configuration;
 
-	public Analytics(Configuration config, Resources vfs,
-			Statistics statistics, BufferedWriter accessLog) {
-
-		super(config, vfs, accessLog);
-		this.statistics = statistics;
-	}
-
+	@Injected
+	private Statistics statistics;
+	
 	/**
 	 * Server statistics
 	 * 

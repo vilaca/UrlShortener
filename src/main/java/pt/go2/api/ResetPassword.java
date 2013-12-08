@@ -1,38 +1,36 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-import com.sun.net.httpserver.HttpExchange;
-
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
 import pt.go2.application.UserMan;
 import pt.go2.daemon.MailQueue;
-import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
+
+import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/user/resetPassword/")
 public class ResetPassword extends AbstractFormHandler {
 
 	private static final String PARAGRAPH_END = "\r\n\r\n";
 	private final Random rnd = new Random();
-	private final MailQueue mail;
-	private final UserMan users;
 
-	public ResetPassword(Configuration config, Resources vfs,
-			BufferedWriter accessLog, final UserMan users, final MailQueue mail) {
-		super(config, vfs, accessLog);
+	@Injected
+	private MailQueue mail;
 
-		this.users = users;
-		this.mail = mail;
-	}
+	@Injected
+	private UserMan users;
+
+	@Injected
+	private Resources vfs;
 
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {

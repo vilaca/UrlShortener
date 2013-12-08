@@ -1,6 +1,5 @@
 package pt.go2.api;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,10 +9,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
-import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;
 
@@ -24,10 +23,9 @@ public class Shorten extends AbstractFormHandler {
 
 	static private final Logger LOG = LogManager.getLogger(Shorten.class);
 
-	public Shorten(Configuration config, Resources vfs, BufferedWriter accessLog) {
-		super(config, vfs, accessLog);
-	}
-
+	@Injected
+	private Resources vfs;
+	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 
