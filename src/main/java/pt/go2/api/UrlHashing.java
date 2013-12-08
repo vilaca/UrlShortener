@@ -1,7 +1,6 @@
 package pt.go2.api;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -9,13 +8,12 @@ import java.io.InputStreamReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.sun.net.httpserver.HttpExchange;
-
 import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
-import pt.go2.fileio.Configuration;
 import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;
+
+import com.sun.net.httpserver.HttpExchange;
 
 // replaced by Shorten 
 @Deprecated
