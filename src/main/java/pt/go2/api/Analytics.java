@@ -4,16 +4,12 @@ import java.io.IOException;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.fileio.Configuration;
 import pt.go2.response.JsonResponse;
 
 import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/statistics/")
 public class Analytics extends AbstractHandler {
-
-	@Injected
-	private Configuration configuration;
 
 	@Injected
 	private Statistics statistics;
