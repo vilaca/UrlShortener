@@ -94,14 +94,6 @@ class Server {
 
 		LOG.trace("Starting virtual file system.");
 
-		// Generate VFS
-
-		final Resources vfs = new Resources();
-
-		if (!vfs.start(config)) {
-			return;
-		}
-
 		BufferedWriter accessLog = null;
 
 		try {
