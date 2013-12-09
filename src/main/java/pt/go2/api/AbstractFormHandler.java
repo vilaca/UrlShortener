@@ -15,7 +15,7 @@ import com.sun.net.httpserver.HttpExchange;
 public abstract class AbstractFormHandler extends AbstractHandler {
 
 	@Injected
-	private Resources vfs;
+	protected Resources vfs;
 	
 	protected boolean parseForm(HttpExchange exchange,
 			final Map<String, String> values, List<String> fields,

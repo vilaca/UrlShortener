@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.Resources;
 import pt.go2.keystore.Uri;
@@ -22,9 +21,6 @@ public class Shorten extends AbstractFormHandler {
 
 	static private final Logger LOG = LogManager.getLogger(Shorten.class);
 
-	@Injected
-	private Resources vfs;
-	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 

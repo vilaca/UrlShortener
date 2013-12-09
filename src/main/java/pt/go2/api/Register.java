@@ -27,9 +27,6 @@ public class Register extends AbstractFormHandler {
 	@Injected
 	private UserMan users;
 
-	@Injected
-	private Resources vfs;
-	
 	@Override
 	public void handle(HttpExchange exchange) throws IOException {
 

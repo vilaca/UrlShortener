@@ -15,9 +15,6 @@ import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/user/changePassword/")
 public class ChangePassword extends AbstractFormHandler {
-
-	@Injected
-	private Resources vfs;
 	
 	@Injected
 	private UserMan users;

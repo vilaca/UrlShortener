@@ -17,9 +17,6 @@ import com.sun.org.apache.xml.internal.security.utils.Base64;
 public class Login extends AbstractFormHandler {
 
 	@Injected
-	private Resources vfs;
-	
-	@Injected
 	private UserMan users;
 
 	@Override
