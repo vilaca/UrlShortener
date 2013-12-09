@@ -7,9 +7,7 @@ import java.util.Map;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
-import pt.go2.application.UserMan;
 import pt.go2.response.AbstractResponse;
 
 import com.sun.net.httpserver.HttpExchange;

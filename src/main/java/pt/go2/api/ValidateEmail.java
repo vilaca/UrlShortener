@@ -6,9 +6,7 @@ import com.sun.net.httpserver.HttpExchange;
 
 import pt.go2.annotations.Page;
 import pt.go2.annotations.Injected;
-import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
-import pt.go2.application.UserMan;
 
 @Page(requireLogin = true, path = "api/user/validate/")
 public class ValidateEmail extends AbstractHandler {

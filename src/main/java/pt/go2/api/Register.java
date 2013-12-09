@@ -10,10 +10,7 @@ import java.util.UUID;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractFormHandler;
 import pt.go2.application.Resources;
-import pt.go2.application.UserMan;
-import pt.go2.daemon.MailQueue;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 

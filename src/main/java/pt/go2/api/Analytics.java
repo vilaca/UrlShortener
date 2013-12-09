@@ -5,9 +5,8 @@ import java.io.IOException;
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.fileio.Configuration;
-import pt.go2.fileio.Statistics;
 import pt.go2.response.JsonResponse;
-import pt.go2.application.AbstractHandler;
+
 import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = true, path = "api/statistics/")

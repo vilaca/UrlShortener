@@ -10,7 +10,6 @@ import org.apache.logging.log4j.Logger;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
 import pt.go2.keystore.HashKey;
 import pt.go2.response.AbstractResponse;

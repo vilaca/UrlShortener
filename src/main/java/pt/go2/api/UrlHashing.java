@@ -8,7 +8,6 @@ import java.io.InputStreamReader;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
 import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;

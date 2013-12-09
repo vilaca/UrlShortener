@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
 import pt.go2.response.JsonResponse;
 

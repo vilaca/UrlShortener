@@ -8,9 +8,7 @@ import org.apache.logging.log4j.Logger;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.AbstractHandler;
 import pt.go2.application.Resources;
-import pt.go2.fileio.Statistics;
 import pt.go2.keystore.HashKey;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
@@ -30,7 +28,7 @@ class StaticPages extends AbstractHandler {
 	final Calendar calendar = Calendar.getInstance();
 
 	@Injected
-	protected Resources vfs;
+	private Resources vfs;
 	
 	@Injected
 	private Statistics statistics;
