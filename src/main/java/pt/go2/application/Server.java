@@ -140,7 +140,7 @@ class Server {
 
 			// create contexts
 			
-			final HttpHandler enforcer = new HttpsEnforcer();
+			final HttpHandler enforcer = new HttpsEnforcer(config);
 
 			final boolean usingHttps = https != null
 					&& !"no".equals(config.HTTPS_ENABLED);
