@@ -2,6 +2,7 @@ package pt.go2.application;
 
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.KeyManagementException;
@@ -67,22 +68,7 @@ class Server {
 		if (config.HOST_HTTPS != null) {
 			try {
 
-				final String ksFilename = config.KS_FILENAME;
-
-				final char[] ksPassword = config.KS_PASSWORD;
-				final char[] certPassword = config.CERT_PASSWORD;
-
-				final KeyStore ks = KeyStore.getInstance("JKS");
-				final SSLContext context = SSLContext.getInstance("TLS");
-				final KeyManagerFactory kmf = KeyManagerFactory
-						.getInstance("SunX509");
-
-				ks.load(new FileInputStream(ksFilename), ksPassword);
-				kmf.init(ks, certPassword);
-				context.init(kmf.getKeyManagers(), null, null);
-
-				https = HttpsServer.create(config.HOST_HTTPS, config.BACKLOG);
-				https.setHttpsConfigurator(new HttpsConfigurator(context));
+				https = createHttps(config);
 
 			} catch (IOException | KeyStoreException | NoSuchAlgorithmException
 					| CertificateException | UnrecoverableKeyException
@@ -231,6 +217,30 @@ class Server {
 			}
 			LOG.trace("Server stopped.");
 		}
+	}
+
+	private static HttpsServer createHttps(final Configuration config)
+			throws KeyStoreException, NoSuchAlgorithmException, IOException,
+			CertificateException, FileNotFoundException,
+			UnrecoverableKeyException, KeyManagementException {
+		HttpsServer https;
+		final String ksFilename = config.KS_FILENAME;
+
+		final char[] ksPassword = config.KS_PASSWORD;
+		final char[] certPassword = config.CERT_PASSWORD;
+
+		final KeyStore ks = KeyStore.getInstance("JKS");
+		final SSLContext context = SSLContext.getInstance("TLS");
+		final KeyManagerFactory kmf = KeyManagerFactory
+				.getInstance("SunX509");
+
+		ks.load(new FileInputStream(ksFilename), ksPassword);
+		kmf.init(ks, certPassword);
+		context.init(kmf.getKeyManagers(), null, null);
+
+		https = HttpsServer.create(config.HOST_HTTPS, config.BACKLOG);
+		https.setHttpsConfigurator(new HttpsConfigurator(context));
+		return https;
 	}
 
 	/**
