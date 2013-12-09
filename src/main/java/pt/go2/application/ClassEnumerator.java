@@ -8,13 +8,16 @@ import java.util.Enumeration;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Adapted from: https://github.com/ddopson/java-class-enumerator
  */
 public class ClassEnumerator {
-	private static void log(String msg) {
-		System.out.println("ClassDiscovery: " + msg);
-	}
+
+	private static final Logger LOG = LogManager
+			.getLogger(ClassEnumerator.class);
 
 	private static Class<?> loadClass(String className) {
 		try {
@@ -28,7 +31,7 @@ public class ClassEnumerator {
 
 	private static void processDirectory(File directory, String pkgname,
 			ArrayList<Class<?>> classes) {
-		log("Reading Directory '" + directory + "'");
+		LOG.info("Reading Directory '" + directory + "'");
 		// Get the list of the files contained in the package
 		String[] files = directory.list();
 		for (int i = 0; i < files.length; i++) {
@@ -40,7 +43,7 @@ public class ClassEnumerator {
 				className = pkgname + '.'
 						+ fileName.substring(0, fileName.length() - 6);
 			}
-			log("FileName '" + fileName + "'  =>  class '" + className + "'");
+			LOG.info("FileName '" + fileName + "'  =>  class '" + className + "'");
 			if (className != null) {
 				classes.add(loadClass(className));
 			}
@@ -57,7 +60,7 @@ public class ClassEnumerator {
 		String resPath = resource.getPath();
 		String jarPath = resPath.replaceFirst("[.]jar[!].*", ".jar")
 				.replaceFirst("file:", "");
-		log("Reading JAR file: '" + jarPath + "'");
+		LOG.info("Reading JAR file: '" + jarPath + "'");
 
 		try (JarFile jarFile = new JarFile(jarPath);) {
 			Enumeration<JarEntry> entries = jarFile.entries();
@@ -72,7 +75,7 @@ public class ClassEnumerator {
 					className = entryName.replace('/', '.').replace('\\', '.')
 							.replace(".class", "");
 				}
-				log("JarEntry '" + entryName + "'  =>  class '" + className
+				LOG.info("JarEntry '" + entryName + "'  =>  class '" + className
 						+ "'");
 				if (className != null) {
 					classes.add(loadClass(className));
@@ -96,7 +99,7 @@ public class ClassEnumerator {
 			throw new RuntimeException("Unexpected problem: No resource for "
 					+ relPath);
 		}
-		log("Package: '" + pkgname + "' becomes Resource: '"
+		LOG.info("Package: '" + pkgname + "' becomes Resource: '"
 				+ resource.toString() + "'");
 
 		resource.getPath();
