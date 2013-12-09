@@ -22,7 +22,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.annotations.Page;
-import pt.go2.api.HttpsEnforcer;
 import pt.go2.fileio.Configuration;
 
 import com.sun.net.httpserver.HttpHandler;
