@@ -32,17 +32,9 @@ public class Resources {
 	 * Canned responses for errors
 	 */
 
-	public enum Error {
-		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX, FORBIDDEN_USER_ALREADY_EXISTS, ERROR_CREATING_USER, ERROR_VALIDATING_USER, USER_VALIDATED, FORBIDDEN, USER_LOGIN_SUCESSFUL, HASH_NOT_FOUND
-	}
-
 	static final Logger logger = LogManager.getLogger(Resources.class);
 
 	private WatchDog watchdog = new WatchDog();
-
-	// error responses
-	private final Map<Error, AbstractResponse> errors = new EnumMap<>(
-			Error.class);
 
 	// responses
 	private FileSystemInterface pages;
@@ -112,80 +104,6 @@ public class Resources {
 		return errors.get(error);
 	}
 
-	/**
-	 * Cache error responses
-	 * 
-	 * @param config
-	 * @return
-	 */
-	private boolean createErrorPages(final Configuration config) {
-
-		try {
-			this.errors.put(
-					Error.PAGE_NOT_FOUND,
-					new SimpleResponse(SmartTagParser.read(Resources.class
-							.getResourceAsStream("/404.html")), 404,
-							AbstractResponse.MIME_TEXT_HTML));
-		} catch (IOException e) {
-			logger.fatal("Cannot read 404 page.");
-			return false;
-		}
-
-		try {
-			this.errors.put(
-					Error.FORBIDDEN_PHISHING,
-					new SimpleResponse(SmartTagParser.read(Resources.class
-							.getResourceAsStream("/403.html")), 403,
-							AbstractResponse.MIME_TEXT_HTML));
-		} catch (IOException e) {
-			logger.fatal("Cannot read 403 page.");
-			return false;
-		}
-
-		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new SimpleResponse(
-				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.FORBIDDEN_USER_ALREADY_EXISTS,
-				new SimpleResponse("User already exists.".getBytes(), 403,
-						AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.FORBIDDEN, new SimpleResponse(
-				"Wrong username or password.".getBytes(), 403,
-				AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.ERROR_CREATING_USER, new SimpleResponse(
-				"Error creating user.".getBytes(), 500,
-				AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.BAD_REQUEST,
-				new SimpleResponse("Bad request.".getBytes(), 400,
-						AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.ERROR_VALIDATING_USER, new SimpleResponse(
-				"User can't be validated".getBytes(), 404,
-				AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.USER_VALIDATED, new SimpleResponse(
-				"User validated. Please login to continue.".getBytes(), 200,
-				AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors.put(Error.HASH_NOT_FOUND,
-				new SimpleResponse("Not found!.".getBytes(), 404,
-						AbstractResponse.MIME_TEXT_PLAIN));
-
-		this.errors
-				.put(Error.USER_LOGIN_SUCESSFUL, new SimpleResponse(
-						"Login OK!.".getBytes(), 200,
-						AbstractResponse.MIME_TEXT_PLAIN));
-
-		// redirect to domain if a sub-domain is being used
-
-		this.errors.put(Error.REJECT_SUBDOMAIN, new RedirectResponse("http://"
-				+ config.ENFORCE_DOMAIN, 301));
-
-		return true;
-	}
-
 	public boolean isBanned(Uri uri) {
 
 		if (uri.getState() != Uri.State.OK) {
@@ -201,13 +119,5 @@ public class Resources {
 
 	public Uri get(HashKey haskey) {
 		return ks.get(haskey);
-	}
-
-	public AbstractResponse get(String requested) {
-		return pages.getFile(requested);
-	}
-
-	public List<String> browse() {
-		return pages.browse();
 	}
 }
