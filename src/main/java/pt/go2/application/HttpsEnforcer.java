@@ -2,7 +2,6 @@ package pt.go2.application;
 
 import java.io.IOException;
 
-import pt.go2.annotations.Injected;
 import pt.go2.api.AbstractHandler;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.RedirectResponse;
@@ -15,8 +14,11 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class HttpsEnforcer extends AbstractHandler {
 
-	@Injected
 	private Configuration config;
+
+	HttpsEnforcer(final Configuration config) {
+		this.config = config;
+	}
 
 	public void handle(HttpExchange exchange) throws IOException {
 
