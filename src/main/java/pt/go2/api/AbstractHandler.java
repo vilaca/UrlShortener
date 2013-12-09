@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.api;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

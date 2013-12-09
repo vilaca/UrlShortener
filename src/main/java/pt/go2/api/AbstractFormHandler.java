@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.api;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 import pt.go2.annotations.Injected;
+import pt.go2.application.Resources;
 
 import com.sun.net.httpserver.HttpExchange;
 

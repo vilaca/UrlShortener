@@ -1,4 +1,4 @@
-package pt.go2.daemon;
+package pt.go2.api;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -15,6 +15,7 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+import pt.go2.daemon.WatchDogTask;
 import pt.go2.fileio.Configuration;
 
 public class MailQueue implements WatchDogTask {

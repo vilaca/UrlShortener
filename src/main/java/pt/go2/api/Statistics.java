@@ -1,4 +1,4 @@
-package pt.go2.fileio;
+package pt.go2.api;
 
 import java.io.BufferedReader;
 import java.io.File;
