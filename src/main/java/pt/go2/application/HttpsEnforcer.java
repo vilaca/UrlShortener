@@ -1,8 +1,9 @@
-package pt.go2.api;
+package pt.go2.application;
 
 import java.io.IOException;
 
 import pt.go2.annotations.Injected;
+import pt.go2.api.AbstractHandler;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.RedirectResponse;
 
