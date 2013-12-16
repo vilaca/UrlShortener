@@ -1,9 +1,8 @@
 package pt.go2.application;
 
 import java.io.IOException;
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -13,19 +12,12 @@ import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.FileSystemInterface;
 import pt.go2.fileio.LocalFiles;
-import pt.go2.fileio.SmartTagParser;
-import pt.go2.keystore.HashKey;
-import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
-import pt.go2.response.SimpleResponse;
-import pt.go2.response.RedirectResponse;
 
 /**
- * Virtualized file resources
- * 
+ * File resources
  */
-// TODO move error pages out ?
 public class Resources {
 
 	/**
@@ -39,9 +31,6 @@ public class Resources {
 	// responses
 	private FileSystemInterface pages;
 
-	// key = hash / value = uri
-	private KeyValueStore ks;
-
 	private PhishTankInterface pi;
 
 	/**
@@ -53,18 +42,6 @@ public class Resources {
 	}
 
 	public boolean start(final Configuration config) {
-
-		try {
-			this.ks = new KeyValueStore(config.DATABASE_FOLDER);
-		} catch (IOException e) {
-			logger.fatal("Could not read backup.");
-			return false;
-		}
-
-		if (!createErrorPages(config)) {
-			logger.fatal("Could not create error pages.");
-			return false;
-		}
 
 		try {
 			if (config.PUBLIC == null) {
@@ -94,16 +71,6 @@ public class Resources {
 		return true;
 	}
 
-	/**
-	 * Return error response
-	 * 
-	 * @param badRequest
-	 * @return
-	 */
-	public AbstractResponse get(Error error) {
-		return errors.get(error);
-	}
-
 	public boolean isBanned(Uri uri) {
 
 		if (uri.getState() != Uri.State.OK) {
@@ -113,11 +80,11 @@ public class Resources {
 		return pi.isBanned(uri);
 	}
 
-	public byte[] add(Uri uri) {
-		return ks.add(uri);
+	public List<String> browse() {
+		return pages.browse();
 	}
 
-	public Uri get(HashKey haskey) {
-		return ks.get(haskey);
+	public AbstractResponse get(final String requested) {
+		return pages.getFile(requested);
 	}
 }
