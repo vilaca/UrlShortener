@@ -45,4 +45,7 @@ public class FileCrawler {
 			}
 		});
 	}
+
+	private FileCrawler() {
+	}
 }
