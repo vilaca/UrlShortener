@@ -33,7 +33,7 @@ public class UserMan {
 
 	private static final int KEY_LENGTH = 160;
 	private static final int HASH_ITERATIONS = 10000;
-	
+
 	private final Path path;
 
 	public UserMan(final Configuration config) {
@@ -71,8 +71,7 @@ public class UserMan {
 		};
 
 		try {
-			final Map<String, String> user = mapper.readValue(f, typeRef);
-			return user;
+			return mapper.readValue(f, typeRef);
 		} catch (IOException e) {
 			return null;
 		}
@@ -190,13 +189,11 @@ public class UserMan {
 	}
 
 	private String getUserDataFilename(final String name) {
-		final String filename = path.resolve(name).toString();
-		return filename;
+		return path.resolve(name).toString();
 	}
 
 	private String getUserDataFilename(final Map<String, String> user) {
 		final String name = user.get(USER_NAME);
-		final String filename = path.resolve(name).toString();
-		return filename;
+		return path.resolve(name).toString();
 	}
 }
