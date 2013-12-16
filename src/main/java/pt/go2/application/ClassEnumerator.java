@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -30,7 +31,7 @@ public class ClassEnumerator {
 	}
 
 	private static void processDirectory(File directory, String pkgname,
-			ArrayList<Class<?>> classes) {
+			List<Class<?>> classes) {
 		LOG.info("Reading Directory '" + directory + "'");
 		// Get the list of the files contained in the package
 		String[] files = directory.list();
@@ -56,7 +57,7 @@ public class ClassEnumerator {
 	}
 
 	private static void processJarfile(URL resource, String pkgname,
-			ArrayList<Class<?>> classes) {
+			List<Class<?>> classes) {
 		String relPath = pkgname.replace('.', '/');
 		String resPath = resource.getPath();
 		String jarPath = resPath.replaceFirst("[.]jar[!].*", ".jar")
@@ -89,8 +90,8 @@ public class ClassEnumerator {
 		}
 	}
 
-	public static ArrayList<Class<?>> getClassesForPackage(String pkgname) {
-		ArrayList<Class<?>> classes = new ArrayList<Class<?>>();
+	public static List<Class<?>> getClassesForPackage(String pkgname) {
+		List<Class<?>> classes = new ArrayList<Class<?>>();
 
 		String relPath = pkgname.replace('.', '/');
 
