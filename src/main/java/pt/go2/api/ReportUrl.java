@@ -74,7 +74,7 @@ public class ReportUrl extends AbstractHandler {
 				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 
-			} while (url == null && reason == null);
+			} while (url == null || reason == null);
 		}
 
 		if (url.length() != 6 || reason.length() > 10
