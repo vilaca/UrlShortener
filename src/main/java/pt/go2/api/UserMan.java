@@ -9,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -73,7 +74,7 @@ public class UserMan {
 		try {
 			return mapper.readValue(f, typeRef);
 		} catch (IOException e) {
-			return null;
+			return Collections.emptyMap();
 		}
 	}
 
@@ -173,7 +174,7 @@ public class UserMan {
 							new PBEKeySpec(passwd, salt, HASH_ITERATIONS,
 									KEY_LENGTH)).getEncoded();
 		} catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-			return null;
+			return new byte[0];
 		}
 	}
 
