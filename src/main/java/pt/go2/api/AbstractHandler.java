@@ -1,28 +1,80 @@
 package pt.go2.api;
 
+import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import pt.go2.annotations.Injected;
+import pt.go2.api.ErrorMessages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
-
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-// TODO: all methods should do same checks StaticPages does, not all children classes need logging
 public abstract class AbstractHandler implements HttpHandler {
 
 	@Injected
-	protected Configuration config;
-	
-	@Injected
 	private BufferedWriter accessLog;
+
+	@Injected
+	ErrorMessages errors;
+
+	@Injected
+	Configuration config;
+
+	@Injected
+	Statistics statistics;
+
+	private HttpExchange exchange;
+
+	private Headers request;
+
+	abstract public void handle() throws IOException;
+
+	@Override
+	public final void handle(HttpExchange exchange) throws IOException {
+
+		this.request = exchange.getRequestHeaders();
+		this.exchange = exchange;
+
+		// we need a host header to continue
+
+		if (!validRequest(request)) {
+
+			reply(errors.get(Error.BAD_REQUEST));
+			return;
+		}
+
+		// redirect to out domain if host header is not correct
+
+		if (!correctHost(request)) {
+
+			reply(errors.get(Error.REJECT_SUBDOMAIN));
+			return;
+		}
+
+		handle();
+	}
+
+	/**
+	 * Server needs a Host header
+	 * 
+	 * @param headers
+	 * @return
+	 */
+	private boolean validRequest(final Headers headers) {
+		return headers.get(AbstractResponse.REQUEST_HEADER_HOST).size() > 0;
+	}
 
 	/**
 	 * Stream Http Response
@@ -31,9 +83,18 @@ public abstract class AbstractHandler implements HttpHandler {
 	 * @param response
 	 * @throws IOException
 	 */
-	protected void reply(final HttpExchange exchange,
-			final AbstractResponse response, final boolean cache)
-			throws IOException {
+	protected void reply(final ErrorMessages.Error e) throws IOException {
+		reply(errors.get(e));
+	}
+
+	/**
+	 * Stream Http Response
+	 * 
+	 * @param exchange
+	 * @param response
+	 * @throws IOException
+	 */
+	protected void reply(final AbstractResponse response) throws IOException {
 
 		final Headers headers = exchange.getResponseHeaders();
 
@@ -42,7 +103,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		final int size = body.length;
 		final int status = response.getHttpStatus();
 
-		setHeaders(response, headers, cache);
+		setHeaders(response, headers);
 
 		exchange.sendResponseHeaders(status, size);
 
@@ -63,7 +124,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	 * @param headers
 	 */
 	private void setHeaders(final AbstractResponse response,
-			final Headers headers, final boolean cache) {
+			final Headers headers) {
 
 		headers.set(AbstractResponse.RESPONSE_HEADER_SERVER,
 				"Carapau de corrida " + config.VERSION);
@@ -71,8 +132,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE,
 				response.getMimeType());
 
-		// TODO only static files should be cached
-		if (cache) {
+		if (getCache()) {
 
 			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
 					"max-age=" + TimeUnit.HOURS.toSeconds(config.CACHE_HINT));
@@ -103,6 +163,64 @@ public abstract class AbstractHandler implements HttpHandler {
 				.startsWith(config.ENFORCE_DOMAIN);
 	}
 
+	protected boolean parseForm(final Map<String, String> values,
+			List<String> fields, final UserMan users) throws IOException {
+
+		int remaining = fields.size();
+
+		try (final InputStream is = exchange.getRequestBody();
+				final InputStreamReader sr = new InputStreamReader(is);
+				final BufferedReader br = new BufferedReader(sr);) {
+
+			// read body content
+
+			do {
+
+				final String line = br.readLine();
+
+				if (line == null) {
+					reply(ErrorMessages.Error.BAD_REQUEST);
+					return false;
+				}
+
+				int idx = line.indexOf('=');
+
+				if (idx == -1) {
+					reply(ErrorMessages.Error.BAD_REQUEST);
+					return false;
+				}
+
+				final String field = line.substring(0, idx);
+
+				idx = fields.indexOf(field);
+
+				if (idx == -1) {
+					reply(ErrorMessages.Error.BAD_REQUEST);
+					return false;
+				}
+
+				final String value = line.substring(idx + 1);
+
+				if (users != null && !users.validateUserProperty(field, value)) {
+					reply(ErrorMessages.Error.BAD_REQUEST);
+					return false;
+				}
+
+				final String prev = values.put(field, value);
+
+				if (prev != null) {
+					reply(ErrorMessages.Error.BAD_REQUEST);
+					return false;
+				}
+
+				remaining--;
+
+			} while (remaining > 0);
+
+			return true;
+		}
+	}
+
 	/**
 	 * Access log output
 	 * 
@@ -131,7 +249,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		sb.append(" \"");
 
 		final Headers headers = params.getRequestHeaders();
-		
+
 		final String referer = headers
 				.getFirst(AbstractResponse.REQUEST_HEADER_REFERER);
 
@@ -157,4 +275,43 @@ public abstract class AbstractHandler implements HttpHandler {
 		}
 	}
 
+	protected boolean getCache() {
+		return false;
+	}
+
+	protected HttpExchange getHttpExchange() {
+		return exchange;
+	}
+
+	protected InputStream getRequestBody() {
+		return exchange.getRequestBody();
+	}
+
+	protected String getRawPath() {
+		return exchange.getRequestURI().getRawPath();
+	}
+
+	protected String[] tokenizeUrl() {
+
+		final String path = exchange.getHttpContext().getPath();
+		final String token = exchange.getRequestURI().getPath()
+				.substring(path.length());
+		return token.split("/");
+	}
+
+	protected String getHostName() {
+		return exchange.getRemoteAddress().getHostName();
+	}
+
+	protected void statistics(final String requested) {
+		final String referer = exchange.getRequestHeaders().getFirst(
+				AbstractResponse.REQUEST_HEADER_REFERER);
+
+		final String ip = exchange.getRemoteAddress().getAddress()
+				.getHostAddress();
+
+		final Calendar calendar = Calendar.getInstance();
+
+		statistics.add(ip, requested, referer, calendar.getTime());
+	}
 }
