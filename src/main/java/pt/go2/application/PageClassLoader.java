@@ -1,7 +1,6 @@
 package pt.go2.application;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -10,8 +9,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.annotations.Injected;
-import pt.go2.annotations.Singleton;
 import pt.go2.annotations.Page;
+import pt.go2.annotations.Singleton;
 
 public class PageClassLoader {
 
@@ -28,7 +27,7 @@ public class PageClassLoader {
 
 	public static void load(final String path, final List<Class<?>> classes) {
 
-		final ArrayList<Class<?>> toLoad = ClassEnumerator
+		final List<Class<?>> toLoad = ClassEnumerator
 				.getClassesForPackage(path);
 
 		for (final Class<?> pageClass : toLoad) {
