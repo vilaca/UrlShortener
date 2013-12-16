@@ -43,7 +43,8 @@ public class ClassEnumerator {
 				className = pkgname + '.'
 						+ fileName.substring(0, fileName.length() - 6);
 			}
-			LOG.info("FileName '" + fileName + "'  =>  class '" + className + "'");
+			LOG.info("FileName '" + fileName + "'  =>  class '" + className
+					+ "'");
 			if (className != null) {
 				classes.add(loadClass(className));
 			}
@@ -75,8 +76,8 @@ public class ClassEnumerator {
 					className = entryName.replace('/', '.').replace('\\', '.')
 							.replace(".class", "");
 				}
-				LOG.info("JarEntry '" + entryName + "'  =>  class '" + className
-						+ "'");
+				LOG.info("JarEntry '" + entryName + "'  =>  class '"
+						+ className + "'");
 				if (className != null) {
 					classes.add(loadClass(className));
 				}
