@@ -7,51 +7,19 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import javax.mail.Authenticator;
-import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 import javax.mail.Transport;
-import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
 import pt.go2.daemon.WatchDogTask;
 import pt.go2.fileio.Configuration;
+import pt.go2.model.MailMessage;
 
 public class MailQueue implements WatchDogTask {
 
-	class QueueMail {
-
-		private final String to;
-		private final String subject;
-		private final String text;
-
-		QueueMail(final String to, final String subject, final String text) {
-			this.to = to;
-			this.subject = subject;
-			this.text = text;
-		}
-
-		MimeMessage createMessage(final Session session, final String from) {
-
-			final MimeMessage message = new MimeMessage(session);
-
-			try {
-
-				message.setFrom(new InternetAddress(from));
-				message.addRecipient(Message.RecipientType.TO,
-						new InternetAddress(to));
-				message.setSubject(subject);
-				message.setText(text);
-				return message;
-
-			} catch (MessagingException e) {
-				return null;
-			}
-		}
-	}
-
-	private Queue<QueueMail> queue = new ConcurrentLinkedQueue<>();
+	private Queue<MailMessage> queue = new ConcurrentLinkedQueue<>();
 	private final Properties properties = new Properties();
 	private volatile Date lastDownload;
 	private final Session session;
@@ -60,7 +28,7 @@ public class MailQueue implements WatchDogTask {
 	public MailQueue(final Configuration config) {
 
 		// TODO load properties from file?
-		
+
 		properties.put("mail.smtp.auth", "true");
 		properties.put("mail.smtp.host", config.SMTP_SERVER_HOST);
 		properties.put("mail.smtp.port", config.SMTP_SERVER_PORT);
@@ -84,7 +52,7 @@ public class MailQueue implements WatchDogTask {
 	@Override
 	public void refresh() {
 
-		QueueMail qm = queue.poll();
+		MailMessage qm = queue.poll();
 
 		if (qm == null) {
 			return;
@@ -92,7 +60,7 @@ public class MailQueue implements WatchDogTask {
 
 		do {
 			try {
-				MimeMessage message = qm.createMessage(session, email);
+				final MimeMessage message = qm.createMessage(session, email);
 
 				if (message != null) {
 					Transport.send(message);
@@ -104,7 +72,7 @@ public class MailQueue implements WatchDogTask {
 			}
 
 			qm = queue.poll();
-			
+
 		} while (qm != null);
 	}
 
@@ -120,7 +88,7 @@ public class MailQueue implements WatchDogTask {
 
 	public void addMessage(String to, String subject, String text) {
 
-		final QueueMail qm = new QueueMail(to, subject, text);
+		final MailMessage qm = new MailMessage(to, subject, text);
 
 		synchronized (this) {
 			queue.add(qm);
