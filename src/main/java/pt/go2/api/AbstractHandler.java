@@ -37,14 +37,12 @@ public abstract class AbstractHandler implements HttpHandler {
 
 	private HttpExchange exchange;
 
-	private Headers request;
-
 	abstract public void handle() throws IOException;
 
 	@Override
 	public final void handle(HttpExchange exchange) throws IOException {
 
-		this.request = exchange.getRequestHeaders();
+		final Headers request = exchange.getRequestHeaders();
 		this.exchange = exchange;
 
 		// we need a host header to continue
