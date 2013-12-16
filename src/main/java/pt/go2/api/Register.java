@@ -10,40 +10,35 @@ import java.util.UUID;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.Resources;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 
-import com.sun.net.httpserver.HttpExchange;
-
 @Page(requireLogin = true, path = "api/user/register/")
-public class Register extends AbstractFormHandler {
+public class Register extends AbstractHandler {
 
 	private static final String PARAGRAPH_END = "\r\n\r\n";
-	
+
 	@Injected
 	private MailQueue mail;
-	
+
 	@Injected
 	private UserMan users;
 
 	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
 		final List<String> fields = UserMan.getUserFields();
 		final Map<String, String> values = new HashMap<>(fields.size());
 
-		if (!parseForm(exchange, values, fields, this.users)) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+		if (!parseForm(values, fields, this.users)) {
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
 
 		final String username = values.get(UserMan.USER_NAME);
 
 		if (users.exist(username)) {
-			reply(exchange,
-					vfs.get(Resources.Error.FORBIDDEN_USER_ALREADY_EXISTS),
-					false);
+			reply(ErrorMessages.Error.FORBIDDEN_USER_ALREADY_EXISTS);
 			return;
 		}
 
@@ -55,7 +50,7 @@ public class Register extends AbstractFormHandler {
 		values.put(UserMan.USER_CREATION_DATE, date);
 
 		if (!users.save(values)) {
-			reply(exchange, vfs.get(Resources.Error.ERROR_CREATING_USER), false);
+			reply(ErrorMessages.Error.ERROR_CREATING_USER);
 			return;
 		}
 
@@ -79,7 +74,7 @@ public class Register extends AbstractFormHandler {
 				"Activate your membership. Please verify your Email Address.",
 				sb.toString());
 
-		reply(exchange, new SimpleResponse(200,
-				AbstractResponse.MIME_TEXT_PLAIN), false);
+		// TODO what to do after register ?
+		reply(new SimpleResponse(200, AbstractResponse.MIME_TEXT_PLAIN));
 	}
 }

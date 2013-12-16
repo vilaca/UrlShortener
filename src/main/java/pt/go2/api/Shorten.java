@@ -9,35 +9,41 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.Resources;
+import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;
 
-import com.sun.net.httpserver.HttpExchange;
-
 @Page(requireLogin = false, path = "api/link/shorten/")
-public class Shorten extends AbstractFormHandler {
+public class Shorten extends AbstractHandler {
 
 	static private final Logger LOG = LogManager.getLogger(Shorten.class);
 
+	@Injected
+	private Resources vfs;
+
+	@Injected
+	private KeyValueStore ks;
+
 	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
 		final String field = "v";
 		final List<String> fields = Arrays.asList(new String[] { field });
 		final Map<String, String> values = new HashMap<>(fields.size());
 
 		try {
-			if (!parseForm(exchange, values, fields, null)) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+			if (!parseForm(values, fields, null)) {
+				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 			}
 
 			final String v = values.get(field);
 
 			if (v == null) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 			}
 
@@ -46,35 +52,32 @@ public class Shorten extends AbstractFormHandler {
 			final Uri uri = Uri.create(v, true);
 
 			if (uri == null) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 			}
 
 			// Refuse banned
 
 			if (vfs.isBanned(uri)) {
-				LOG.warn("banned: " + uri + " - "
-						+ exchange.getRemoteAddress().getHostName());
-				reply(exchange,
-						vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX), false);
+				LOG.warn("banned: " + uri + " - " + getHostName());
+				reply(ErrorMessages.Error.FORBIDDEN_PHISHING_AJAX);
 				return;
 			}
 
 			// hash Uri
 
-			final byte[] hashedUri = vfs.add(uri);
+			final byte[] hashedUri = ks.add(uri);
 
 			if (hashedUri.length == 0) {
-				reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 			}
 
-			reply(exchange, new HtmlResponse(hashedUri), false);
+			reply(new HtmlResponse(hashedUri));
 
 		} catch (IOException e) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
-
 	}
 }

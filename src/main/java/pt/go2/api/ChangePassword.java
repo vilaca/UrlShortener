@@ -7,37 +7,31 @@ import java.util.Map;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.Resources;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 
-import com.sun.net.httpserver.HttpExchange;
-
 @Page(requireLogin = true, path = "api/user/changePassword/")
-public class ChangePassword extends AbstractFormHandler {
-	
+public class ChangePassword extends AbstractHandler {
+
 	@Injected
 	private UserMan users;
 
 	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
 		final List<String> fields = users.getPasswordChangeFields();
 		final Map<String, String> values = new HashMap<>(fields.size());
 
-		if (!parseForm(exchange, values, fields, this.users)) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+		if (!parseForm(values, fields, this.users)) {
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
 
 		if (!users.changePassword(values)) {
-			reply(exchange,
-					vfs.get(Resources.Error.FORBIDDEN_USER_ALREADY_EXISTS),
-					false);
+			reply(ErrorMessages.Error.FORBIDDEN_USER_ALREADY_EXISTS);
 			return;
 		}
 
-		reply(exchange, new SimpleResponse(200,
-				AbstractResponse.MIME_TEXT_PLAIN), false);
+		reply(new SimpleResponse(200, AbstractResponse.MIME_TEXT_PLAIN));
 	}
 }

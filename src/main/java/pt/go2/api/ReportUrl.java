@@ -12,10 +12,9 @@ import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.Resources;
 import pt.go2.keystore.HashKey;
+import pt.go2.keystore.KeyValueStore;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
-
-import com.sun.net.httpserver.HttpExchange;
 
 /**
  * Reported Url handler
@@ -29,9 +28,12 @@ public class ReportUrl extends AbstractHandler {
 
 	private static final String URL = "url=";
 	private static final String REASON = "reason=";
-	
+
 	@Injected
 	private Resources resources;
+
+	@Injected
+	private KeyValueStore ks;
 
 	/**
 	 * Get Url and Reason from POST request
@@ -39,12 +41,12 @@ public class ReportUrl extends AbstractHandler {
 	 * Fields: [url] & [reason]
 	 */
 	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
 		String url = null;
 		String reason = null;
 
-		try (final InputStream is = exchange.getRequestBody();
+		try (final InputStream is = getRequestBody();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {
 
@@ -55,7 +57,7 @@ public class ReportUrl extends AbstractHandler {
 				final String postBody = br.readLine();
 
 				if (postBody == null) {
-					reply(exchange, resources.get(Resources.Error.BAD_REQUEST), false);
+					reply(ErrorMessages.Error.BAD_REQUEST);
 					return;
 				}
 
@@ -69,7 +71,7 @@ public class ReportUrl extends AbstractHandler {
 					continue;
 				}
 
-				reply(exchange, resources.get(Resources.Error.BAD_REQUEST), false);
+				reply(ErrorMessages.Error.BAD_REQUEST);
 				return;
 
 			} while (url == null && reason == null);
@@ -80,19 +82,18 @@ public class ReportUrl extends AbstractHandler {
 
 			LOG.info("Failed to Report Url: " + url + ", " + reason);
 
-			reply(exchange, resources.get(Resources.Error.BAD_REQUEST), false);
+			reply(ErrorMessages.Error.BAD_REQUEST);
 		}
 
-		if (resources.get(new HashKey(url)) == null) {
+		if (ks.get(new HashKey(url)) == null) {
 
 			LOG.info("Reported Url: " + url + " does not exist.");
 
-			reply(exchange, resources.get(Resources.Error.BAD_REQUEST), false);
+			reply(ErrorMessages.Error.BAD_REQUEST);
 		}
 
 		LOG.warn("Reported Url: " + url + ", " + reason);
 
-		reply(exchange, new SimpleResponse(200,
-				AbstractResponse.MIME_TEXT_PLAIN), false);
+		reply(new SimpleResponse(200, AbstractResponse.MIME_TEXT_PLAIN));
 	}
 }

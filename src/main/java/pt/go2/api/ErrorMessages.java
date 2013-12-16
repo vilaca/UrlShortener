@@ -21,7 +21,8 @@ public class ErrorMessages {
 		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX, FORBIDDEN_USER_ALREADY_EXISTS, ERROR_CREATING_USER, ERROR_VALIDATING_USER, USER_VALIDATED, FORBIDDEN, USER_LOGIN_SUCESSFUL, HASH_NOT_FOUND
 	}
 
-	private static final Logger logger = LogManager.getLogger(ErrorMessages.class);
+	private static final Logger logger = LogManager
+			.getLogger(ErrorMessages.class);
 
 	private final Map<Error, AbstractResponse> errors;
 

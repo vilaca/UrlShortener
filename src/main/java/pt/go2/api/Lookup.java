@@ -6,46 +6,48 @@ import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
 import pt.go2.application.Resources;
 import pt.go2.keystore.HashKey;
+import pt.go2.keystore.KeyValueStore;
 import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
-
-import com.sun.net.httpserver.HttpExchange;
 
 @Page(requireLogin = false, path = "api/url/lookup/")
 public class Lookup extends AbstractHandler {
 
 	@Injected
-	protected Resources vfs;
-	
-	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	private Resources vfs;
 
-		final String request = exchange.getRequestURI().getPath();
+	@Injected
+	private KeyValueStore ks;
+
+	@Override
+	public void handle() throws IOException {
+
+		final String request = getHttpExchange().getRequestURI().getPath();
 
 		final String fields[] = request.split("/");
 
 		if (fields.length < 3) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
 
 		final String hash = fields[2];
 
 		if (hash.isEmpty()) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
 
 		final HashKey hk = new HashKey(hash);
 
-		final Uri uri = vfs.get(hk);
+		final Uri uri = ks.get(hk);
 
 		if (uri == null) {
-			reply(exchange, vfs.get(Resources.Error.HASH_NOT_FOUND), false);
+			reply(ErrorMessages.Error.HASH_NOT_FOUND);
 		} else {
-			reply(exchange, new SimpleResponse(uri.toString().getBytes(), 200,
-					AbstractResponse.MIME_TEXT_PLAIN), false);
+			reply(new SimpleResponse(uri.toString().getBytes(), 200,
+					AbstractResponse.MIME_TEXT_PLAIN));
 		}
 	}
 }

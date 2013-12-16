@@ -8,14 +8,11 @@ import java.util.Random;
 
 import pt.go2.annotations.Injected;
 import pt.go2.annotations.Page;
-import pt.go2.application.Resources;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.SimpleResponse;
 
-import com.sun.net.httpserver.HttpExchange;
-
 @Page(requireLogin = true, path = "api/user/resetPassword/")
-public class ResetPassword extends AbstractFormHandler {
+public class ResetPassword extends AbstractHandler {
 
 	private static final String PARAGRAPH_END = "\r\n\r\n";
 	private final Random rnd = new Random();
@@ -27,13 +24,13 @@ public class ResetPassword extends AbstractFormHandler {
 	private UserMan users;
 
 	@Override
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
 		final List<String> fields = UserMan.getUserFields();
 		final Map<String, String> values = new HashMap<>(fields.size());
 
-		if (!parseForm(exchange, values, fields, this.users)) {
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+		if (!parseForm(values, fields, this.users)) {
+			reply(ErrorMessages.Error.BAD_REQUEST);
 			return;
 		}
 
@@ -50,8 +47,7 @@ public class ResetPassword extends AbstractFormHandler {
 		final String newPassword = new String(newb);
 
 		if (users.changePassword(username, newPassword)) {
-			reply(exchange, vfs.get(Resources.Error.ERROR_VALIDATING_USER),
-					false);
+			reply(ErrorMessages.Error.ERROR_VALIDATING_USER);
 			return;
 		}
 
@@ -67,7 +63,6 @@ public class ResetPassword extends AbstractFormHandler {
 		mail.addMessage(email, "New password for " + username + ".",
 				sb.toString());
 
-		reply(exchange, new SimpleResponse(200,
-				AbstractResponse.MIME_TEXT_PLAIN), false);
+		reply(new SimpleResponse(200, AbstractResponse.MIME_TEXT_PLAIN));
 	}
 }
