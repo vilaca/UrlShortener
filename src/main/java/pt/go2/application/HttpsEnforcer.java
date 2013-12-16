@@ -6,8 +6,6 @@ import pt.go2.api.AbstractHandler;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.RedirectResponse;
 
-import com.sun.net.httpserver.HttpExchange;
-
 /**
  * The role of this handler is to redirect HTTP requests to HTTPS
  * 
@@ -20,11 +18,9 @@ public class HttpsEnforcer extends AbstractHandler {
 		this.config = config;
 	}
 
-	public void handle(HttpExchange exchange) throws IOException {
+	public void handle() throws IOException {
 
-		final String requested = exchange.getRequestURI().getRawPath();
-		final String redirect = "https://" + config.ENFORCE_DOMAIN + requested;
-
-		reply(exchange, new RedirectResponse(redirect, 301), true);
+		final String redirect = "https://" + config.ENFORCE_DOMAIN + getRawPath();
+		reply(new RedirectResponse(redirect, 301));
 	}
 }
