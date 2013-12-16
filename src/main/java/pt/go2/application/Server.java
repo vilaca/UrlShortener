@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyManagementException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
@@ -109,44 +110,42 @@ class Server {
 			LOG.trace("Appending to access log.");
 
 			// RequestHandler
-/*
-			final BasicAuthenticator ba = new BasicAuthenticator("Statistics") {
-
-				@Override
-				public boolean checkCredentials(final String user,
-						final String pass) {
-
-					LOG.info("login: [" + user + "] | [" + pass + "]");
-
-					LOG.info("required: [" + config.STATISTICS_USERNAME
-							+ "] | [" + config.STATISTICS_PASSWORD + "]");
-
-					return user.equals(config.STATISTICS_USERNAME)
-							&& pass.equals(config.STATISTICS_PASSWORD.trim());
-				}
-			};
-*/
+			/*
+			 * final BasicAuthenticator ba = new
+			 * BasicAuthenticator("Statistics") {
+			 * 
+			 * @Override public boolean checkCredentials(final String user,
+			 * final String pass) {
+			 * 
+			 * LOG.info("login: [" + user + "] | [" + pass + "]");
+			 * 
+			 * LOG.info("required: [" + config.STATISTICS_USERNAME + "] | [" +
+			 * config.STATISTICS_PASSWORD + "]");
+			 * 
+			 * return user.equals(config.STATISTICS_USERNAME) &&
+			 * pass.equals(config.STATISTICS_PASSWORD.trim()); } };
+			 */
 			final List<Class<?>> pages = new ArrayList<>();
-			
+
 			// scan packages
-			
+
 			PageClassLoader.load(config.PAGES_PACKAGES, pages);
 
 			final List<Object> pageObjs = new ArrayList<>();
-			
+
 			// instantiate objects and inject dependencies
-			
+
 			PageClassLoader.injectDependencies(pages, pageObjs);
 
 			// create contexts
-			
+
 			final HttpHandler enforcer = new HttpsEnforcer(config);
 
 			final boolean usingHttps = https != null
 					&& !"no".equals(config.HTTPS_ENABLED);
 
 			for (Class<?> pageClass : pages) {
-				
+
 				LOG.info("Creating context for: " + pageClass.getName());
 
 				final Page page = pageClass.getAnnotation(Page.class);
@@ -222,10 +221,12 @@ class Server {
 
 		final KeyStore ks = KeyStore.getInstance("JKS");
 		final SSLContext context = SSLContext.getInstance("TLS");
-		final KeyManagerFactory kmf = KeyManagerFactory
-				.getInstance("SunX509");
+		final KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
 
-		ks.load(new FileInputStream(ksFilename), ksPassword);
+		try (FileInputStream ksis = new FileInputStream(ksFilename);) {
+			ks.load(ksis, ksPassword);
+		}
+		
 		kmf.init(ks, certPassword);
 		context.init(kmf.getKeyManagers(), null, null);
 
