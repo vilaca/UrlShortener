@@ -10,6 +10,8 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import pt.go2.model.RestoreItem;
+
 /**
  * Restore Urls and their Hashes
  */
@@ -17,20 +19,7 @@ public class Restore {
 
 	private static final Logger LOG = LogManager.getLogger(Restore.class);
 
-	private Restore () {}
-	
-	/**
-	 * Class to hold data records from restore files
-	 */
-	public static class RestoreItem {
-
-		public final String key;
-		public final String value;
-
-		public RestoreItem(final String _key, final String _value) {
-			this.key = _key;
-			this.value = _value;
-		}
+	private Restore() {
 	}
 
 	/**
@@ -83,7 +72,7 @@ public class Restore {
 				LOG.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
-		
+
 		return items;
 	}
 }
