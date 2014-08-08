@@ -145,6 +145,12 @@ public class PhishTankInterface implements WatchDogTask {
 					end = entry.indexOf(',', idx);
 				}
 
+				if ( idx == -1 || end == -1 )
+				{
+					logger.error("Bad entry: " + entry);
+					continue;
+				}
+				
 				final Uri uri;
 				uri = Uri.create(entry.substring(idx, end), false);
 
