@@ -206,6 +206,6 @@ public class PhishTankInterface implements WatchDogTask {
 
 	@Override
 	public String name() {
-		return "PhishThankTask";
+		return "PhishTankTask";
 	}
 }
