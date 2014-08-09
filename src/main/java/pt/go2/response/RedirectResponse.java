@@ -7,8 +7,8 @@ import com.sun.net.httpserver.HttpExchange;
  */
 public class RedirectResponse extends AbstractResponse {
 
-	final String redirect;
-	final int status;
+	private final String redirect;
+	private final int status;
 
 	public RedirectResponse(final String redirect, final int status) {
 
@@ -18,12 +18,12 @@ public class RedirectResponse extends AbstractResponse {
 
 	@Override
 	public int getHttpStatus() {
-		return 301;
+		return status;
 	}
 
 	@Override
 	public byte[] run(HttpExchange exchange) {
 		exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, redirect);
-		return "".getBytes();
+		return new byte[] {};
 	}
 }
