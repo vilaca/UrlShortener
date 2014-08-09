@@ -136,7 +136,7 @@ public abstract class AbstractHandler implements HttpHandler {
 		sb.append(params.getRequestURI().toString());
 		sb.append(" ");
 		sb.append(params.getProtocol());
-		sb.append(" ");
+		sb.append("\" ");
 		sb.append(response.getHttpStatus());
 		sb.append(" ");
 		sb.append(size);
