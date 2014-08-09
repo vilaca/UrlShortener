@@ -63,11 +63,19 @@ public class WatchDog extends TimerTask {
 	@Override
 	synchronized public void run() {
 
+		logger.info("Watchdog woke.");
+		
 		for (WatchDogTask wt : tasks) {
+			
+			logger.info("Checking task: " + wt.name());
+			
 			if (trigger(wt)) {
 				wt.refresh();
 			}
 		}
+		
+		logger.info("Watchdog back to sleep.");
+
 	}
 
 	/**
@@ -79,6 +87,8 @@ public class WatchDog extends TimerTask {
 
 		final Date lastRun = wt.lastRun();
 
+		logger.info("Last run: " + lastRun);
+		
 		if (wt.lastRun() == null) {
 			return true;
 		}

@@ -12,5 +12,7 @@ public interface WatchDogTask {
 	Date lastRun();
 	
 	long interval();
+
+	String name();
 	
 }

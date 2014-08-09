@@ -165,11 +165,16 @@ public class PhishTankInterface implements WatchDogTask {
 			this.banned = banned;
 
 		} catch (IOException e) {
+
+			logger.error(e);
 			return false;
+			
 		} finally {
 			try {
 				response.close();
 			} catch (IOException e) {
+				logger.error(e);
+				return false;
 			}
 		}
 
@@ -197,5 +202,10 @@ public class PhishTankInterface implements WatchDogTask {
 	@Override
 	public long interval() {
 		return UPDATE_INTERVAL;
+	}
+
+	@Override
+	public String name() {
+		return "PhishThankTask";
 	}
 }
