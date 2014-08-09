@@ -1,4 +1,3 @@
-
 package pt.go2.keystore;
 
 import org.junit.Assert;
@@ -92,6 +91,15 @@ public class UriTest {
 		Assert.assertNotNull(u2);
 		
 		Assert.assertThat(u1, is(not(u2)));
+	}
+
+	@Test
+	public void testEmpty() {
+		
+		final Uri u1 = Uri.create("", true);
+
+		Assert.assertNull(u1);
+		
 	}
 
 }
