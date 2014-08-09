@@ -24,7 +24,7 @@ Features
 Get the latest version
 ======================
 
-The current latest stable version is at [r10](https://github.com/vilaca/UrlShortener/releases/tag/r10).
+The latest stable version is the [production branch](https://github.com/vilaca/UrlShortener/tree/production).
 
 You can build the Jar or edit the code in an Java IDE. An Eclipse project is included.
 
