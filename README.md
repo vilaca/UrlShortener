@@ -49,10 +49,10 @@ The server configuration can be edited without having to change the source code 
 | server.ip | 0.0.0.0 | Your server IP. |
 | server.backlog | 100 | Backlog for waiting connections. |
 | server.accessLog | access_log | File where the access log is written. 
-| server.version | software version | Version of the server software being run. |
-| google-site-verification | googlee8c2b6528722a6b6.html | Key used by Google Webmaster tools to confirm site ownership. |
+| server.version | go2.pt | Version of the server software being run. |
+| google-site-verification | | Key used by Google Webmaster tools to confirm site ownership. |
 | server.redirect | 301 | HTTP response code for Shortened Urls. Valid values are either 301 or 302. |
-| web.shortlinkdomain | go2.pt/ | Replace this with your site domain plus a '/' |
+| enforce-domain | | Must be your site domain plus a '/' |
 
 
 Content and layout
