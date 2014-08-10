@@ -3,11 +3,12 @@ package pt.go2.application;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
-import com.sun.net.httpserver.BasicAuthenticator;
+
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
@@ -68,44 +69,15 @@ class Server {
 			return;
 		}
 
-		Statistics statistics;
-		try {
-			statistics = new Statistics(config.STATISTICS_FOLDER);
-		} catch (IOException e1) {
-			logger.fatal("Can't collect statistics.");
-			return;
-		}
-
 		// RequestHandler
 
-		final HttpHandler root = new StaticPages(config, vfs, statistics,
+		final HttpHandler root = new StaticPages(config, vfs,
 				accessLog);
 		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
-
-		final HttpHandler stats = new Analytics(config, vfs, statistics,
-				accessLog);
 
 		listener.createContext("/", root);
 
 		listener.createContext("/new", novo);
-
-		listener.createContext("/stats", stats).setAuthenticator(
-				new BasicAuthenticator("Statistics") {
-
-					@Override
-					public boolean checkCredentials(final String user,
-							final String pass) {
-
-						logger.info("login: [" + user + "] | [" + pass + "]");
-
-						logger.info("required: [" + config.STATISTICS_USERNAME
-								+ "] | [" + config.STATISTICS_PASSWORD + "]");
-
-						return user.equals(config.STATISTICS_USERNAME)
-								&& pass.equals(config.STATISTICS_PASSWORD
-										.trim());
-					}
-				});
 
 		listener.setExecutor(null);
 

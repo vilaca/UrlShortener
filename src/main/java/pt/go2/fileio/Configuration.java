@@ -45,13 +45,6 @@ public class Configuration {
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
-	// folder for statistics backup/Restore
-	public final String STATISTICS_FOLDER;
-
-	// statics login
-	public final String STATISTICS_USERNAME;
-	public final String STATISTICS_PASSWORD;
-
 	// server version
 	public final String VERSION;
 
@@ -90,9 +83,6 @@ public class Configuration {
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
-		STATISTICS_FOLDER = getProperty("statistics.folder", "");
-		STATISTICS_USERNAME = getProperty("statistics.username", "statistics");
-		STATISTICS_PASSWORD = getProperty("statistics.password", "secret");
 		VERSION = getProperty("server.version", "beta");
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}

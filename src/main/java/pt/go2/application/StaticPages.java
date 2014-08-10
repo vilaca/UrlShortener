@@ -25,9 +25,6 @@ class StaticPages extends AbstractHandler {
 	static final Logger logger = LogManager.getLogger(StaticPages.class);
 
 	final Calendar calendar = Calendar.getInstance();
-
-	private final Statistics statistics;
-
 	
 	/**
 	 * C'tor
@@ -37,11 +34,8 @@ class StaticPages extends AbstractHandler {
 	 * @param statistics 
 	 * @throws IOException
 	 */
-	public StaticPages(final Configuration config, final Resources vfs,
-			Statistics statistics, final BufferedWriter accessLog) {
+	public StaticPages(final Configuration config, final Resources vfs,final BufferedWriter accessLog) {
 		super(config, vfs, accessLog);
-		
-		this.statistics = statistics;
 	}
 
 	/**
@@ -76,10 +70,6 @@ class StaticPages extends AbstractHandler {
 
 		if (requested.length() == 6) {
 
-			final String referer = exchange.getRequestHeaders().getFirst(AbstractResponse.REQUEST_HEADER_REFERER);
-			
-			statistics.add( requested, referer, calendar.getTime() );
-			
 			final Uri uri = vfs.get(new HashKey(requested));
 
 			if (uri == null) {
