@@ -35,7 +35,7 @@ class Server {
 		logger.trace("Creating listener.");
 
 		final org.eclipse.jetty.server.Server listener;
-		
+
 		listener = new org.eclipse.jetty.server.Server(config.HOST);
 
 		logger.trace("Appending to access log.");
@@ -67,16 +67,17 @@ class Server {
 		final ContextHandler root = new ContextHandler();
 		root.setContextPath("/");
 		root.setHandler(new StaticPages(config, vfs, accessLog));
-		
+
 		final ContextHandler novo = new ContextHandler();
 		novo.setContextPath("/new");
 		novo.setHandler(new UrlHashing(config, vfs, accessLog));
-		
+
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new org.eclipse.jetty.server.Handler[] { root, novo });
-        
-        listener.setHandler(contexts);
-		
+		contexts.setHandlers(new org.eclipse.jetty.server.Handler[] { novo,
+				root });
+
+		listener.setHandler(contexts);
+
 		try {
 
 			// start server
@@ -98,13 +99,12 @@ class Server {
 
 			logger.trace("Server stopping.");
 
-
 		} catch (Exception e1) {
 
 			logger.trace("Couldn't start server.");
-			
+
 		} finally {
-			
+
 			// Destroy server
 			try {
 				if (accessLog != null) {

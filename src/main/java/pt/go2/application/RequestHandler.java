@@ -56,6 +56,8 @@ public abstract class RequestHandler extends AbstractHandler {
 		setHeaders(exchange, response, cache);
 
 		exchange.setStatus(status);
+		
+		exchange.getOutputStream().write(body);
 
 		printLogMessage(request, exchange, response, body.length);
 	}

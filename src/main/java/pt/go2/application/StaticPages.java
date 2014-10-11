@@ -55,7 +55,7 @@ class StaticPages extends RequestHandler {
 
 		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
 		
-		if (!host.isEmpty()) {
+		if (host.isEmpty()) {
 			reply(request, exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 			return;
 		}
@@ -104,6 +104,8 @@ class StaticPages extends RequestHandler {
 		if (response == null)
 			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
 
+        baseRequest.setHandled(true);
+		
 		reply(request, exchange, response, true);
 	}
 
