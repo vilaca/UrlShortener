@@ -22,25 +22,25 @@ class BidiMap<H,U> {
 		this.url2Hash = new HashMap<U,H>();
 	}
 
-	void put(H hk, U uri)
+	synchronized void put(H hk, U uri)
 	{
 		this.hash2Url.put(hk, uri);
 		this.url2Hash.put(uri, hk);		
 	}
 
-	H getUrl2Hash(U uri) {
+	synchronized H getUrl2Hash(U uri) {
 		return url2Hash.get(uri);
 	}
 
-	U get(H hashKey) {
+	synchronized U get(H hashKey) {
 		return hash2Url.get(hashKey);
 	}
 
-	boolean contains(HashKey hk) {
+	synchronized boolean contains(HashKey hk) {
 		return hash2Url.containsKey(hk);
 	}
 	
-	void remove(HashKey hk, Uri uri) {
+	synchronized void remove(HashKey hk, Uri uri) {
 		hash2Url.remove(hk);
 		url2Hash.remove(uri);
 	}

@@ -1,6 +1,6 @@
 package pt.go2.response;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Http Redirect
@@ -22,8 +22,8 @@ public class RedirectResponse extends AbstractResponse {
 	}
 
 	@Override
-	public byte[] run(HttpExchange exchange) {
-		exchange.getResponseHeaders().set(RESPONSE_HEADER_LOCATION, redirect);
+	public byte[] run(HttpServletResponse exchange) {
+		exchange.setHeader(RESPONSE_HEADER_LOCATION, redirect);
 		return new byte[] {};
 	}
 }

@@ -32,24 +32,8 @@ public class KeyValueStore {
 			final HashKey hk = new HashKey(item.key);
 			final Uri uri = Uri.create(item.value, false);
 
-			storeHash(hk, uri);
+			map.put(hk, uri);
 		}
-	}
-
-	/**
-	 * Add to key store
-	 * 
-	 * @param hk
-	 *            Hash identifier for link
-	 * 
-	 * @param uri
-	 *            new Uri
-	 * 
-	 * @return
-	 */
-	private void storeHash(final HashKey hk, final Uri uri) {
-
-		map.put(hk, uri);
 	}
 
 	/**
@@ -88,7 +72,7 @@ public class KeyValueStore {
 			hk = new HashKey();
 		}
 
-		storeHash(hk, uri);
+		map.put(hk, uri);
 
 		try {
 

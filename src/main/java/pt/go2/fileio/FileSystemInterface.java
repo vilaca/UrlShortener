@@ -8,6 +8,5 @@ public interface FileSystemInterface {
 	
 	void stop();
 	
-	AbstractResponse getFile( final String filename );
-	
+	AbstractResponse getFile( final String filename );	
 }

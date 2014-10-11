@@ -6,11 +6,10 @@ import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.server.handler.ContextHandler;
+import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
 import pt.go2.fileio.Configuration;
-
-import com.sun.net.httpserver.HttpHandler;
-import com.sun.net.httpserver.HttpServer;
 
 class Server {
 
@@ -35,15 +34,9 @@ class Server {
 
 		logger.trace("Creating listener.");
 
-		final HttpServer listener;
-		try {
+		final org.eclipse.jetty.server.Server listener;
 
-			listener = HttpServer.create(config.HOST, config.BACKLOG);
-
-		} catch (IOException e) {
-			logger.fatal("Could not create listener.");
-			return;
-		}
+		listener = new org.eclipse.jetty.server.Server(config.HOST);
 
 		logger.trace("Appending to access log.");
 
@@ -71,15 +64,19 @@ class Server {
 
 		// RequestHandler
 
-		final HttpHandler root = new StaticPages(config, vfs,
-				accessLog);
-		final HttpHandler novo = new UrlHashing(config, vfs, accessLog);
+		final ContextHandler root = new ContextHandler();
+		root.setContextPath("/");
+		root.setHandler(new StaticPages(config, vfs, accessLog));
 
-		listener.createContext("/", root);
+		final ContextHandler novo = new ContextHandler();
+		novo.setContextPath("/new");
+		novo.setHandler(new UrlHashing(config, vfs, accessLog));
 
-		listener.createContext("/new", novo);
+		ContextHandlerCollection contexts = new ContextHandlerCollection();
+		contexts.setHandlers(new org.eclipse.jetty.server.Handler[] { novo,
+				root });
 
-		listener.setExecutor(null);
+		listener.setHandler(contexts);
 
 		try {
 
@@ -102,15 +99,21 @@ class Server {
 
 			logger.trace("Server stopping.");
 
-			listener.stop(1);
+		} catch (Exception e1) {
+
+			logger.trace("Couldn't start server.");
 
 		} finally {
+
+			// Destroy server
 			try {
 				if (accessLog != null) {
 					accessLog.close();
 				}
 			} catch (IOException e) {
 			}
+
+			listener.destroy();
 			logger.trace("Server stopped.");
 		}
 	}

@@ -1,6 +1,6 @@
 package pt.go2.response;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Used when the client asks to hash an Url
@@ -19,7 +19,7 @@ public class HtmlResponse extends AbstractResponse {
 	}
 
 	@Override
-	public byte[] run(HttpExchange exchange) {
+	public byte[] run(HttpServletResponse exchange) {
 		return body;
 	}
 	
