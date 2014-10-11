@@ -2,11 +2,9 @@ package pt.go2.response;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.List;
 import java.util.zip.GZIPOutputStream;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author vilaca
@@ -76,7 +74,7 @@ public class GzipResponse extends AbstractResponse {
 	 * )
 	 */
 	@Override
-	public byte[] run(HttpExchange exchange) {
+	public byte[] run(HttpServletResponse exchange) {
 
 		if (this.zipBody != null && clientAcceptsZip(exchange)) {
 			zipped = true;
@@ -104,14 +102,10 @@ public class GzipResponse extends AbstractResponse {
 	 * 
 	 * @return
 	 */
-	private boolean clientAcceptsZip(final HttpExchange exchange) {
+	private boolean clientAcceptsZip(final HttpServletResponse exchange) {
 
-		final Headers headers;
-		final List<String> values;
+		final String header = exchange.getHeader(REQUEST_HEADER_ACCEPT_ENCODING);
 
-		headers = exchange.getRequestHeaders();
-		values = headers.get(REQUEST_HEADER_ACCEPT_ENCODING);
-
-		return values.size() > 0 && values.get(0).indexOf("gzip") != -1;
+		return header != null && header.indexOf("gzip") != -1;
 	}
 }

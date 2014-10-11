@@ -2,19 +2,19 @@ package pt.go2.application;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.handler.AbstractHandler;
+
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
-
-public abstract class AbstractHandler implements HttpHandler {
+public abstract class RequestHandler extends AbstractHandler {
 
 	protected final Resources vfs;
 	protected final Configuration config;
@@ -28,7 +28,7 @@ public abstract class AbstractHandler implements HttpHandler {
 	 * @param accessLog
 	 * @throws IOException
 	 */
-	public AbstractHandler(final Configuration config,
+	public RequestHandler(final Configuration config,
 			final Resources vfs, final BufferedWriter accessLog) {
 
 		this.accessLog = accessLog;
@@ -38,117 +38,96 @@ public abstract class AbstractHandler implements HttpHandler {
 
 	/**
 	 * Stream Http Response
+	 * @param request 
 	 * 
 	 * @param exchange
 	 * @param response
 	 * @throws IOException
 	 */
-	protected void reply(final HttpExchange exchange,
+
+	protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
 			final AbstractResponse response, final boolean cache)
 			throws IOException {
 
-		final Headers headers = exchange.getResponseHeaders();
-
 		final byte[] body = response.run(exchange);
 
-		final int size = body.length;
 		final int status = response.getHttpStatus();
 
-		setHeaders(response, headers, cache);
+		setHeaders(exchange, response, cache);
 
-		exchange.sendResponseHeaders(status, size);
+		exchange.setStatus(status);
 
-		final OutputStream os = exchange.getResponseBody();
-
-		os.write(body);
-
-		os.flush();
-		os.close();
-
-		printLogMessage(exchange, response, size);
+		printLogMessage(request, exchange, response, body.length);
 	}
 
 	/**
 	 * Set response headers
+	 * @param exchange 
 	 * 
 	 * @param response
 	 * @param headers
 	 */
-	private void setHeaders(final AbstractResponse response,
-			final Headers headers, final boolean cache) {
+	private void setHeaders(HttpServletResponse exchange,
+			final AbstractResponse response, final boolean cache) {
 
-		headers.set(AbstractResponse.RESPONSE_HEADER_SERVER,
+		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER,
 				"Carapau de corrida " + config.VERSION);
 
-		headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE,
+		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE,
 				response.getMimeType());
 
 		// TODO only static files should be cached
 		if (cache) {
 
-			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
+			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
 					"max-age=" + TimeUnit.HOURS.toSeconds(config.CACHE_HINT));
 
 		} else {
-			headers.set(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
+			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
 					"no-cache, no-store, must-revalidate");
 
-			headers.set(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
+			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
 		}
 
 		if (response.isZipped()) {
-			headers.set(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING,
-					"gzip");
+			exchange.setHeader(
+					AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
 		}
 	}
-
-	/**
-	 * Is the request for this domain?
-	 * 
-	 * (Used to redirect from www.go2.pt to go2.pt)
-	 * 
-	 * @param headers
-	 * @return
-	 */
-	protected boolean correctHost(final Headers headers) {
-		return headers.getFirst(AbstractResponse.REQUEST_HEADER_HOST)
-				.startsWith(config.ENFORCE_DOMAIN);
-	}
-
+		
 	/**
 	 * Access log output
+	 * @param request 
+	 * @param exchange 
+	 * @param exchange 
 	 * 
 	 * @param params
 	 * @param response
 	 */
-	protected void printLogMessage(final HttpExchange params,
-			final AbstractResponse response, final int size) {
+	protected void printLogMessage(
+			HttpServletRequest request, HttpServletResponse exchange, final AbstractResponse response, final int size) {
 
 		final StringBuilder sb = new StringBuilder();
 
-		sb.append(params.getRemoteAddress().getAddress().getHostAddress());
+		sb.append(request.getRemoteAddr());
 		sb.append(" - - [");
 		sb.append(new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z")
 				.format(new Date()));
 		sb.append("] \"");
-		sb.append(params.getRequestMethod());
+		sb.append(request.getMethod());
 		sb.append(" ");
-		sb.append(params.getRequestURI().toString());
+		sb.append(request.getRequestURI());
 		sb.append(" ");
-		sb.append(params.getProtocol());
+		sb.append(request.getProtocol());
 		sb.append("\" ");
 		sb.append(response.getHttpStatus());
 		sb.append(" ");
 		sb.append(size);
 		sb.append(" \"");
 
-		final Headers headers = params.getRequestHeaders();
-		
-		final String referer = headers
-				.getFirst(AbstractResponse.REQUEST_HEADER_REFERER);
+		final String referer = request.getHeader(AbstractResponse.REQUEST_HEADER_REFERER);
 
-		final String agent = headers
-				.getFirst(AbstractResponse.REQUEST_HEADER_USER_AGENT);
+		final String agent = request.getHeader(AbstractResponse.REQUEST_HEADER_USER_AGENT);
 
 		sb.append(referer == null ? "-" : referer);
 

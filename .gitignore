@@ -16,3 +16,4 @@ access_log
 
 # sonarqube files
 .sonar/*
+/bin/

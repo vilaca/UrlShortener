@@ -1,6 +1,6 @@
 package pt.go2.response;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * Abstract class for server response
@@ -47,7 +47,7 @@ public abstract class AbstractResponse {
 	 * @param exchange
 	 * @return
 	 */
-	public abstract byte[] run(final HttpExchange exchange);
+	public abstract byte[] run(final HttpServletResponse exchange);
 
 	/**
 	 * Implementations should override mime type when necessary

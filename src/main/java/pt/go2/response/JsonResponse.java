@@ -1,6 +1,6 @@
 package pt.go2.response;
 
-import com.sun.net.httpserver.HttpExchange;
+import javax.servlet.http.HttpServletResponse;
 
 public class JsonResponse extends AbstractResponse {
 
@@ -17,7 +17,7 @@ public class JsonResponse extends AbstractResponse {
 	}
 
 	@Override
-	public byte[] run(HttpExchange exchange) {
+	public byte[] run(HttpServletResponse exchange) {
 		return body;
 	}
 	

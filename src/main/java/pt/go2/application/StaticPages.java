@@ -2,11 +2,15 @@ package pt.go2.application;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.net.URI;
 import java.util.Calendar;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.server.Request;
 
 import pt.go2.fileio.Configuration;
 import pt.go2.keystore.HashKey;
@@ -14,13 +18,10 @@ import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
 
-import com.sun.net.httpserver.Headers;
-import com.sun.net.httpserver.HttpExchange;
-
 /**
  * Handles server requests
  */
-class StaticPages extends AbstractHandler {
+class StaticPages extends RequestHandler {
 
 	static final Logger logger = LogManager.getLogger(StaticPages.class);
 
@@ -46,85 +47,76 @@ class StaticPages extends AbstractHandler {
 	 * @exception IOException
 	 */
 	@Override
-	public void handle(final HttpExchange exchange) throws IOException {
-
-		final Headers request = exchange.getRequestHeaders();
+	public void handle(String target, Request baseRequest,
+			HttpServletRequest request, HttpServletResponse exchange)
+			throws IOException, ServletException {
 
 		// we need a host header to continue
 
-		if (!validRequest(request)) {
-
-			reply(exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+		
+		if (!host.isEmpty()) {
+			reply(request, exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
 			return;
 		}
 
 		// redirect to out domain if host header is not correct
 
-		if (!correctHost(request)) {
+		if (!host.startsWith(config.ENFORCE_DOMAIN)) {
 
-			reply(exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN), false);
+			reply(request, exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN),
+					false);
+			
+			logger.error("Wrong host: " + host);
 			return;
 		}
 
-		final String requested = getRequestedFilename(exchange.getRequestURI());
+		final String requested = getRequestedFilename(request.getRequestURI());
 
 		if (requested.length() == 6) {
 
 			final Uri uri = vfs.get(new HashKey(requested));
 
 			if (uri == null) {
-				reply(exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
+				reply(request, exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
 				return;
 			}
 
 			if (vfs.isBanned(uri)) {
 				logger.warn("banned: " + uri);
-				reply(exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING), true);
+				reply(request, exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING),
+						true);
 				return;
 			}
-			
-			reply(exchange, new RedirectResponse(uri.toString(), 301), true);
+
+			reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
 			return;
 		}
 
 		AbstractResponse response;
-		
-		if (requested.equals("/") && config.PUBLIC!= null )
-		{
-			response  = vfs.get(config.PUBLIC_ROOT);
-		}
-		else
-		{
+
+		if (requested.equals("/") && config.PUBLIC != null) {
+			response = vfs.get(config.PUBLIC_ROOT);
+		} else {
 			response = vfs.get(requested);
 		}
 
-		if ( response == null ) response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
-				
-		reply(exchange, response, true);
-	}
+		if (response == null)
+			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
 
-	/**
-	 * Server needs a Host header
-	 * 
-	 * @param headers
-	 * @return
-	 */
-	private boolean validRequest(final Headers headers) {
-		return headers.get(AbstractResponse.REQUEST_HEADER_HOST).size() > 0;
+		reply(request, exchange, response, true);
 	}
 
 	/**
 	 * Parse requested filename from URI
 	 * 
-	 * @param request
+	 * @param path
 	 * 
 	 * @return Requested filename
 	 */
-	private String getRequestedFilename(final URI request) {
+	private String getRequestedFilename(final String path) {
 
 		// split into tokens
-
-		final String path = request.getRawPath();
 
 		if (path.equals("/")) {
 			return path;
