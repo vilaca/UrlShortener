@@ -72,6 +72,7 @@ public abstract class RequestHandler extends AbstractHandler {
 	private void setHeaders(HttpServletResponse exchange,
 			final AbstractResponse response, final boolean cache) {
 
+		// TODO ? does this still work ?
 		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER,
 				"Carapau de corrida " + config.VERSION);
 
@@ -144,8 +145,10 @@ public abstract class RequestHandler extends AbstractHandler {
 		}
 
 		try {
-			accessLog.write(output);
-			accessLog.flush();
+			synchronized (this) {
+				accessLog.write(output);
+				accessLog.flush();
+			}
 		} catch (IOException e) {
 		}
 	}

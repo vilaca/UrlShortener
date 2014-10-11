@@ -49,8 +49,10 @@ public class Backup {
 		sb.append(uri.toString());
 		sb.append(System.getProperty("line.separator"));
 
-		resumeLog.write(sb.toString());
-		resumeLog.flush();
+		synchronized (this) {
+			resumeLog.write(sb.toString());
+			resumeLog.flush();
+		}
 	}
 
 	public void close() throws IOException {
