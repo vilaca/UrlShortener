@@ -1,7 +1,7 @@
 UrlShortener
 ============
 
-Fast URL Shortener - Pure Java SE Web Application with embedded web server.
+URL Shortener - Pure Java SE Web Application with embedded Jetty 9 Http server.
 
 Use java -server -jar UrlShortener.jar to run.
 
@@ -11,7 +11,7 @@ Try it on-line at [http://go2.pt/](http://go2.pt/) or download the [latest versi
 Features
 ========
 
-- Single Jar Application - no Application server or Database dependencies;
+- Single Jar Application - no Application server, Servelet Container or External Database dependencies;
 - Refuses abusive Phishing Urls;
 - Easily customized with PHP-like smart tags;
 - Apache style logging for compatibility with existing tools;
@@ -93,6 +93,7 @@ Apache Http-Components - http://hc.apache.org/
 
 Log4j2 - http://logging.apache.org/log4j/2.x/
 
+Jetty 9 - http://www.eclipse.org/jetty/
 
 License
 =======
