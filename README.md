@@ -24,12 +24,14 @@ Features
 Get the latest version
 ======================
 
-The current latest stable version is the [r11](https://github.com/vilaca/UrlShortener/releases/tag/r11).
+The current latest stable version is [r11](https://github.com/vilaca/UrlShortener/releases/tag/r11).
 
-You can build the Jar or edit the code in an Java IDE. An Eclipse project is included.
+An Eclipse project is included.
+
+Binary can be downloaded from [latest version jar](http://vilaca.eu/Download/UrlShortener.jar).
 
 
-How to build your own Url Shortener
+How to customize the instalation
 ===================================
 
 At the source/main/config/ folder you can find the application.properties file with the default configuration.
