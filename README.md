@@ -11,7 +11,8 @@ Try it on-line at [http://go2.pt/](http://go2.pt/) or download the [latest versi
 Features
 ========
 
-- Single Jar Application - no Application server, Servelet Container or External Database dependencies;
+- Single Jar Application;
+- No Application server, Servelet Container or External Database dependencies;
 - Refuses abusive Phishing Urls;
 - Easily customized with PHP-like smart tags;
 - Apache style logging for compatibility with existing tools;
