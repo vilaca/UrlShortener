@@ -25,7 +25,7 @@ Features
 Get the latest version
 ======================
 
-The current stable version is [v0.1.0](https://github.com/vilaca/UrlShortener/releases/tag/v0.1.0).
+The stable version used in production at http://go2.pt is [v0.1.0](https://github.com/vilaca/UrlShortener/releases/tag/v0.1.0).
 
 
 How to customize the instalation
