@@ -52,6 +52,8 @@ class UrlHashing extends RequestHandler {
 	public void handle(String target, Request baseRequest, HttpServletRequest request,
 			HttpServletResponse response) throws IOException, ServletException {
 		
+		baseRequest.setHandled(true);	
+		
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {
