@@ -27,8 +27,6 @@ Get the latest version
 
 The current stable version is [v0.1.0](https://github.com/vilaca/UrlShortener/releases/tag/v0.1.0).
 
-To download the binary [click](http://vilaca.eu/Download/UrlShortener.jar).
-
 
 How to customize the instalation
 ===================================
