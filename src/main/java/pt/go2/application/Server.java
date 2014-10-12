@@ -69,7 +69,7 @@ class Server {
 		root.setHandler(new StaticPages(config, vfs, accessLog));
 
 		final ContextHandler novo = new ContextHandler();
-		novo.setContextPath("/new");
+		novo.setContextPath("/new/");
 		novo.setHandler(new UrlHashing(config, vfs, accessLog));
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
