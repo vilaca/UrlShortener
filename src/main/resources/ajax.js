@@ -123,7 +123,7 @@ window.onload = function () {
 
 			inputDisable()
 
-            http.open('POST', '/new', true)
+            http.open('POST', '/new/', true)
             
             http.send(params)
 
