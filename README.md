@@ -25,11 +25,9 @@ Features
 Get the latest version
 ======================
 
-The current latest stable version is [v0.1.0](https://github.com/vilaca/UrlShortener/releases/tag/v0.1.0).
+The current stable version is [v0.1.0](https://github.com/vilaca/UrlShortener/releases/tag/v0.1.0).
 
-An Eclipse project is included.
-
-Binary can be downloaded from [latest version jar](http://vilaca.eu/Download/UrlShortener.jar).
+To download the binary [click](http://vilaca.eu/Download/UrlShortener.jar).
 
 
 How to customize the instalation
