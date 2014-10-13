@@ -3,11 +3,12 @@ package pt.go2.application;
 import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.daemon.PhishTankInterface;
-import pt.go2.daemon.WatchDog;
+import pt.go2.abuse.PhishTankInterface;
+import pt.go2.abuse.WatchDog;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.FileSystemInterface;
@@ -155,9 +156,15 @@ public class Resources {
 		return true;
 	}
 
+	/**
+	 * 
+	 * check healt uri health instead
+	 * 
+	 */
+	@Deprecated
 	public boolean isBanned(Uri uri) {
 
-		if (uri.getState() != Uri.State.OK) {
+		if (uri.health() != Uri.Health.OK) {
 			return true;
 		}
 
