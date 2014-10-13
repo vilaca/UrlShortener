@@ -45,6 +45,9 @@ public class Configuration {
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
+	// Google safe browsing lookup API key
+	public final String SAFE_LOOKUP_API_KEY;
+	
 	// server version
 	public final String VERSION;
 
@@ -83,6 +86,7 @@ public class Configuration {
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
+		SAFE_LOOKUP_API_KEY = getProperty("safe-lookup-api-key");
 		VERSION = getProperty("server.version", "beta");
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
