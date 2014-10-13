@@ -12,27 +12,27 @@ import org.apache.commons.validator.routines.UrlValidator;
  * 
  * Other future optimizations are possible.
  * 
- * MUST OVERRIDE BOTH hashCode() and equals(Object). hashCode() value must be
- * calculated in c'tor for faster lookups in Map
+ * MUST OVERRIDE BOTH hashCode() and equals(Object).
+ * hashCode() value calculated in c'tor for faster lookups in Map
  */
 public class Uri {
 
-	public enum State {
-		OK, OFFLINE, FORBIDEN_PHISHING, FORBIDDEN_MALWARE
+	public enum Health {
+		OK, PHISHING, BAD_URL, REDIRECT, MALWARE
 	}
 
 	private static final String[] SCHEMES = new String[] { "http", "https", "" };
 	private final byte[] inner;
 	private final int hashcode;
 
-	private State state;
+	private Health health;
 	private Date updated;
 
 	public static Uri create(final String str, final boolean validate) {
-		return create(str, validate, State.OK);
+		return create(str, validate, Health.OK);
 	}
 
-	public static Uri create(String str, final boolean validate, State state) {
+	public static Uri create(String str, final boolean validate, Health state) {
 
 		str = normalizeUrl(str);
 
@@ -49,10 +49,10 @@ public class Uri {
 	 * @param str
 	 * @param state
 	 */
-	private Uri(final String str, final State state) {
+	private Uri(final String str, final Health state) {
 		inner = str.getBytes();
 		hashcode = Arrays.hashCode(inner);
-		this.state = state;
+		this.health = state;
 	}
 
 	@Override
@@ -128,21 +128,19 @@ public class Uri {
 		input = input.substring(0, idxDomain).toLowerCase()
 				+ input.substring(idxDomain);
 
-		// add http:// scheme if needed
-
 		return input;
 	}
 
-	public State getState() {
-		return state;
+	public Health health() {
+		return health;
 	}
 
-	public Date getLastUpdated() {
-		return updated;
+	public void setHealth(final Health h) {
+		this.health = h;
+		this.updated = new Date();
 	}
 
-	public void setState(final State state, final Date updated) {
-		this.state = state;
-		this.updated = updated;
+	public long lastChecked() {
+		return updated == null ? 0 : updated.getTime();
 	}
 }
