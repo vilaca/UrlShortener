@@ -2,6 +2,7 @@ package pt.go2.keystore;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -108,5 +109,10 @@ public class KeyValueStore {
 	public Uri get(final HashKey haskey) {
 
 		return map.get(haskey);
+	}
+	
+	public Set<Uri> Uris()
+	{
+		return map.getKeys();
 	}
 }
