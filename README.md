@@ -50,6 +50,7 @@ The server configuration can be edited without having to change the source code 
 | server.accessLog | access_log | File where the access log is written. 
 | server.version | go2.pt | Version of the server software being run. |
 | google-site-verification | | Key used by Google Webmaster tools to confirm site ownership. |
+| safe-lookup-api-key | | API key to integrate with Google safe browsing lookup API. |
 | server.redirect | 301 | HTTP response code for Shortened Urls. Valid values are either 301 or 302. |
 | enforce-domain | | Must be your site domain plus a '/' |
 
