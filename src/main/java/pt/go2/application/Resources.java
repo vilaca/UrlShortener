@@ -161,7 +161,7 @@ public class Resources {
 			return true;
 		}
 
-		return pi.isBanned(uri);
+		return pi == null ? false : pi.isBanned(uri);
 	}
 
 	public byte[] add(Uri uri) {

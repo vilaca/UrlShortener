@@ -51,6 +51,8 @@ class StaticPages extends RequestHandler {
 			HttpServletRequest request, HttpServletResponse exchange)
 			throws IOException, ServletException {
 
+        baseRequest.setHandled(true);		
+		
 		// we need a host header to continue
 
 		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
@@ -62,11 +64,12 @@ class StaticPages extends RequestHandler {
 
 		// redirect to out domain if host header is not correct
 
-		if (!host.startsWith(config.ENFORCE_DOMAIN)) {
+		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
+				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
 
 			reply(request, exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN),
 					false);
-			
+
 			logger.error("Wrong host: " + host);
 			return;
 		}
@@ -104,8 +107,6 @@ class StaticPages extends RequestHandler {
 		if (response == null)
 			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
 
-        baseRequest.setHandled(true);
-		
 		reply(request, exchange, response, true);
 	}
 
