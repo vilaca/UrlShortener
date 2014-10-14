@@ -1,4 +1,4 @@
-package pt.go2.keystore;
+package pt.go2.storage;
 
 import java.util.HashMap;
 import java.util.Map;

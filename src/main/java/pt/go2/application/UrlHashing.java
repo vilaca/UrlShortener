@@ -10,17 +10,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.Uri;
 import pt.go2.response.HtmlResponse;
+import pt.go2.storage.Uri;
+import pt.go2.storage.Uri.Health;
 
 class UrlHashing extends RequestHandler {
-
-	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
 
 	private final Resources vfs;
 
@@ -80,7 +77,7 @@ class UrlHashing extends RequestHandler {
 
 			// Parse string into Uri
 
-			final Uri uri = Uri.create(postBody.substring(idx), true);
+			final Uri uri = Uri.create(postBody.substring(idx), true, Health.UNKNOWN);
 
 			if (uri == null) {
 				reply(request, response, vfs.get(Resources.Error.BAD_REQUEST),
@@ -90,6 +87,7 @@ class UrlHashing extends RequestHandler {
 
 			// Refuse banned
 
+			/*
 			if (vfs.isBanned(uri)) {
 				logger.warn("banned: " + uri + " - "
 						+ request.getRemoteAddr());
@@ -98,7 +96,8 @@ class UrlHashing extends RequestHandler {
 						false);
 				return;
 			}
-
+			*/
+			
 			// hash Uri
 
 			final byte[] hashedUri = vfs.add(uri);

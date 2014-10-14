@@ -1,5 +1,5 @@
 
-package pt.go2.keystore;
+package pt.go2.storage;
 
 import org.junit.Assert;
 import org.junit.Test;

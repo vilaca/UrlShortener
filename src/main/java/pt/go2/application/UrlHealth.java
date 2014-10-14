@@ -14,105 +14,92 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 
-import pt.go2.abuse.PhishTankInterface;
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.KeyValueStore;
-import pt.go2.keystore.Uri;
-import pt.go2.keystore.Uri.Health;
+import pt.go2.storage.Uri;
+import pt.go2.storage.Uri.Health;
 
 public class UrlHealth {
 
 	private static final Logger logger = LogManager.getLogger();
 
-	private volatile boolean running = false;
-
 	private final long interval = 60 * 60 * 1000; // 1h
-
-	private final PhishTankInterface pi;
-	private final KeyValueStore ks;
+	
+	private final Resources vfs;
 	private final Configuration conf;
 
-	public UrlHealth(KeyValueStore ks, PhishTankInterface pi, Configuration conf) {
-		this.ks = ks;
-		this.pi = pi;
+	public UrlHealth(Resources vfs, Configuration conf) {
+		this.vfs = vfs;
 		this.conf = conf;
 	}
 
-	public void test() {
+	public void test(Set<Uri> uris) {
+		for ( Uri uri: uris)
+			test(uri);
+	}
 
-		if (running) {
-			logger.warn("Already running.");
-			return;
-		}
-
-		running = true;
-
-		final Set<Uri> uris = ks.Uris();
+	public void test(Uri uri) {
 
 		final long now = new Date().getTime();
 
-		for (Uri uri : uris) {
-
-			if (uri.health() != Uri.Health.OK) {
-				continue;
-			}
-
-			if (now - uri.lastChecked() > interval) {
-				continue;
-			}
-
-			// check if Phishing
-
-			if (pi.isBanned(uri)) {
-				uri.setHealth(Uri.Health.PHISHING);
-				logger.info("Caugh phishing: " + uri);
-				continue;
-			}
-
-			final URL url;
-			try {
-				url = new URL(uri.toString());
-			} catch (MalformedURLException e) {
-				uri.setHealth(Uri.Health.BAD_URL);
-				logger.info("Caugh bad form: " + uri, e);
-				continue;
-			}
-
-			final HttpURLConnection con;
-			try {
-				con = (HttpURLConnection) url.openConnection();
-			} catch (IOException e) {
-				logger.error(e);
-				continue;
-			}
-
-			con.setInstanceFollowRedirects(false);
-			con.setConnectTimeout(5000);
-
-			final int status;
-			try {
-				con.connect();
-				status = con.getResponseCode();
-			} catch (IOException e) {
-				uri.setHealth(Uri.Health.BAD_URL);
-				logger.info("Could not connect or get response code: " + uri, e);
-				continue;
-			}
-
-			con.disconnect();
-
-			if (status >= 300 && status <= 399) {
-				uri.setHealth(Uri.Health.REDIRECT);
-				logger.info("Found redirect: " + uri);
-				continue;
-			}
-
-			if (conf.SAFE_LOOKUP_API_KEY != null && !conf.SAFE_LOOKUP_API_KEY.isEmpty()) {
-
-				safeBrowsingLookup(uri);
-			}
+		if (uri.health() != Health.UNKNOWN && uri.health() != Health.OK) {
+			return;
 		}
-		running = false;
+
+		if (now - uri.lastChecked() < interval) {
+			return;
+		}
+
+		// check if Phishing
+
+		if (vfs.isBanned(uri)) {
+			uri.setHealth(Uri.Health.PHISHING);
+			logger.info("Caugh phishing: " + uri);
+			return;
+		}
+
+		final URL url;
+		try {
+			url = new URL(uri.toString());
+		} catch (MalformedURLException e) {
+			uri.setHealth(Uri.Health.BAD_URL);
+			logger.info("Caugh bad form: " + uri, e);
+			return;
+		}
+
+		final HttpURLConnection con;
+		try {
+			con = (HttpURLConnection) url.openConnection();
+		} catch (IOException e) {
+			logger.error(e);
+			return;
+		}
+
+		con.setInstanceFollowRedirects(false);
+		con.setConnectTimeout(5000);
+
+		final int status;
+		try {
+			con.connect();
+			status = con.getResponseCode();
+		} catch (IOException e) {
+			uri.setHealth(Uri.Health.BAD_URL);
+			logger.info("Could not connect or get response code: " + uri, e);
+			return;
+		}
+
+		con.disconnect();
+
+		if (status >= 300 && status <= 399) {
+			uri.setHealth(Uri.Health.REDIRECT);
+			logger.info("Found redirect: " + uri);
+			return;
+		}
+
+		if (conf.SAFE_LOOKUP_API_KEY != null
+				&& !conf.SAFE_LOOKUP_API_KEY.isEmpty()) {
+
+			safeBrowsingLookup(uri);
+		}
 	}
 
 	private boolean safeBrowsingLookup(Uri uri) {
@@ -128,7 +115,7 @@ public class UrlHealth {
 					+ conf.VERSION
 					+ "&pver=3.1&url="
 					+ URLEncoder.encode(uri.toString(), "ASCII");
-			
+
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Error: " + uri, e);
 			return false;
@@ -145,9 +132,10 @@ public class UrlHealth {
 			logger.error("Connecting to : " + lookup, e);
 			return false;
 		}
-		
-		logger.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
-		
+
+		logger.info("Google SB Lookup API returns " + response.getStatus()
+				+ " for " + uri.toString());
+
 		if (response.getStatus() != 200)
 			return false;
 
@@ -156,7 +144,7 @@ public class UrlHealth {
 		} else {
 			uri.setHealth(Health.PHISHING);
 		}
-		
+
 		return true;
 	}
 }

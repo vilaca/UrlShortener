@@ -1,4 +1,4 @@
-package pt.go2.keystore;
+package pt.go2.storage;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -18,7 +18,7 @@ import org.apache.commons.validator.routines.UrlValidator;
 public class Uri {
 
 	public enum Health {
-		OK, PHISHING, BAD_URL, REDIRECT, MALWARE
+		OK, PHISHING, BAD_URL, REDIRECT, MALWARE, UNKNOWN
 	}
 
 	private static final String[] SCHEMES = new String[] { "http", "https", "" };

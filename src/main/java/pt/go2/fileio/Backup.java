@@ -6,8 +6,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
-import pt.go2.keystore.HashKey;
-import pt.go2.keystore.Uri;
+import pt.go2.storage.HashKey;
+import pt.go2.storage.Uri;
 
 /**
  * Persist Urls and their Hashes so they can be later restored w/ the Restore

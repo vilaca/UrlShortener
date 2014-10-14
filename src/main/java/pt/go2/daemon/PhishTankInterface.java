@@ -7,6 +7,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+
 import org.apache.http.TruncatedChunkException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -17,15 +18,15 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.Uri;
+import pt.go2.storage.BannedUrlList;
+import pt.go2.storage.Uri;
 
 /**
  * Downloads file from PhishTank API for Phishing Url detection
  */
 public class PhishTankInterface implements WatchDogTask {
 
-	private static final Logger logger = LogManager
-			.getLogger(PhishTankInterface.class);
+	private static final Logger logger = LogManager.getLogger();
 
 	// watchdog sleep time
 
@@ -35,11 +36,6 @@ public class PhishTankInterface implements WatchDogTask {
 
 	private static final int EXPECTED_ENTRIES = 15000;
 
-	// keep the ids off all known entries - supplied by PhishTank
-	// and all the banned Uris
-
-	private volatile Set<Uri> banned = new HashSet<>(0);
-
 	// last time the list was refreshed successfully
 
 	private volatile Date lastDownload;
@@ -48,37 +44,21 @@ public class PhishTankInterface implements WatchDogTask {
 
 	private final String API_URL;
 
+	private final BannedUrlList banned;
+
 	/**
 	 * Factory method - only creates instance if api-key is in configuration
 	 * 
 	 * @param config
 	 * @return
 	 */
-	public static PhishTankInterface create(Configuration config) {
+	public static PhishTankInterface create(Configuration config, BannedUrlList banned) {
 
 		if (config.PHISHTANK_API_KEY == null) {
 			return null;
 		}
 
-		return new PhishTankInterface(config.PHISHTANK_API_KEY);
-	}
-
-	/**
-	 * Check if Uri is banned
-	 * 
-	 * @param uri
-	 * @return
-	 */
-	public boolean isBanned(final Uri uri) {
-
-		final Date pivot = uri.getLastUpdated();
-
-		if (pivot == null || uri.getLastUpdated().before(lastDownload)) {
-
-			return banned.contains(uri);
-		}
-
-		return false;
+		return new PhishTankInterface(config.PHISHTANK_API_KEY, banned);
 	}
 
 	/**
@@ -110,8 +90,6 @@ public class PhishTankInterface implements WatchDogTask {
 		final HttpGet httpGet = new HttpGet(API_URL);
 
 		final Set<Uri> banned = new HashSet<>(EXPECTED_ENTRIES);
-
-		long refused = 0;
 
 		CloseableHttpResponse response = null;
 
@@ -154,16 +132,11 @@ public class PhishTankInterface implements WatchDogTask {
 				final Uri uri;
 				uri = Uri.create(entry.substring(idx, end), false);
 
-				if (!banned.add(uri)) {
-					refused++;
-				}
+				banned.add(uri);
 			}
 
-			logger.info("Stats - Old: " + this.banned.size() + " New: "
-					+ banned.size() + " Refused: " + refused);
-
-			this.banned = banned;
-
+			this.banned.set(banned);
+			
 		} catch (IOException e) {
 
 			logger.error(e);
@@ -187,11 +160,14 @@ public class PhishTankInterface implements WatchDogTask {
 	 * C'tor use factory method instead
 	 * 
 	 * @param apiKey
+	 * @param banned2 
 	 */
-	private PhishTankInterface(final String apiKey) {
+	private PhishTankInterface(final String apiKey, BannedUrlList banned) {
 
 		API_URL = "http://data.phishtank.com/data/" + apiKey
 				+ "/online-valid.csv";
+		
+		this.banned = banned;
 	}
 
 	@Override

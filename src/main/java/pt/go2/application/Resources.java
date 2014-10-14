@@ -7,19 +7,20 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.abuse.PhishTankInterface;
-import pt.go2.abuse.WatchDog;
+import pt.go2.daemon.PhishTankInterface;
+import pt.go2.daemon.WatchDog;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.FileSystemInterface;
 import pt.go2.fileio.LocalFiles;
 import pt.go2.fileio.SmartTagParser;
-import pt.go2.keystore.HashKey;
-import pt.go2.keystore.KeyValueStore;
-import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.ErrorResponse;
 import pt.go2.response.RedirectResponse;
+import pt.go2.storage.BannedUrlList;
+import pt.go2.storage.HashKey;
+import pt.go2.storage.KeyValueStore;
+import pt.go2.storage.Uri;
 
 /**
  * Virtualized file resources
@@ -49,7 +50,7 @@ public class Resources {
 	// key = hash / value = uri
 	private KeyValueStore ks;
 
-	private PhishTankInterface pi;
+	private BannedUrlList banned;
 
 	/**
 	 * C'tor
@@ -89,7 +90,9 @@ public class Resources {
 
 		pages.start();
 
-		this.pi = PhishTankInterface.create(config);
+		this.banned = new BannedUrlList();
+		
+		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
 
 		if (pi == null) {
 			logger.warn("Could init PhishTank API Interface.");
@@ -161,14 +164,13 @@ public class Resources {
 	 * check healt uri health instead
 	 * 
 	 */
-	@Deprecated
 	public boolean isBanned(Uri uri) {
 
 		if (uri.health() != Uri.Health.OK) {
 			return true;
 		}
 
-		return pi == null ? false : pi.isBanned(uri);
+		return banned.isBanned(uri);
 	}
 
 	public byte[] add(Uri uri) {

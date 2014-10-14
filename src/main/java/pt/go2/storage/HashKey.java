@@ -1,4 +1,4 @@
-package pt.go2.keystore;
+package pt.go2.storage;
 
 /**
  * Each Hashkey unequivocally identifies an Url

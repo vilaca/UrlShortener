@@ -13,10 +13,10 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.HashKey;
-import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
+import pt.go2.storage.HashKey;
+import pt.go2.storage.Uri;
 
 /**
  * Handles server requests
@@ -82,13 +82,6 @@ class StaticPages extends RequestHandler {
 
 			if (uri == null) {
 				reply(request, exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
-				return;
-			}
-
-			if (vfs.isBanned(uri)) {
-				logger.warn("banned: " + uri);
-				reply(request, exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING),
-						true);
 				return;
 			}
 
