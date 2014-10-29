@@ -7,11 +7,9 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.fileio.Configuration;
 import pt.go2.fileio.SmartTagParser;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.ErrorResponse;
-import pt.go2.response.RedirectResponse;
 
 // TODO better name
 public class ErrorPages {
@@ -22,7 +20,7 @@ public class ErrorPages {
 	 * Canned responses for errors
 	 */
 	enum Error {
-		PAGE_NOT_FOUND, REJECT_SUBDOMAIN, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX
+		PAGE_NOT_FOUND, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX
 	}
 
 	private final Map<Error, AbstractResponse> errors = new EnumMap<>(
@@ -45,7 +43,7 @@ public class ErrorPages {
 	 * @return
 	 * @throws IOException
 	 */
-	public ErrorPages(final Configuration config) throws IOException {
+	public ErrorPages() throws IOException {
 
 		try {
 			this.errors.put(
@@ -58,7 +56,7 @@ public class ErrorPages {
 			throw e;
 		}
 
-		try {
+/*		try {
 			this.errors.put(
 					Error.FORBIDDEN_PHISHING,
 					new ErrorResponse(SmartTagParser.read(Resources.class
@@ -71,15 +69,9 @@ public class ErrorPages {
 
 		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new ErrorResponse(
 				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
-
+*/
 		this.errors.put(Error.BAD_REQUEST,
 				new ErrorResponse("Bad request.".getBytes(), 400,
 						AbstractResponse.MIME_TEXT_PLAIN));
-
-		// redirect to domain if a sub-domain is being used
-
-		this.errors.put(Error.REJECT_SUBDOMAIN, new RedirectResponse("http://"
-				+ config.ENFORCE_DOMAIN, 301));
-
 	}
 }

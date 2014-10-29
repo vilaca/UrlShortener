@@ -34,7 +34,7 @@ public class Server {
 		
 		try {
 			ks = new KeyValueStore(config);
-			errors = new ErrorPages(config);
+			errors = new ErrorPages();
 			res = new Resources(config);
 			
 		} catch (IOException e3) {

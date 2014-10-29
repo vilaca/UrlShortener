@@ -19,6 +19,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
+import pt.go2.response.RedirectResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
@@ -180,7 +181,7 @@ public abstract class RequestHandler extends AbstractHandler {
 			throws IOException, ServletException {
 
 		base.setHandled(true);
-		
+
 		// we need a host header to continue
 
 		final String host = request
@@ -193,15 +194,17 @@ public abstract class RequestHandler extends AbstractHandler {
 
 		// redirect to out domain if host header is not correct
 
-		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
-				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
+		final String enforce = config.ENFORCE_DOMAIN;
 
-			reply(request, response, Error.REJECT_SUBDOMAIN, false);
+		if (enforce != null && !enforce.isEmpty() && !host.startsWith(enforce)) {
+
+			reply(request, response, new RedirectResponse("//" + enforce, 301),
+					false);
 
 			logger.error("Wrong host: " + host);
 			return;
 		}
-		
+
 		handle(request, response);
 	}
 
