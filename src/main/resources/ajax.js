@@ -47,7 +47,7 @@ function clearError() {
 }
 
 
-function submit(textbox) {
+function submit(su) {
     var http = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP")
 
     http.onreadystatechange = function() {
@@ -76,7 +76,7 @@ function submit(textbox) {
 
     http.open('POST', '/new/', true)
 
-    http.send(params)
+    http.send('v=' + su)
 }
 
 window.onload = function() {
@@ -105,14 +105,9 @@ window.onload = function() {
 
         } else {
             f.v.style.color = 'black'
-
-            var params = 'v=' + su
-
             inputDisable();
-
-            submit(f.v);
-
-        };
+            submit(su);
+        }
 
         // returning 'false' cancels HTML basic submit behavior
         return false

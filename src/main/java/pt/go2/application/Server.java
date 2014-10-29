@@ -50,7 +50,7 @@ public class Server {
 		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
 		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
 		
-		watchdog.register(pi, true);
+		if ( pi != null )watchdog.register(pi, true);
 		watchdog.register(bad, false);
 
 		watchdog.start(config.WATCHDOG_INTERVAL);
@@ -115,7 +115,7 @@ public class Server {
 			do {
 
 				try {
-					running = System.in.read() == 'k';
+					running = System.in.read() != 'k';
 				} catch (IOException e) {
 				}
 
