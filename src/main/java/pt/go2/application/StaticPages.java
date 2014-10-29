@@ -4,13 +4,11 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.server.Request;
 
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
@@ -25,23 +23,14 @@ import pt.go2.storage.Uri;
  */
 class StaticPages extends RequestHandler {
 
-	static final Logger logger = LogManager.getLogger(StaticPages.class);
-
 	final Calendar calendar = Calendar.getInstance();
 
 	final KeyValueStore ks;
 	final Resources res;
 
-	/**
-	 * C'tor
-	 * 
-	 * @param config
-	 * @param vfs
-	 * @param statistics
-	 * @throws IOException
-	 */
 	public StaticPages(final Configuration config,
-			final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks, Resources res) {
+			final BufferedWriter accessLog, ErrorPages errors,
+			KeyValueStore ks, Resources res) {
 		super(config, accessLog, errors);
 		this.ks = ks;
 		this.res = res;
@@ -55,33 +44,7 @@ class StaticPages extends RequestHandler {
 	 * @exception IOException
 	 */
 	@Override
-	public void handle(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse exchange)
-			throws IOException, ServletException {
-
-		baseRequest.setHandled(true);
-
-		// we need a host header to continue
-
-		final String host = request
-				.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
-
-		if (host.isEmpty()) {
-			reply(request, exchange, Error.BAD_REQUEST, false);
-			return;
-		}
-
-		// redirect to out domain if host header is not correct
-
-		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
-				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
-
-			reply(request, exchange, Error.REJECT_SUBDOMAIN, false);
-
-			logger.error("Wrong host: " + host);
-			return;
-		}
-
+	public void handle(HttpServletRequest request, HttpServletResponse exchange) {
 		final String requested = getRequestedFilename(request.getRequestURI());
 
 		if (requested.length() == 6) {

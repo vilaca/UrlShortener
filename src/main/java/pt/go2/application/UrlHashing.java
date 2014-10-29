@@ -6,11 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.eclipse.jetty.server.Request;
 
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
@@ -40,11 +37,7 @@ class UrlHashing extends RequestHandler {
 	 */
 
 	@Override
-	public void handle(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
-
-		baseRequest.setHandled(true);
+	public void handle(HttpServletRequest request, HttpServletResponse response) {
 
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
@@ -112,7 +105,7 @@ class UrlHashing extends RequestHandler {
 
 			// Refuse banned
 
-			//vfs.get().test(uri);
+			// vfs.get().test(uri);
 
 			/*
 			 * if (vfs.isBanned(uri)) { logger.warn("banned: " + uri + " - " +

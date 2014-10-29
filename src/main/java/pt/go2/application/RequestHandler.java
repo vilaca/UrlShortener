@@ -6,10 +6,14 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import pt.go2.application.ErrorPages.Error;
@@ -18,20 +22,14 @@ import pt.go2.response.AbstractResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
+	static final Logger logger = LogManager.getLogger();
+
 	protected final Configuration config;
 	private final BufferedWriter accessLog;
 	private final ErrorPages errors;
 
-	/**
-	 * C'tor
-	 * 
-	 * @param accessLog
-	 * @param config
-	 * @param accessLog
-	 * @throws IOException
-	 */
-	public RequestHandler(Configuration config,
-			BufferedWriter accessLog, ErrorPages errors) {
+	public RequestHandler(Configuration config, BufferedWriter accessLog,
+			ErrorPages errors) {
 
 		this.accessLog = accessLog;
 		this.config = config;
@@ -40,42 +38,48 @@ public abstract class RequestHandler extends AbstractHandler {
 
 	/**
 	 * Stream Http Response
-	 * @param request 
+	 * 
+	 * @param request
 	 * 
 	 * @param exchange
 	 * @param response
 	 * @throws IOException
 	 */
-
-	protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
-			final AbstractResponse response, final boolean cache)
-			throws IOException {
+	protected void reply(HttpServletRequest request,
+			final HttpServletResponse exchange,
+			final AbstractResponse response, final boolean cache) {
 
 		final byte[] body = response.run(exchange);
 
-		final int status = response.getHttpStatus();
+		int status = response.getHttpStatus();
 
 		setHeaders(exchange, response, cache);
 
 		exchange.setStatus(status);
-		
-		final ServletOutputStream stream = exchange.getOutputStream();
-		
-		stream.write(body);
-		stream.flush();
-		stream.close();
 
-		printLogMessage(request, exchange, response, body.length);
+		try (ServletOutputStream stream = exchange.getOutputStream()) {
+
+			stream.write(body);
+			stream.flush();
+
+		} catch (IOException e) {
+
+			// TODO ???
+			status = 500;
+		}
+
+		printLogMessage(status, request, exchange, response, body.length);
 	}
 
 	protected void reply(HttpServletRequest request,
-			HttpServletResponse exchange, Error badRequest, boolean cache) throws IOException {
+			HttpServletResponse exchange, Error badRequest, boolean cache) {
 		reply(request, exchange, errors.get(badRequest), cache);
 	}
-	
+
 	/**
 	 * Set response headers
-	 * @param exchange 
+	 * 
+	 * @param exchange
 	 * 
 	 * @param response
 	 * @param headers
@@ -108,18 +112,22 @@ public abstract class RequestHandler extends AbstractHandler {
 					AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
 		}
 	}
-		
+
 	/**
 	 * Access log output
-	 * @param request 
-	 * @param exchange 
-	 * @param exchange 
+	 * 
+	 * @param status
+	 * 
+	 * @param request
+	 * @param exchange
+	 * @param exchange
 	 * 
 	 * @param params
 	 * @param response
 	 */
-	protected void printLogMessage(
-			HttpServletRequest request, HttpServletResponse exchange, final AbstractResponse response, final int size) {
+	protected void printLogMessage(int status, HttpServletRequest request,
+			HttpServletResponse exchange, final AbstractResponse response,
+			final int size) {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -134,14 +142,16 @@ public abstract class RequestHandler extends AbstractHandler {
 		sb.append(" ");
 		sb.append(request.getProtocol());
 		sb.append("\" ");
-		sb.append(response.getHttpStatus());
+		sb.append(status);
 		sb.append(" ");
 		sb.append(size);
 		sb.append(" \"");
 
-		final String referer = request.getHeader(AbstractResponse.REQUEST_HEADER_REFERER);
+		final String referer = request
+				.getHeader(AbstractResponse.REQUEST_HEADER_REFERER);
 
-		final String agent = request.getHeader(AbstractResponse.REQUEST_HEADER_USER_AGENT);
+		final String agent = request
+				.getHeader(AbstractResponse.REQUEST_HEADER_USER_AGENT);
 
 		sb.append(referer == null ? "-" : referer);
 
@@ -164,4 +174,36 @@ public abstract class RequestHandler extends AbstractHandler {
 		}
 	}
 
+	@Override
+	public void handle(String dontcare, Request base,
+			HttpServletRequest request, HttpServletResponse response)
+			throws IOException, ServletException {
+
+		base.setHandled(true);
+		
+		// we need a host header to continue
+
+		final String host = request
+				.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+
+		if (host.isEmpty()) {
+			reply(request, response, Error.BAD_REQUEST, false);
+			return;
+		}
+
+		// redirect to out domain if host header is not correct
+
+		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
+				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
+
+			reply(request, response, Error.REJECT_SUBDOMAIN, false);
+
+			logger.error("Wrong host: " + host);
+			return;
+		}
+		
+		handle(request, response);
+	}
+
+	abstract public void handle(HttpServletRequest req, HttpServletResponse res);
 }
