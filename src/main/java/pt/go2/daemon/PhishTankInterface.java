@@ -1,6 +1,7 @@
 package pt.go2.daemon;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Calendar;
@@ -8,14 +9,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.apache.http.TruncatedChunkException;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentResponse;
 
 import pt.go2.fileio.Configuration;
 import pt.go2.storage.BannedUrlList;
@@ -52,7 +49,8 @@ public class PhishTankInterface implements WatchDogTask {
 	 * @param config
 	 * @return
 	 */
-	public static PhishTankInterface create(Configuration config, BannedUrlList banned) {
+	public static PhishTankInterface create(Configuration config,
+			BannedUrlList banned) {
 
 		if (config.PHISHTANK_API_KEY == null) {
 			return null;
@@ -83,35 +81,39 @@ public class PhishTankInterface implements WatchDogTask {
 	 */
 	private boolean download() {
 
-		logger.info("Download starting");
-
-		final CloseableHttpClient httpclient = HttpClients.createDefault();
-
-		final HttpGet httpGet = new HttpGet(API_URL);
-
 		final Set<Uri> banned = new HashSet<>(EXPECTED_ENTRIES);
 
-		CloseableHttpResponse response = null;
+		logger.info("Download starting");
+
+		HttpClient httpClient = new HttpClient();
+
+		ContentResponse response;
+		try {
+			httpClient.start();
+			response = httpClient.GET(API_URL);
+		} catch (Exception e) {
+			logger.error(e);
+			return false;
+		}
+
+		final int statusCode = response.getStatus();
+
+		if (statusCode != 200) {
+			logger.error("Error on download: " + statusCode);
+			return false;
+		}
+
+		final ByteArrayInputStream ba = new ByteArrayInputStream(
+				response.getContent());
+
+		final BufferedReader br = new BufferedReader(new InputStreamReader(ba));
 
 		try {
 
-			response = httpclient.execute(httpGet);
-
-			final int statusCode = response.getStatusLine().getStatusCode();
-
-			if (statusCode != 200) {
-				logger.error("Error on download: " + statusCode);
-				return false;
-			}
-
-			final BufferedReader br = new BufferedReader(new InputStreamReader(
-					response.getEntity().getContent()));
-
-			String entry;
-			
-			 // skip header
+			// skip header
 			br.readLine();
-			
+			String entry;
+
 			while ((entry = br.readLine()) != null) {
 
 				int idx = entry.indexOf(',') + 1, end;
@@ -123,33 +125,27 @@ public class PhishTankInterface implements WatchDogTask {
 					end = entry.indexOf(',', idx);
 				}
 
-				if ( idx == -1 || end == -1 )
-				{
+				if (idx == -1 || end == -1) {
 					logger.error("Bad entry: " + entry);
 					continue;
 				}
-				
+
 				final Uri uri;
 				uri = Uri.create(entry.substring(idx, end), false);
 
 				banned.add(uri);
 			}
-
-			this.banned.set(banned);
-			
 		} catch (IOException e) {
-
 			logger.error(e);
 			return false;
-			
 		} finally {
 			try {
-				response.close();
+				ba.close();
 			} catch (IOException e) {
-				logger.error(e);
-				return false;
 			}
 		}
+
+		this.banned.set(banned);
 
 		logger.info("Download exiting");
 
@@ -160,13 +156,13 @@ public class PhishTankInterface implements WatchDogTask {
 	 * C'tor use factory method instead
 	 * 
 	 * @param apiKey
-	 * @param banned2 
+	 * @param banned2
 	 */
 	private PhishTankInterface(final String apiKey, BannedUrlList banned) {
 
 		API_URL = "http://data.phishtank.com/data/" + apiKey
 				+ "/online-valid.csv";
-		
+
 		this.banned = banned;
 	}
 
