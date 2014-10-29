@@ -12,10 +12,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 
+import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
+import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
 
 /**
@@ -26,17 +28,23 @@ class StaticPages extends RequestHandler {
 	static final Logger logger = LogManager.getLogger(StaticPages.class);
 
 	final Calendar calendar = Calendar.getInstance();
-	
+
+	final KeyValueStore ks;
+	final Resources res;
+
 	/**
 	 * C'tor
 	 * 
 	 * @param config
 	 * @param vfs
-	 * @param statistics 
+	 * @param statistics
 	 * @throws IOException
 	 */
-	public StaticPages(final Configuration config, final Resources vfs,final BufferedWriter accessLog) {
-		super(config, vfs, accessLog);
+	public StaticPages(final Configuration config,
+			final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks, Resources res) {
+		super(config, accessLog, errors);
+		this.ks = ks;
+		this.res = res;
 	}
 
 	/**
@@ -51,14 +59,15 @@ class StaticPages extends RequestHandler {
 			HttpServletRequest request, HttpServletResponse exchange)
 			throws IOException, ServletException {
 
-        baseRequest.setHandled(true);		
-		
+		baseRequest.setHandled(true);
+
 		// we need a host header to continue
 
-		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
-		
+		final String host = request
+				.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+
 		if (host.isEmpty()) {
-			reply(request, exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
+			reply(request, exchange, Error.BAD_REQUEST, false);
 			return;
 		}
 
@@ -67,8 +76,7 @@ class StaticPages extends RequestHandler {
 		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
 				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
 
-			reply(request, exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN),
-					false);
+			reply(request, exchange, Error.REJECT_SUBDOMAIN, false);
 
 			logger.error("Wrong host: " + host);
 			return;
@@ -78,29 +86,31 @@ class StaticPages extends RequestHandler {
 
 		if (requested.length() == 6) {
 
-			final Uri uri = vfs.get(new HashKey(requested));
+			final Uri uri = ks.get(new HashKey(requested));
 
 			if (uri == null) {
-				reply(request, exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
+				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
 				return;
 			}
 
-			reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
+			reply(request, exchange, new RedirectResponse(uri.toString(), 301),
+					true);
 			return;
 		}
 
 		AbstractResponse response;
 
 		if (requested.equals("/") && config.PUBLIC != null) {
-			response = vfs.get(config.PUBLIC_ROOT);
+			response = res.get(config.PUBLIC_ROOT);
 		} else {
-			response = vfs.get(requested);
+			response = res.get(requested);
 		}
 
-		if (response == null)
-			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
-
-		reply(request, exchange, response, true);
+		if (response == null) {
+			reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+		} else {
+			reply(request, exchange, response, true);
+		}
 	}
 
 	/**

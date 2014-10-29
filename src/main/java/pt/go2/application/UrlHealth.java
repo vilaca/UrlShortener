@@ -7,7 +7,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,6 +14,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 
 import pt.go2.fileio.Configuration;
+import pt.go2.storage.BannedUrlList;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
 
@@ -24,20 +24,15 @@ public class UrlHealth {
 
 	private final long interval = 60 * 60 * 1000; // 1h
 	
-	private final Resources vfs;
 	private final Configuration conf;
+	private final BannedUrlList banned;
 
-	public UrlHealth(Resources vfs, Configuration conf) {
-		this.vfs = vfs;
+	public UrlHealth(Configuration conf, BannedUrlList banned) {
 		this.conf = conf;
+		this.banned = banned;
 	}
 
-	public void test(Set<Uri> uris) {
-		for ( Uri uri: uris)
-			test(uri);
-	}
-
-	public void test(Uri uri) {
+	public synchronized void test(Uri uri) {
 
 		final long now = new Date().getTime();
 
@@ -51,7 +46,7 @@ public class UrlHealth {
 
 		// check if Phishing
 
-		if (vfs.isBanned(uri)) {
+		if (banned.isBanned(uri)) {
 			uri.setHealth(Uri.Health.PHISHING);
 			logger.info("Caugh phishing: " + uri);
 			return;
@@ -61,7 +56,7 @@ public class UrlHealth {
 		try {
 			url = new URL(uri.toString());
 		} catch (MalformedURLException e) {
-			uri.setHealth(Uri.Health.BAD_URL);
+			uri.setHealth(Uri.Health.BAD);
 			logger.info("Caugh bad form: " + uri, e);
 			return;
 		}
@@ -82,7 +77,7 @@ public class UrlHealth {
 			con.connect();
 			status = con.getResponseCode();
 		} catch (IOException e) {
-			uri.setHealth(Uri.Health.BAD_URL);
+			uri.setHealth(Uri.Health.BAD);
 			logger.info("Could not connect or get response code: " + uri, e);
 			return;
 		}

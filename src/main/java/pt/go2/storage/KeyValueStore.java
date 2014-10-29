@@ -8,6 +8,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Backup;
+import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Restore;
 import pt.go2.fileio.Restore.RestoreItem;
 
@@ -23,11 +24,11 @@ public class KeyValueStore {
 	// log for restoring hash->url
 	private final Backup backupFile;
 
-	public KeyValueStore(final String resumeFolder) throws IOException {
+	public KeyValueStore(final Configuration config) throws IOException {
 
-		this.backupFile = new Backup(resumeFolder);
+		this.backupFile = new Backup(config.DATABASE_FOLDER);
 
-		final List<RestoreItem> restoredItems = Restore.start(resumeFolder);
+		final List<RestoreItem> restoredItems = Restore.start(config.DATABASE_FOLDER);
 
 		for (RestoreItem item : restoredItems) {
 			final HashKey hk = new HashKey(item.key);
@@ -44,15 +45,7 @@ public class KeyValueStore {
 	 * 
 	 * @return
 	 */
-	public byte[] add(final Uri uri) {
-
-		// lookup database to see if URL is already there
-
-		HashKey base64hash = map.getUrl2Hash(uri);
-
-		if (base64hash != null) {
-			return base64hash.getBytes();
-		}
+	public synchronized byte[] add(final Uri uri) {
 
 		int retries = 0;
 		HashKey hk = new HashKey();
@@ -114,5 +107,24 @@ public class KeyValueStore {
 	public Set<Uri> Uris()
 	{
 		return map.getKeys();
+	}
+
+	public Uri find(Uri uri) {
+		
+		// lookup database to see if URL is already there
+
+		// TODO 2 lookups is too much optimize store
+		
+		HashKey base64hash = map.getUrl2Hash(uri);
+
+		if (base64hash != null) {
+			return map.get(base64hash);
+		}
+		
+		return null;
+	}
+
+	public byte[] get(Uri uri) {
+		return map.getUrl2Hash(uri).getBytes();
 	}
 }

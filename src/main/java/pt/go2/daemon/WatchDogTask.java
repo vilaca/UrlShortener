@@ -14,5 +14,4 @@ public interface WatchDogTask {
 	long interval();
 
 	String name();
-	
 }

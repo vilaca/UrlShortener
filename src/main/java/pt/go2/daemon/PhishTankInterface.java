@@ -65,7 +65,7 @@ public class PhishTankInterface implements WatchDogTask {
 	 * Refresh banned list
 	 */
 	@Override
-	public void refresh() {
+	public synchronized void refresh() {
 
 		if (download()) {
 			lastDownload = Calendar.getInstance().getTime();

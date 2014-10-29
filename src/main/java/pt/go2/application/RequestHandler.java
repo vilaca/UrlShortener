@@ -6,19 +6,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
-	protected final Resources vfs;
 	protected final Configuration config;
 	private final BufferedWriter accessLog;
+	private final ErrorPages errors;
 
 	/**
 	 * C'tor
@@ -28,12 +30,12 @@ public abstract class RequestHandler extends AbstractHandler {
 	 * @param accessLog
 	 * @throws IOException
 	 */
-	public RequestHandler(final Configuration config,
-			final Resources vfs, final BufferedWriter accessLog) {
+	public RequestHandler(Configuration config,
+			BufferedWriter accessLog, ErrorPages errors) {
 
 		this.accessLog = accessLog;
 		this.config = config;
-		this.vfs = vfs;
+		this.errors = errors;
 	}
 
 	/**
@@ -57,11 +59,20 @@ public abstract class RequestHandler extends AbstractHandler {
 
 		exchange.setStatus(status);
 		
-		exchange.getOutputStream().write(body);
+		final ServletOutputStream stream = exchange.getOutputStream();
+		
+		stream.write(body);
+		stream.flush();
+		stream.close();
 
 		printLogMessage(request, exchange, response, body.length);
 	}
 
+	protected void reply(HttpServletRequest request,
+			HttpServletResponse exchange, Error badRequest, boolean cache) throws IOException {
+		reply(request, exchange, errors.get(badRequest), cache);
+	}
+	
 	/**
 	 * Set response headers
 	 * @param exchange 

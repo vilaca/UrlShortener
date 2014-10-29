@@ -3,7 +3,11 @@ package pt.go2.storage;
 import java.util.Arrays;
 import java.util.Date;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.apache.commons.validator.routines.UrlValidator;
+
+import pt.go2.response.AbstractResponse;
 
 /**
  * Immutable ASCII string
@@ -12,16 +16,50 @@ import org.apache.commons.validator.routines.UrlValidator;
  * 
  * Other future optimizations are possible.
  * 
- * MUST OVERRIDE BOTH hashCode() and equals(Object).
- * hashCode() value calculated in c'tor for faster lookups in Map
+ * MUST OVERRIDE BOTH hashCode() and equals(Object). hashCode() value calculated
+ * in c'tor for faster lookups in Map
  */
 public class Uri {
 
 	public enum Health {
-		OK, PHISHING, BAD_URL, REDIRECT, MALWARE, UNKNOWN
+
+		// good
+		OK("OK"),
+
+		// doesn't exist / is down
+		BAD("BAD"),
+		
+		// health not yet known
+		UNKNOWN("UNKNOWN"),
+		
+		// avoid redirect chaining
+		REDIRECT("REDIRECT"),
+		
+		// should be obvious
+		PHISHING("PHISHING"), MALWARE("MALWARE");
+
+		private AbstractResponse response;
+
+		private Health(String s) {
+			response = new AbstractResponse() {
+
+				@Override
+				public int getHttpStatus() {
+					return 200;
+				}
+
+				@Override
+				public byte[] run(HttpServletResponse exchange) {
+					return s.getBytes();
+				}
+			};
+		}
+
+		public AbstractResponse inner() {
+			return response;
+		}
 	}
 
-	private static final String[] SCHEMES = new String[] { "http", "https", "" };
 	private final byte[] inner;
 	private final int hashcode;
 
@@ -36,10 +74,12 @@ public class Uri {
 
 		str = normalizeUrl(str);
 
-		if (validate && !new UrlValidator(SCHEMES).isValid(str)) {
+		if (validate && !new UrlValidator(new String[] { "http", "https", "" }).isValid(str)) {
 			return null;
 		}
 
+		
+		
 		return new Uri(str, state);
 	}
 
