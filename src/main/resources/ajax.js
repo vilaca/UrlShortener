@@ -63,7 +63,7 @@ function submit(su) {
                     textbox.select()
                 }
             } else if (http.status == 202) {
-                go(textbox)
+                submit(su)
             } else if (http.status == 400) {
                 inputError()
             } else if (http.status == 403) {

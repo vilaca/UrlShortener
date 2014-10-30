@@ -97,7 +97,7 @@ public class UrlHealth {
 		}
 	}
 
-	private boolean safeBrowsingLookup(Uri uri) {
+	private void safeBrowsingLookup(Uri uri) {
 
 		final String lookup;
 
@@ -113,7 +113,7 @@ public class UrlHealth {
 
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Error: " + uri, e);
-			return false;
+			return;
 		}
 
 		final HttpClient httpClient = new HttpClient();
@@ -125,21 +125,22 @@ public class UrlHealth {
 			response = httpClient.GET(lookup);
 		} catch (Exception e) {
 			logger.error("Connecting to : " + lookup, e);
-			return false;
+			return;
 		}
 
 		logger.info("Google SB Lookup API returns " + response.getStatus()
 				+ " for " + uri.toString());
 
 		if (response.getStatus() != 200)
-			return false;
-
+		{
+			logger.error("SBAPI http errors: " + response);
+			return;
+		}
+		
 		if (response.getContentAsString().contains("malware")) {
 			uri.setHealth(Health.MALWARE);
 		} else {
 			uri.setHealth(Health.PHISHING);
 		}
-
-		return true;
 	}
 }

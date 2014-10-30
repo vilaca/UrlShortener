@@ -31,26 +31,28 @@ public class Server {
 		final KeyValueStore ks;
 		final ErrorPages errors;
 		final Resources res;
-		
+
 		try {
 			ks = new KeyValueStore(config);
 			errors = new ErrorPages();
 			res = new Resources(config);
-			
+
 		} catch (IOException e3) {
 			// TODO Auto-generated catch block
 			e3.printStackTrace();
 			return;
 		}
-		
+
 		final BannedUrlList banned = new BannedUrlList();
 		final UrlHealth ul = new UrlHealth(config, banned);
-		
-		final WatchDog watchdog = new WatchDog();		
+
+		final WatchDog watchdog = new WatchDog();
 		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
 		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
-		
-		if ( pi != null )watchdog.register(pi, true);
+
+		if (pi != null) {
+			watchdog.register(pi, true);
+		}
 		watchdog.register(bad, false);
 
 		watchdog.start(config.WATCHDOG_INTERVAL);
@@ -95,7 +97,7 @@ public class Server {
 
 		final ContextHandler novo = new ContextHandler();
 		novo.setContextPath("/new/");
-		novo.setHandler(new UrlHashing(config, accessLog, errors, ks));
+		novo.setHandler(new UrlHashing(config, accessLog, errors, ks, ul));
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
 		contexts.setHandlers(new Handler[] { novo, root });

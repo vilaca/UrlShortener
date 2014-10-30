@@ -20,13 +20,15 @@ import pt.go2.storage.Uri.Health;
 class UrlHashing extends RequestHandler {
 
 	final KeyValueStore ks;
+	final UrlHealth health;
 
 	public UrlHashing(Configuration config, BufferedWriter accessLog,
-			ErrorPages errors, KeyValueStore ks) {
+			ErrorPages errors, KeyValueStore ks, UrlHealth health) {
 
 		super(config, accessLog, errors);
 
 		this.ks = ks;
+		this.health = health;
 	}
 
 	/**
@@ -35,10 +37,42 @@ class UrlHashing extends RequestHandler {
 	 * If Url already exists return hash. If Url wasn't hashed before generate
 	 * hash and add it to value store
 	 */
-
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response) {
 
+		final Uri uri = urltoHash(request, response);
+
+		if (uri == null)
+			return;
+
+		// try to find hash for url is ks
+
+		final Uri stored = ks.find(uri);
+
+		if (stored == null) {
+
+			// hash not found, add new
+
+			ks.add(uri);
+			reply(request, response, new ProcessingResponse(), false);
+			health.test(uri);
+			return;
+		}
+
+		if (uri.health() == Health.OK) {
+			reply(request, response, new HtmlResponse(ks.get(stored)), false);
+			return;
+		}
+
+		if (uri.health() == Health.UNKNOWN) {
+			reply(request, response, new ProcessingResponse(), false);
+			return;
+
+		}
+	}
+
+	private Uri urltoHash(HttpServletRequest request,
+			HttpServletResponse response) {
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {
@@ -49,7 +83,7 @@ class UrlHashing extends RequestHandler {
 
 			if (postBody == null) {
 				reply(request, response, Error.BAD_REQUEST, false);
-				return;
+				return null;
 			}
 
 			// format for form content is 'fieldname=value'
@@ -58,7 +92,7 @@ class UrlHashing extends RequestHandler {
 
 			if (idx == -1 || postBody.length() - idx < 3) {
 				reply(request, response, Error.BAD_REQUEST, false);
-				return;
+				return null;
 			}
 
 			// Parse string into Uri
@@ -68,55 +102,13 @@ class UrlHashing extends RequestHandler {
 
 			if (uri == null) {
 				reply(request, response, Error.BAD_REQUEST, false);
-				return;
 			}
 
-			final Uri stored = ks.find(uri);
-
-			if (stored != null) {
-				switch (stored.health()) {
-				case OK:
-					reply(request, response, new HtmlResponse(ks.get(stored)),
-							false);
-					break;
-				case BAD:
-				case MALWARE:
-				case PHISHING:
-				case REDIRECT:
-					// TODO
-					break;
-				case UNKNOWN:
-					reply(request, response, new ProcessingResponse(), false);
-					ks.add(uri);
-					break;
-				default:
-					break;
-				}
-			}
-
-			// hash Uri
-
-			final byte[] hashedUri = ks.add(uri);
-
-			if (hashedUri.length == 0) {
-				reply(request, response, Error.BAD_REQUEST, false);
-				return;
-			}
-
-			// Refuse banned
-
-			// vfs.get().test(uri);
-
-			/*
-			 * if (vfs.isBanned(uri)) { logger.warn("banned: " + uri + " - " +
-			 * request.getRemoteAddr()); reply(request, response,
-			 * vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX), false); return;
-			 * }
-			 */
+			return uri;
 
 		} catch (IOException e) {
 			reply(request, response, Error.BAD_REQUEST, false);
-			return;
 		}
+		return null;
 	}
 }
