@@ -1,12 +1,17 @@
 package pt.go2.application;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,13 +28,35 @@ public class UrlHealth {
 	private static final Logger logger = LogManager.getLogger();
 
 	private final long interval = 60 * 60 * 1000; // 1h
-	
+
 	private final Configuration conf;
 	private final BannedUrlList banned;
+	private final Set<String> whitelist;
 
 	public UrlHealth(Configuration conf, BannedUrlList banned) {
+
 		this.conf = conf;
 		this.banned = banned;
+		this.whitelist = new HashSet<>();
+
+		try (InputStream is = Configuration.class
+				.getResourceAsStream("/whitelist");) {
+
+			final BufferedReader br = new BufferedReader(new InputStreamReader(
+					is));
+
+			String site;
+
+			while ((site = br.readLine()) != null) {
+				this.whitelist.add(site);
+			}
+
+			logger.info("Entries on whitelist: " + this.whitelist.size());
+
+		} catch (IOException e) {
+			logger.error("Could not read whitelist.");
+		}
+
 	}
 
 	public synchronized void test(Uri uri) {
@@ -44,6 +71,12 @@ public class UrlHealth {
 			return;
 		}
 
+		if ( this.whitelist.contains(uri.getDomain()))
+		{
+			uri.setHealth(Health.OK);
+			return;
+		}
+		
 		// check if Phishing
 
 		if (banned.isBanned(uri)) {
@@ -131,12 +164,11 @@ public class UrlHealth {
 		logger.info("Google SB Lookup API returns " + response.getStatus()
 				+ " for " + uri.toString());
 
-		if (response.getStatus() != 200)
-		{
+		if (response.getStatus() != 200) {
 			logger.error("SBAPI http errors: " + response);
 			return;
 		}
-		
+
 		if (response.getContentAsString().contains("malware")) {
 			uri.setHealth(Health.MALWARE);
 		} else {

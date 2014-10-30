@@ -28,13 +28,13 @@ public class Uri {
 
 		// doesn't exist / is down
 		BAD("BAD"),
-		
+
 		// health not yet known
 		UNKNOWN("UNKNOWN"),
-		
+
 		// avoid redirect chaining
 		REDIRECT("REDIRECT"),
-		
+
 		// should be obvious
 		PHISHING("PHISHING"), MALWARE("MALWARE");
 
@@ -74,12 +74,12 @@ public class Uri {
 
 		str = normalizeUrl(str);
 
-		if (validate && !new UrlValidator(new String[] { "http", "https", "" }).isValid(str)) {
+		if (validate
+				&& !new UrlValidator(new String[] { "http", "https", "" })
+						.isValid(str)) {
 			return null;
 		}
 
-		
-		
 		return new Uri(str, state);
 	}
 
@@ -182,5 +182,18 @@ public class Uri {
 
 	public long lastChecked() {
 		return updated == null ? 0 : updated.getTime();
+	}
+
+	public String getDomain() {
+
+		final String uri = new String(inner);
+
+		int i = uri.indexOf("//") + 2;
+
+		final String website = uri.substring(2, uri.indexOf("/", i));
+
+		i = website.lastIndexOf(website.lastIndexOf(".") - 1);
+
+		return uri.substring(i);
 	}
 }
