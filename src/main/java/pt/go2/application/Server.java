@@ -14,6 +14,7 @@ import pt.go2.daemon.BadUrlScanner;
 import pt.go2.daemon.PhishTankInterface;
 import pt.go2.daemon.WatchDog;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.WhiteList;
 import pt.go2.storage.BannedUrlList;
 import pt.go2.storage.KeyValueStore;
 
@@ -43,8 +44,10 @@ public class Server {
 			return;
 		}
 
+		final WhiteList whitelist = WhiteList.create();
 		final BannedUrlList banned = new BannedUrlList();
-		final UrlHealth ul = new UrlHealth(config, banned);
+		
+		final UrlHealth ul = new UrlHealth(config, whitelist, banned);
 
 		final WatchDog watchdog = new WatchDog();
 		final PhishTankInterface pi = PhishTankInterface.create(config, banned);

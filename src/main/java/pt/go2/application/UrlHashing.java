@@ -71,8 +71,16 @@ class UrlHashing extends RequestHandler {
 		}
 	}
 
+	/**
+	 * Get URL to hash from POST request
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
 	private Uri urltoHash(HttpServletRequest request,
 			HttpServletResponse response) {
+		
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {

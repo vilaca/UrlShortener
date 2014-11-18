@@ -1,17 +1,12 @@
 package pt.go2.application;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,6 +14,7 @@ import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
 
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.WhiteList;
 import pt.go2.storage.BannedUrlList;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
@@ -31,32 +27,13 @@ public class UrlHealth {
 
 	private final Configuration conf;
 	private final BannedUrlList banned;
-	private final Set<String> whitelist;
+	private final WhiteList whitelist;
 
-	public UrlHealth(Configuration conf, BannedUrlList banned) {
+	public UrlHealth(Configuration conf, WhiteList whitelist, BannedUrlList banned) {
 
 		this.conf = conf;
 		this.banned = banned;
-		this.whitelist = new HashSet<>();
-
-		try (InputStream is = Configuration.class
-				.getResourceAsStream("/whitelist");) {
-
-			final BufferedReader br = new BufferedReader(new InputStreamReader(
-					is));
-
-			String site;
-
-			while ((site = br.readLine()) != null) {
-				this.whitelist.add(site);
-			}
-
-			logger.info("Entries on whitelist: " + this.whitelist.size());
-
-		} catch (IOException e) {
-			logger.error("Could not read whitelist.");
-		}
-
+		this.whitelist = whitelist;
 	}
 
 	public synchronized void test(Uri uri) {
