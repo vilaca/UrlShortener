@@ -40,20 +40,15 @@ public class UrlHealth {
 
 		final long now = new Date().getTime();
 
-		if (uri.health() != Health.UNKNOWN && uri.health() != Health.OK) {
-			return;
-		}
-
 		if (now - uri.lastChecked() < interval) {
 			return;
 		}
 
-		if ( this.whitelist.contains(uri.domain()))
-		{
+		if (this.whitelist.contains(uri.domain())) {
 			uri.setHealth(Health.OK);
 			return;
 		}
-		
+
 		// check if Phishing
 
 		if (banned.isBanned(uri)) {
@@ -100,8 +95,7 @@ public class UrlHealth {
 			return;
 		}
 
-		if (conf.SAFE_LOOKUP_API_KEY != null
-				&& !conf.SAFE_LOOKUP_API_KEY.isEmpty()) {
+		if (conf.SAFE_LOOKUP_API_KEY != null && !conf.SAFE_LOOKUP_API_KEY.isEmpty()) {
 
 			safeBrowsingLookup(uri);
 		}
@@ -112,13 +106,8 @@ public class UrlHealth {
 		final String lookup;
 
 		try {
-			lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client="
-					+ "go2-pt"
-					+ "&key="
-					+ conf.SAFE_LOOKUP_API_KEY
-					+ "&appver="
-					+ conf.VERSION
-					+ "&pver=3.1&url="
+			lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=" + "go2-pt" + "&key="
+					+ conf.SAFE_LOOKUP_API_KEY + "&appver=" + conf.VERSION + "&pver=3.1&url="
 					+ URLEncoder.encode(uri.toString(), "ASCII");
 
 		} catch (UnsupportedEncodingException e) {
@@ -138,8 +127,7 @@ public class UrlHealth {
 			return;
 		}
 
-		logger.info("Google SB Lookup API returns " + response.getStatus()
-				+ " for " + uri.toString());
+		logger.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
 
 		if (response.getStatus() != 200) {
 			logger.error("SBAPI http errors: " + response);

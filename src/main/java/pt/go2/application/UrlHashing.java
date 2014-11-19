@@ -11,8 +11,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
+import pt.go2.response.AbstractResponse;
+import pt.go2.response.ErrorResponse;
 import pt.go2.response.HtmlResponse;
 import pt.go2.response.ProcessingResponse;
+import pt.go2.storage.HashKey;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
@@ -22,8 +25,8 @@ class UrlHashing extends RequestHandler {
 	final KeyValueStore ks;
 	final UrlHealth health;
 
-	public UrlHashing(Configuration config, BufferedWriter accessLog,
-			ErrorPages errors, KeyValueStore ks, UrlHealth health) {
+	public UrlHashing(Configuration config, BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
+			UrlHealth health) {
 
 		super(config, accessLog, errors);
 
@@ -40,16 +43,16 @@ class UrlHashing extends RequestHandler {
 	@Override
 	public void handle(HttpServletRequest request, HttpServletResponse response) {
 
-		final Uri uri = urltoHash(request, response);
+		Uri uri = urltoHash(request, response);
 
 		if (uri == null)
 			return;
 
 		// try to find hash for url is ks
 
-		final Uri stored = ks.find(uri);
+		final HashKey hk = ks.find(uri);
 
-		if (stored == null) {
+		if (hk == null) {
 
 			// hash not found, add new
 
@@ -59,16 +62,21 @@ class UrlHashing extends RequestHandler {
 			return;
 		}
 
+		uri = ks.get(hk);
+
 		if (uri.health() == Health.OK) {
-			reply(request, response, new HtmlResponse(ks.get(stored)), false);
+			reply(request, response, new HtmlResponse(hk.getBytes()), false);
 			return;
 		}
 
-		if (uri.health() == Health.UNKNOWN) {
+		if (uri.health() == Health.PROCESSING) {
 			reply(request, response, new ProcessingResponse(), false);
 			return;
-
 		}
+
+		reply(request, response, new ErrorResponse("Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN), true);
+		return;
+
 	}
 
 	/**
@@ -78,9 +86,8 @@ class UrlHashing extends RequestHandler {
 	 * @param response
 	 * @return
 	 */
-	private Uri urltoHash(HttpServletRequest request,
-			HttpServletResponse response) {
-		
+	private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
+
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {
@@ -105,8 +112,7 @@ class UrlHashing extends RequestHandler {
 
 			// Parse string into Uri
 
-			final Uri uri = Uri.create(postBody.substring(idx), true,
-					Health.UNKNOWN);
+			final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
 
 			if (uri == null) {
 				reply(request, response, Error.BAD_REQUEST, false);

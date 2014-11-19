@@ -30,7 +30,7 @@ public class Uri {
 		BAD("BAD"),
 
 		// health not yet known
-		UNKNOWN("UNKNOWN"),
+		PROCESSING("PROCESSING"),
 
 		// avoid redirect chaining
 		REDIRECT("REDIRECT"),
@@ -63,7 +63,7 @@ public class Uri {
 	private final byte[] inner;
 	private final int hashcode;
 
-	private Health health;
+	private volatile Health health;
 	private Date updated;
 
 	public static Uri create(final String str, final boolean validate) {
@@ -186,9 +186,16 @@ public class Uri {
 		String uri = toString();
 
 		// remove https/http
-		int i = uri.indexOf("//") + 2;
-		uri = uri.substring(i, uri.indexOf("/", i));
+		int i = uri.indexOf("//");
+		if (i != -1) {
+			uri = uri.substring(i + 2);
+		}
 
+		// remove file path
+		i = uri.indexOf("/", i);
+		if (i != -1) {
+			uri = uri.substring(0, i);
+		}
 		// remove port
 		i = uri.indexOf(":");
 		if (i != -1) {

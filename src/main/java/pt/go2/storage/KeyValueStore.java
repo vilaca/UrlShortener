@@ -103,25 +103,13 @@ public class KeyValueStore {
 
 		return map.get(haskey);
 	}
-	
-	public Set<Uri> Uris()
-	{
+
+	public Set<Uri> Uris() {
 		return map.getKeys();
 	}
 
-	public Uri find(Uri uri) {
-		
-		// lookup database to see if URL is already there
-
-		// TODO 2 lookups is too much optimize store
-		
-		HashKey base64hash = map.getUrl2Hash(uri);
-
-		if (base64hash != null) {
-			return map.get(base64hash);
-		}
-		
-		return null;
+	public HashKey find(Uri uri) {
+		return map.getUrl2Hash(uri);
 	}
 
 	public byte[] get(Uri uri) {
