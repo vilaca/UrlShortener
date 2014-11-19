@@ -3,12 +3,17 @@ package pt.go2.daemon;
 import java.util.Date;
 import java.util.Set;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import pt.go2.application.UrlHealth;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
 
 public class BadUrlScanner implements WatchDogTask {
+
+	private static final Logger logger = LogManager.getLogger();
 
 	// watchdog sleep time
 
@@ -39,9 +44,18 @@ public class BadUrlScanner implements WatchDogTask {
 
 		final Set<Uri> uris = ks.Uris();
 
+		logger.info(uris.size() + " total stored uris.");
+
 		for (Uri uri : uris) {
-			if (uri.health() == Health.OK) {
-				ul.test(uri);
+
+			if (uri.health() != Health.OK) {
+				continue;
+			}
+
+			ul.test(uri);
+
+			if (uri.health() != Health.OK) {
+				logger.trace(uri.toString() + " - " + uri.health().toString());
 			}
 		}
 
