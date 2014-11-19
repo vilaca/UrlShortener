@@ -39,14 +39,13 @@ public class Server {
 			res = new Resources(config);
 
 		} catch (IOException e3) {
-			// TODO Auto-generated catch block
-			e3.printStackTrace();
+			logger.fatal(e3);
 			return;
 		}
 
 		final WhiteList whitelist = WhiteList.create();
 		final BannedUrlList banned = new BannedUrlList();
-		
+
 		final UrlHealth ul = new UrlHealth(config, whitelist, banned);
 
 		final WatchDog watchdog = new WatchDog();
@@ -130,7 +129,7 @@ public class Server {
 
 		} catch (Exception e1) {
 
-			logger.trace("Couldn't start server.");
+			logger.trace("Couldn't start server.", e1);
 
 		} finally {
 
