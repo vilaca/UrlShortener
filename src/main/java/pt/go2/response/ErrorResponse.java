@@ -25,17 +25,6 @@ public class ErrorResponse extends AbstractResponse {
 		this.mime = mime;
 	}
 
-	/**
-	 * C'tor for responses with an empty body
-	 * 
-	 * @param status
-	 * @param mime
-	 */
-	ErrorResponse(int status, String mime) {
-
-		this("".getBytes(), status, mime);
-	}
-
 	@Override
 	public int getHttpStatus() {
 		return status;
