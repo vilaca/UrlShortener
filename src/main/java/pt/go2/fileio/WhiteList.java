@@ -25,18 +25,18 @@ public class WhiteList {
 	 */
 	public static WhiteList create() {
 
-		try (InputStream is = Configuration.class.getResourceAsStream("/"
-				+ FILENAME);) {
+		try (InputStream is = Configuration.class.getResourceAsStream("/" + FILENAME);) {
 
 			final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
 			final BufferedReader br = new BufferedReader(isr);
 			final WhiteList wl = new WhiteList();
 
-			String line = br.readLine();
+			String line;
 
-			while (line != null) {
+			while ((line = br.readLine()) != null) {
 
 				if (line.isEmpty() || line.startsWith("#"))
+
 					continue;
 
 				LOG.info("Adding " + line + " to whitelist.");
@@ -44,8 +44,6 @@ public class WhiteList {
 				wl.whitelist.add(line);
 
 				// next line
-
-				line = br.readLine();
 			}
 
 			return wl;
