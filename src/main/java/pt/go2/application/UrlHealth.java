@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.ContentResponse;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.WhiteList;
@@ -106,16 +107,29 @@ public class UrlHealth {
 		final String lookup;
 
 		try {
-			lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=" + "go2-pt" + "&key="
-					+ conf.SAFE_LOOKUP_API_KEY + "&appver=" + conf.VERSION + "&pver=3.1&url="
-					+ URLEncoder.encode(uri.toString(), "ASCII");
+
+			final StringBuffer sb = new StringBuffer();
+
+			sb.append("https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key=");
+			sb.append(conf.SAFE_LOOKUP_API_KEY);
+			sb.append("&url=");
+			sb.append(URLEncoder.encode(uri.toString(), "ASCII"));
+
+			lookup = sb.toString();
 
 		} catch (UnsupportedEncodingException e) {
 			logger.error("Error: " + uri, e);
 			return;
 		}
 
-		final HttpClient httpClient = new HttpClient();
+		final HttpClient httpClient;
+
+		if (lookup.startsWith("https://")) {
+			httpClient = new HttpClient(new SslContextFactory());
+		} else {
+			httpClient = new HttpClient();
+		}
+
 		httpClient.setFollowRedirects(false);
 
 		final ContentResponse response;
