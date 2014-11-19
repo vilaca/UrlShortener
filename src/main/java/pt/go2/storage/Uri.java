@@ -26,17 +26,13 @@ public class Uri {
 		// good
 		OK("OK"),
 
-		// doesn't exist / is down
-		BAD("BAD"),
-
 		// health not yet known
 		PROCESSING("PROCESSING"),
 
-		// avoid redirect chaining
-		REDIRECT("REDIRECT"),
-
 		// should be obvious
-		PHISHING("PHISHING"), MALWARE("MALWARE");
+		PHISHING("PHISHING"), 
+		
+		MALWARE("MALWARE");
 
 		private AbstractResponse response;
 

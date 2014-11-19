@@ -57,6 +57,6 @@ public class WhiteList {
 	}
 
 	public boolean contains(String url) {
-		return whitelist.contains(whitelist);
+		return whitelist.contains(url);
 	}
 }

@@ -1,10 +1,6 @@
 package pt.go2.application;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.util.Date;
 
@@ -31,7 +27,6 @@ public class UrlHealth {
 	private final WhiteList whitelist;
 
 	public UrlHealth(Configuration conf, WhiteList whitelist, BannedUrlList banned) {
-
 		this.conf = conf;
 		this.banned = banned;
 		this.whitelist = whitelist;
@@ -55,44 +50,6 @@ public class UrlHealth {
 		if (banned.isBanned(uri)) {
 			uri.setHealth(Uri.Health.PHISHING);
 			logger.info("Caugh phishing: " + uri);
-			return;
-		}
-
-		final URL url;
-		try {
-			url = new URL(uri.toString());
-		} catch (MalformedURLException e) {
-			uri.setHealth(Uri.Health.BAD);
-			logger.info("Caugh bad form: " + uri, e);
-			return;
-		}
-
-		final HttpURLConnection con;
-		try {
-			con = (HttpURLConnection) url.openConnection();
-		} catch (IOException e) {
-			logger.error(e);
-			return;
-		}
-
-		con.setInstanceFollowRedirects(false);
-		con.setConnectTimeout(5000);
-
-		final int status;
-		try {
-			con.connect();
-			status = con.getResponseCode();
-		} catch (IOException e) {
-			uri.setHealth(Uri.Health.BAD);
-			logger.info("Could not connect or get response code: " + uri, e);
-			return;
-		}
-
-		con.disconnect();
-
-		if (status >= 300 && status <= 399) {
-			uri.setHealth(Uri.Health.REDIRECT);
-			logger.info("Found redirect: " + uri);
 			return;
 		}
 
