@@ -74,9 +74,7 @@ public class Uri {
 
 		str = normalizeUrl(str);
 
-		if (validate
-				&& !new UrlValidator(new String[] { "http", "https", "" })
-						.isValid(str)) {
+		if (validate && !new UrlValidator(new String[] { "http", "https", "" }).isValid(str)) {
 			return null;
 		}
 
@@ -149,24 +147,20 @@ public class Uri {
 
 		if (input.startsWith("https://")) {
 
-			idxDomain = input.substring("https://".length()).indexOf("/")
-					+ "https://".length();
+			idxDomain = input.substring("https://".length()).indexOf("/") + "https://".length();
 
 		} else if (input.startsWith("http://")) {
 
-			idxDomain = input.substring("http://".length()).indexOf("/")
-					+ "http://".length();
+			idxDomain = input.substring("http://".length()).indexOf("/") + "http://".length();
 
 		} else {
 			input = "http://" + input;
-			idxDomain = input.substring("http://".length()).indexOf("/")
-					+ "http://".length();
+			idxDomain = input.substring("http://".length()).indexOf("/") + "http://".length();
 		}
 
 		// make sure domain and TLD are lower case
 
-		input = input.substring(0, idxDomain).toLowerCase()
-				+ input.substring(idxDomain);
+		input = input.substring(0, idxDomain).toLowerCase() + input.substring(idxDomain);
 
 		return input;
 	}
@@ -184,16 +178,29 @@ public class Uri {
 		return updated == null ? 0 : updated.getTime();
 	}
 
-	public String getDomain() {
+	/**
+	 * Get domain ( and TLD )
+	 */
+	public String domain() {
 
-		final String uri = new String(inner);
+		String uri = toString();
 
+		// remove https/http
 		int i = uri.indexOf("//") + 2;
+		uri = uri.substring(i, uri.indexOf("/", i));
 
-		final String website = uri.substring(2, uri.indexOf("/", i));
+		// remove port
+		i = uri.indexOf(":");
+		if (i != -1) {
+			uri = uri.substring(0, i);
+		}
 
-		i = website.lastIndexOf(website.lastIndexOf(".") - 1);
+		// remove subdomain
+		i = uri.lastIndexOf(".", uri.lastIndexOf(".") - 1);
+		if (i != -1) {
+			uri = uri.substring(i + 1);
+		}
 
-		return uri.substring(i);
+		return uri;
 	}
 }

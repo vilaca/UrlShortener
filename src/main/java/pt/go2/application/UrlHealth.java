@@ -48,7 +48,7 @@ public class UrlHealth {
 			return;
 		}
 
-		if ( this.whitelist.contains(uri.getDomain()))
+		if ( this.whitelist.contains(uri.domain()))
 		{
 			uri.setHealth(Health.OK);
 			return;
