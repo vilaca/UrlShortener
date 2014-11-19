@@ -6,9 +6,10 @@ import java.util.Set;
 import pt.go2.application.UrlHealth;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
+import pt.go2.storage.Uri.Health;
 
 public class BadUrlScanner implements WatchDogTask {
-	
+
 	// watchdog sleep time
 
 	private static final long UPDATE_INTERVAL = 5;
@@ -22,7 +23,8 @@ public class BadUrlScanner implements WatchDogTask {
 
 	/**
 	 * Factory method - only creates instance if api-key is in configuration
-	 * @param ul 
+	 * 
+	 * @param ul
 	 * 
 	 * @param config
 	 * @return
@@ -31,16 +33,19 @@ public class BadUrlScanner implements WatchDogTask {
 		this.ks = ks;
 		this.ul = ul;
 	}
-	
+
 	@Override
 	public synchronized void refresh() {
-		
+
 		final Set<Uri> uris = ks.Uris();
-		
-		for ( Uri uri: uris)
-		{
-			ul.test(uri);
+
+		for (Uri uri : uris) {
+			if (uri.health() == Health.OK) {
+				ul.test(uri);
+			}
 		}
+
+		lastRun = new Date();
 	}
 
 	@Override
@@ -57,5 +62,4 @@ public class BadUrlScanner implements WatchDogTask {
 	public String name() {
 		return "Bad Url Scanner";
 	}
-
 }

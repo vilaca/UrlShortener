@@ -52,12 +52,10 @@ public class Server {
 		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
 		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
 
-		if (pi != null) {
-			watchdog.register(pi, true);
-		}
+		watchdog.register(pi, true);
 		watchdog.register(bad, false);
 
-		watchdog.start(config.WATCHDOG_INTERVAL);
+		watchdog.start(config.WATCHDOG_WAIT,config.WATCHDOG_INTERVAL);
 
 		logger.trace("Starting server...");
 

@@ -54,6 +54,7 @@ public class Configuration {
 	public final String VERSION;
 
 	// watchdog sleep interval
+	public final long WATCHDOG_WAIT;
 	public final long WATCHDOG_INTERVAL;
 
 	/**
@@ -92,6 +93,7 @@ public class Configuration {
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
 		SAFE_LOOKUP_API_KEY = getProperty("safe-lookup-api-key");
 		VERSION = getProperty("server.version", "beta");
+		WATCHDOG_WAIT = getPropertyAsInt("watchdog.wait", 5);
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
 
