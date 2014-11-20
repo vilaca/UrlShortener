@@ -9,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import pt.go2.application.UrlHealth;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
-import pt.go2.storage.Uri.Health;
 
 public class BadUrlScanner implements WatchDogTask {
 
@@ -46,18 +45,7 @@ public class BadUrlScanner implements WatchDogTask {
 
 		logger.info(uris.size() + " total stored uris.");
 
-		for (Uri uri : uris) {
-
-			if (uri.health() != Health.OK) {
-				continue;
-			}
-
-			ul.test(uri);
-
-			if (uri.health() != Health.OK) {
-				logger.trace(uri.toString() + " - " + uri.health().toString());
-			}
-		}
+		ul.test(uris);
 
 		lastRun = new Date();
 	}

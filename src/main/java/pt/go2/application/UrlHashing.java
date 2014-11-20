@@ -58,7 +58,7 @@ class UrlHashing extends RequestHandler {
 
 			ks.add(uri);
 			reply(request, response, new ProcessingResponse(), false);
-			health.test(uri);
+			health.test(uri, true);
 			return;
 		}
 
