@@ -16,7 +16,7 @@ public class BadUrlScanner implements WatchDogTask {
 
 	// watchdog sleep time
 
-	private static final long UPDATE_INTERVAL = 5;
+	private static final long UPDATE_INTERVAL = 90;
 
 	// url to fetch list from, needs api-key from configuration
 
