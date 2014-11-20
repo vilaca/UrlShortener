@@ -6,8 +6,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,9 +38,7 @@ public class UrlHealth {
 
 	public void test(Set<Uri> uris) {
 
-		final List<Uri> lst = new ArrayList<>(100);
-		StringBuilder sb = new StringBuilder();
-		int counter = 0;
+		final List<Uri> lookuplist = new ArrayList<>();
 
 		for (Uri uri : uris) {
 
@@ -57,47 +53,54 @@ public class UrlHealth {
 				continue;
 			}
 
-			if (!canUseSafeBrowsingLookup()) {
+			// remember files that still need to be checked
+
+			if (canUseSafeBrowsingLookup()) {
+				lookuplist.add(uri);
+			}
+		}
+
+		// prepare list for safebrowsing lookup
+
+		for (int i = 0; i < lookuplist.size();) {
+
+			// prepare a list of a max of 500 URIs
+
+			final StringBuilder sb = new StringBuilder();
+
+			int j;
+			for (j = 0; j < 500 && i < lookuplist.size(); i++, j++) {
+				sb.append(lookuplist.get(i).toString());
+				sb.append("\n");
+			}
+
+			// prepend n of records into list
+
+			sb.insert(0, "\n");
+			sb.insert(0, j);
+
+			// response is an array, a entry for each URI
+
+			String[] response = safeBrowsingLookup(sb.toString());
+
+			if (response == null) {
 				continue;
 			}
 
-			lst.add(uri);
-			sb.append(uri.toString());
-			sb.append("\n");
-			counter++;
+			markBadUris(lookuplist, response);
+		}
+	}
 
-			if (counter == 500) {
+	private void markBadUris(final List<Uri> lookuplist, String[] response) {
+		for (int j = 0; j < response.length; j++) {
 
-				sb.insert(0, "500\n");
+			if (response[j].contains("malware")) {
 
-				final String list = sb.toString();
+				lookuplist.get(j).setHealth(Health.MALWARE);
 
-				counter = 0;
-				sb = new StringBuilder();
+			} else if (response[j].contains("phishing")) {
 
-				String response = safeBrowsingLookup(list);
-
-				if (response == null) {
-					continue;
-				}
-
-				final String[] lines = response.split("\n");
-
-				response = null;
-
-				for (int i = 0; i < lines.length; i++) {
-
-					if (lines[i].contains("malware")) {
-
-						lst.get(i).setHealth(Health.MALWARE);
-
-					} else if (lines[i].contains("phishing")) {
-
-						lst.get(i).setHealth(Health.PHISHING);
-					}
-				}
-
-				lst.clear();
+				lookuplist.get(j).setHealth(Health.PHISHING);
 			}
 		}
 	}
@@ -152,12 +155,11 @@ public class UrlHealth {
 			return;
 		}
 
-		final HttpClient httpClient = createHttpClient(lookup);
-
 		final ContentResponse response;
 		try {
-			httpClient.start();
+			final HttpClient httpClient = createHttpClient(lookup);
 			response = httpClient.GET(lookup);
+			
 		} catch (Exception e) {
 			logger.error("Connecting to : " + lookup, e);
 			return;
@@ -177,7 +179,7 @@ public class UrlHealth {
 		}
 	}
 
-	private HttpClient createHttpClient(final String lookup) {
+	private HttpClient createHttpClient(final String lookup) throws Exception {
 
 		final HttpClient httpClient;
 
@@ -189,19 +191,21 @@ public class UrlHealth {
 
 		httpClient.setFollowRedirects(false);
 
+		httpClient.start();
+		
 		return httpClient;
 	}
 
-	private String safeBrowsingLookup(String body) {
+	private String[] safeBrowsingLookup(String body) {
 
 		final String lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key="
 				+ conf.SAFE_LOOKUP_API_KEY;
 
-		final HttpClient httpClient = createHttpClient(lookup);
-
 		try {
 
-			final ContentResponse httpResponse = httpClient.POST(lookup).content(new BytesContentProvider(body)).send();
+			final HttpClient httpClient = createHttpClient(lookup);
+			
+			final ContentResponse httpResponse = httpClient.POST(lookup).content(new BytesContentProvider(body.getBytes()),"text/plain").send();
 
 			final int r = httpResponse.getStatus();
 
@@ -219,10 +223,10 @@ public class UrlHealth {
 			final String response = httpResponse.getContentAsString();
 
 			if (response.contains("malware") || response.contains("phishing")) {
-				return response;
+				return response.split("\n");
 			}
 
-		} catch (InterruptedException | TimeoutException | ExecutionException e) {
+		} catch (Exception e) {
 			logger.error("Error in POST safebrowsing lookup API.", e);
 		}
 
