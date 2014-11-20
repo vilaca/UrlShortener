@@ -36,7 +36,7 @@ public class Uri {
 
 		private AbstractResponse response;
 
-		private Health(String s) {
+		private Health(final String s) {
 			response = new AbstractResponse() {
 
 				@Override
