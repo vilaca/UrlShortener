@@ -26,9 +26,14 @@ function inputError() {
     error.innerHTML = 'Invalid URL!'
 }
 
-function inputForbidden() {
+function inputForbidden(reason) {
     f.v.style.borderColor = 'red'
-    error.innerHTML = 'Forbidden URL - Phishing'
+    
+    if ( reason==='malware' )
+    	error.innerHTML = 'Forbidden URL - Suspected Malware'
+    else if ( reason==='phishing' )
+    	error.innerHTML = 'Forbidden URL - Suspected Phishing'
+
 }
 
 function inputDisable() {
@@ -48,6 +53,8 @@ function clearError() {
 
 
 function submit(su) {
+
+
     var http = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP")
 
     http.onreadystatechange = function() {
@@ -57,17 +64,22 @@ function submit(su) {
 
             if (http.status == 200) {
                 if (http.responseText !== '') {
+                	error.innerHTML = ''
                     // place result in form and select text
-                    textbox.value = '[$shortlinkdomain$]' + http.responseText
-                    textbox.focus()
-                    textbox.select()
+                    f.v.value = '[$shortlinkdomain$]' + http.responseText
+                    f.v.focus()
+                    f.v.select()
+                }
+                else
+                {
+                	error.innerHTML = 'Please try again.'
                 }
             } else if (http.status == 202) {
                 submit(su)
             } else if (http.status == 400) {
                 inputError()
             } else if (http.status == 403) {
-                inputForbidden()
+                inputForbidden(http.responseText)
             } else {
                 error.innerHTML = 'Please try again.'
             }
@@ -77,6 +89,8 @@ function submit(su) {
     http.open('POST', '/new/', true)
 
     http.send('v=' + su)
+    
+    error.innerHTML = 'Processing...'
 }
 
 window.onload = function() {

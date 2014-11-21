@@ -59,24 +59,32 @@ class UrlHashing extends RequestHandler {
 			ks.add(uri);
 			reply(request, response, new ProcessingResponse(), false);
 			health.test(uri, true);
+
+			if (uri.health() == Health.PROCESSING) {
+				uri.setHealth(Health.OK);
+			}
+
 			return;
 		}
 
 		uri = ks.get(hk);
 
-		if (uri.health() == Health.OK) {
+		switch (uri.health()) {
+		case MALWARE:
+			reply(request, response, new ErrorResponse("malware".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+					true);
+			break;
+		case OK:
 			reply(request, response, new HtmlResponse(hk.getBytes()), false);
-			return;
-		}
-
-		if (uri.health() == Health.PROCESSING) {
+			break;
+		case PHISHING:
+			reply(request, response, new ErrorResponse("phishing".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+					true);
+			break;
+		case PROCESSING:
 			reply(request, response, new ProcessingResponse(), false);
-			return;
+			break;
 		}
-
-		reply(request, response, new ErrorResponse("Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN), true);
-		return;
-
 	}
 
 	/**

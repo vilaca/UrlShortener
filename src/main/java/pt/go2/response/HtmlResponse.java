@@ -5,6 +5,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Used when the client asks to hash an Url
  */
+//TODO should be named hash key response
 public class HtmlResponse extends AbstractResponse {
 
 	final byte[] body;
@@ -21,11 +22,5 @@ public class HtmlResponse extends AbstractResponse {
 	@Override
 	public byte[] run(HttpServletResponse exchange) {
 		return body;
-	}
-	
-	@Override
-	public String getMimeType() {
-		// TODO hash return is not really HTML
-		return MIME_TEXT_HTML;
 	}
 }

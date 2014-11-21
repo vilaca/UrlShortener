@@ -96,11 +96,19 @@ public class UrlHealth {
 
 			if (response[j].contains("malware")) {
 
-				lookuplist.get(j).setHealth(Health.MALWARE);
+				final Uri uri = lookuplist.get(j);
+
+				uri.setHealth(Health.MALWARE);
+
+				logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 
 			} else if (response[j].contains("phishing")) {
 
-				lookuplist.get(j).setHealth(Health.PHISHING);
+				final Uri uri = lookuplist.get(j);
+
+				uri.setHealth(Health.PHISHING);
+
+				logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 			}
 		}
 	}
@@ -159,7 +167,7 @@ public class UrlHealth {
 		try {
 			final HttpClient httpClient = createHttpClient(lookup);
 			response = httpClient.GET(lookup);
-			
+
 		} catch (Exception e) {
 			logger.error("Connecting to : " + lookup, e);
 			return;
@@ -168,7 +176,6 @@ public class UrlHealth {
 		logger.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
 
 		if (response.getStatus() != 200) {
-			logger.error("SBAPI http errors: " + response);
 			return;
 		}
 
@@ -177,6 +184,8 @@ public class UrlHealth {
 		} else {
 			uri.setHealth(Health.PHISHING);
 		}
+
+		logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 	}
 
 	private HttpClient createHttpClient(final String lookup) throws Exception {
@@ -192,7 +201,7 @@ public class UrlHealth {
 		httpClient.setFollowRedirects(false);
 
 		httpClient.start();
-		
+
 		return httpClient;
 	}
 
@@ -204,8 +213,9 @@ public class UrlHealth {
 		try {
 
 			final HttpClient httpClient = createHttpClient(lookup);
-			
-			final ContentResponse httpResponse = httpClient.POST(lookup).content(new BytesContentProvider(body.getBytes()),"text/plain").send();
+
+			final ContentResponse httpResponse = httpClient.POST(lookup)
+					.content(new BytesContentProvider(body.getBytes()), "text/plain").send();
 
 			final int r = httpResponse.getStatus();
 
