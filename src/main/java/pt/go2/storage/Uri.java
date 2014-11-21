@@ -3,11 +3,7 @@ package pt.go2.storage;
 import java.util.Arrays;
 import java.util.Date;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.apache.commons.validator.routines.UrlValidator;
-
-import pt.go2.response.AbstractResponse;
 
 /**
  * Immutable ASCII string
@@ -23,37 +19,7 @@ public class Uri {
 
 	public enum Health {
 
-		// good
-		OK("OK"),
-
-		// health not yet known
-		PROCESSING("PROCESSING"),
-
-		// should be obvious
-		PHISHING("PHISHING"), 
-		
-		MALWARE("MALWARE");
-
-		private AbstractResponse response;
-
-		private Health(final String s) {
-			response = new AbstractResponse() {
-
-				@Override
-				public int getHttpStatus() {
-					return 200;
-				}
-
-				@Override
-				public byte[] run(HttpServletResponse exchange) {
-					return s.getBytes();
-				}
-			};
-		}
-
-		public AbstractResponse inner() {
-			return response;
-		}
+		OK, PROCESSING, PHISHING, MALWARE;
 	}
 
 	private final byte[] inner;
