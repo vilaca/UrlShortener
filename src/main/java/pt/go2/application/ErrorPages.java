@@ -11,7 +11,8 @@ import pt.go2.fileio.SmartTagParser;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.ErrorResponse;
 
-// TODO better name
+// TODO needs improvement
+
 public class ErrorPages {
 
 	static final Logger logger = LogManager.getLogger();
@@ -20,11 +21,10 @@ public class ErrorPages {
 	 * Canned responses for errors
 	 */
 	enum Error {
-		PAGE_NOT_FOUND, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_PHISHING_AJAX
+		PAGE_NOT_FOUND, BAD_REQUEST, FORBIDDEN_PHISHING, FORBIDDEN_MALWARE
 	}
 
-	private final Map<Error, AbstractResponse> errors = new EnumMap<>(
-			Error.class);
+	private final Map<Error, AbstractResponse> errors = new EnumMap<>(Error.class);
 
 	/**
 	 * Return error response
@@ -45,33 +45,34 @@ public class ErrorPages {
 	 */
 	public ErrorPages() throws IOException {
 
+		this.errors.put(Error.BAD_REQUEST, new ErrorResponse("Bad request.".getBytes(), 400,
+				AbstractResponse.MIME_TEXT_PLAIN));
+		
 		try {
-			this.errors.put(
-					Error.PAGE_NOT_FOUND,
-					new ErrorResponse(SmartTagParser.read(Resources.class
-							.getResourceAsStream("/404.html")), 404,
+			this.errors.put(Error.PAGE_NOT_FOUND,
+					new ErrorResponse(SmartTagParser.read(Resources.class.getResourceAsStream("/404.html")), 404,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			logger.fatal("Cannot read 404 page.", e);
 			throw e;
 		}
 
-/*		try {
-			this.errors.put(
-					Error.FORBIDDEN_PHISHING,
-					new ErrorResponse(SmartTagParser.read(Resources.class
-							.getResourceAsStream("/403.html")), 403,
+		try {
+			this.errors.put(Error.FORBIDDEN_PHISHING,
+					new ErrorResponse(SmartTagParser.read(Resources.class.getResourceAsStream("/403-phishing.html")), 404,
 							AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
-			logger.fatal("Cannot read 403 page.", e);
+			logger.fatal("Cannot read 403-phishing page.", e);
 			throw e;
 		}
 
-		this.errors.put(Error.FORBIDDEN_PHISHING_AJAX, new ErrorResponse(
-				"Forbidden".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN));
-*/
-		this.errors.put(Error.BAD_REQUEST,
-				new ErrorResponse("Bad request.".getBytes(), 400,
-						AbstractResponse.MIME_TEXT_PLAIN));
+		try {
+			this.errors.put(Error.FORBIDDEN_MALWARE,
+					new ErrorResponse(SmartTagParser.read(Resources.class.getResourceAsStream("/403-malware.html")), 404,
+							AbstractResponse.MIME_TEXT_HTML));
+		} catch (IOException e) {
+			logger.fatal("Cannot read 403-malware page.", e);
+			throw e;
+		}
 	}
 }

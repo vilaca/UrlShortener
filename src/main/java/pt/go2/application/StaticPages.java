@@ -25,9 +25,8 @@ class StaticPages extends RequestHandler {
 	final KeyValueStore ks;
 	final Resources res;
 
-	public StaticPages(final Configuration config,
-			final BufferedWriter accessLog, ErrorPages errors,
-			KeyValueStore ks, Resources res) {
+	public StaticPages(final Configuration config, final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
+			Resources res) {
 		super(config, accessLog, errors);
 		this.ks = ks;
 		this.res = res;
@@ -53,8 +52,20 @@ class StaticPages extends RequestHandler {
 				return;
 			}
 
-			reply(request, exchange, new RedirectResponse(uri.toString(), 301),
-					true);
+			switch (uri.health()) {
+			case PHISHING:
+				reply(request, exchange, Error.FORBIDDEN_PHISHING, true);
+				break;
+			case OK:
+				reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
+				break;
+			case MALWARE:
+				reply(request, exchange, Error.FORBIDDEN_MALWARE, true);
+				break;
+			default:
+				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+			}
+
 			return;
 		}
 
