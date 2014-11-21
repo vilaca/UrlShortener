@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/vilaca/UrlShortener.svg?branch=dev-abuse)](https://travis-ci.org/vilaca/UrlShortener)
+
+
 UrlShortener
 ============
 
@@ -46,10 +49,10 @@ The server configuration can be edited without having to change the source code 
 |-------|:-------------:|---------|
 | server.port | 80 | Port the server will be listening at. |
 | server.ip | 0.0.0.0 | Your server IP. |
-| server.backlog | 100 | Backlog for waiting connections. |
 | server.accessLog | access_log | File where the access log is written. 
 | server.version | go2.pt | Version of the server software being run. |
 | google-site-verification | | Key used by Google Webmaster tools to confirm site ownership. |
+| safe-lookup-api-key | | API key to integrate with Google safe browsing lookup API. |
 | server.redirect | 301 | HTTP response code for Shortened Urls. Valid values are either 301 or 302. |
 | enforce-domain | | Must be your site domain plus a '/' |
 

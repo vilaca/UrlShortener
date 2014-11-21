@@ -6,20 +6,22 @@ import java.io.InputStream;
 import java.net.InetSocketAddress;
 import java.util.Properties;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Process configuration
  */
 public class Configuration {
 
+	static final Logger logger = LogManager.getLogger();
+	
 	// resource file locations on JAR
 	private static final String PROPERTIES = "application.properties";
 	private static final Properties prop = new Properties();
 
 	// apache style access log
 	public final String ACCESS_LOG;
-
-	// server listener backlog
-	public final int BACKLOG;
 
 	// Amount of time static pages should be cached
 	public final int CACHE_HINT;
@@ -45,35 +47,41 @@ public class Configuration {
 	// redirect status code to be used for short Urls
 	public final int REDIRECT;
 
+	// Google safe browsing lookup API key
+	public final String SAFE_LOOKUP_API_KEY;
+	
 	// server version
 	public final String VERSION;
 
 	// watchdog sleep interval
+	public final long WATCHDOG_WAIT;
 	public final long WATCHDOG_INTERVAL;
 
 	/**
-	 * Read configuration from file
+	 * Read configuration
 	 */
 	public Configuration() {
+
 		// attempt reading properties/configuration from JAR
 
 		try (InputStream is = Configuration.class.getResourceAsStream("/"
 				+ PROPERTIES);) {
 			prop.load(is);
-
+			logger.info("Read embedded properties from jar file.");
 		} catch (IOException e) {
+			logger.info("Could not read properties from jar");
 		}
 
 		// attempt reading properties/configuration from basedir
 
 		try (InputStream is = new FileInputStream(PROPERTIES);) {
 			prop.load(is);
-
+			logger.info("Read properties from current directory.");
 		} catch (IOException e) {
+			logger.info("Could not read properties from directory");
 		}
 
 		ACCESS_LOG = getProperty("server.accessLog", "access_log");
-		BACKLOG = getPropertyAsInt("server.backlog", 100);
 		CACHE_HINT = getPropertyAsInt("server.cache", 2);
 		DATABASE_FOLDER = getResumeFolder();
 		ENFORCE_DOMAIN = getProperty("enforce-domain", null);
@@ -83,7 +91,9 @@ public class Configuration {
 		PUBLIC = getProperty("server.public");
 		PUBLIC_ROOT = getProperty("server.public-root");
 		REDIRECT = getPropertyAsInt("server.redirect", 301);
+		SAFE_LOOKUP_API_KEY = getProperty("safe-lookup-api-key");
 		VERSION = getProperty("server.version", "beta");
+		WATCHDOG_WAIT = getPropertyAsInt("watchdog.wait", 5);
 		WATCHDOG_INTERVAL = getPropertyAsInt("watchdog.interval", 16);
 	}
 

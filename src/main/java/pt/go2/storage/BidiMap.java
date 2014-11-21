@@ -1,7 +1,8 @@
-package pt.go2.keystore;
+package pt.go2.storage;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Bidirectional Map class
@@ -12,10 +13,10 @@ import java.util.Map;
 class BidiMap<H,U> {
 
 	// hash to URL
-	protected final Map<H, U> hash2Url;
+	private final Map<H, U> hash2Url;
 
 	// URL to hash
-	protected final Map<U, H> url2Hash;
+	private final Map<U, H> url2Hash;
 
 	public BidiMap() {
 		this.hash2Url = new HashMap<H,U>();
@@ -43,5 +44,9 @@ class BidiMap<H,U> {
 	synchronized void remove(HashKey hk, Uri uri) {
 		hash2Url.remove(hk);
 		url2Hash.remove(uri);
+	}
+
+	public synchronized Set<U> getKeys() {
+		return url2Hash.keySet();
 	}
 }

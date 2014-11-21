@@ -27,14 +27,18 @@ public class WatchDog extends TimerTask {
 	/**
 	 * Start service
 	 * 
+	 * @param wait
+	 *            wait interval (seconds)
 	 * @param refresh
 	 *            Refresh interval (minutes)
 	 */
-	public void start(final long refresh) {
+	public void start(long wait, long refresh) {
 
-		final long millis = TimeUnit.MINUTES.toMillis(refresh);
+		wait = TimeUnit.SECONDS.toMillis(wait);
 
-		watchdog.schedule(this, millis, millis);
+		refresh = TimeUnit.MINUTES.toMillis(refresh);
+
+		watchdog.schedule(this, wait, refresh);
 	}
 
 	/**
@@ -45,8 +49,10 @@ public class WatchDog extends TimerTask {
 		watchdog.purge();
 	}
 
-	synchronized public void register(final WatchDogTask task,
-			final boolean runNow) {
+	synchronized public void register(final WatchDogTask task, final boolean runNow) {
+
+		if (task == null)
+			return;
 
 		tasks.add(task);
 
@@ -64,18 +70,17 @@ public class WatchDog extends TimerTask {
 	synchronized public void run() {
 
 		logger.info("Watchdog woke.");
-		
+
 		for (WatchDogTask wt : tasks) {
-			
+
 			logger.info("Checking task: " + wt.name());
-			
+
 			if (trigger(wt)) {
 				wt.refresh();
 			}
 		}
-		
-		logger.info("Watchdog back to sleep.");
 
+		logger.info("Watchdog back to sleep.");
 	}
 
 	/**
@@ -88,7 +93,7 @@ public class WatchDog extends TimerTask {
 		final Date lastRun = wt.lastRun();
 
 		logger.info("Last run: " + lastRun);
-		
+
 		if (wt.lastRun() == null) {
 			return true;
 		}

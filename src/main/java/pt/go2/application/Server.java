@@ -10,7 +10,13 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import pt.go2.daemon.BadUrlScanner;
+import pt.go2.daemon.PhishTankInterface;
+import pt.go2.daemon.WatchDog;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.WhiteList;
+import pt.go2.storage.BannedUrlList;
+import pt.go2.storage.KeyValueStore;
 
 public class Server {
 
@@ -22,6 +28,34 @@ public class Server {
 	public static void main(final String[] args) {
 
 		final Configuration config = new Configuration();
+
+		final KeyValueStore ks;
+		final ErrorPages errors;
+		final Resources res;
+
+		try {
+			ks = new KeyValueStore(config);
+			errors = new ErrorPages();
+			res = new Resources(config);
+
+		} catch (IOException e3) {
+			logger.fatal(e3);
+			return;
+		}
+
+		final WhiteList whitelist = WhiteList.create();
+		final BannedUrlList banned = new BannedUrlList();
+
+		final UrlHealth ul = new UrlHealth(config, whitelist, banned);
+
+		final WatchDog watchdog = new WatchDog();
+		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
+		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
+
+		watchdog.register(pi, true);
+		watchdog.register(bad, false);
+
+		watchdog.start(config.WATCHDOG_WAIT,config.WATCHDOG_INTERVAL);
 
 		logger.trace("Starting server...");
 
@@ -55,23 +89,15 @@ public class Server {
 
 		logger.trace("Starting virtual file system.");
 
-		// Generate VFS
-
-		final Resources vfs = new Resources();
-
-		if (!vfs.start(config)) {
-			return;
-		}
-
 		// RequestHandler
 
 		final ContextHandler root = new ContextHandler();
 		root.setContextPath("/");
-		root.setHandler(new StaticPages(config, vfs, accessLog));
+		root.setHandler(new StaticPages(config, accessLog, errors, ks, res));
 
 		final ContextHandler novo = new ContextHandler();
 		novo.setContextPath("/new/");
-		novo.setHandler(new UrlHashing(config, vfs, accessLog));
+		novo.setHandler(new UrlHashing(config, accessLog, errors, ks, ul));
 
 		ContextHandlerCollection contexts = new ContextHandlerCollection();
 		contexts.setHandlers(new Handler[] { novo, root });
@@ -91,7 +117,7 @@ public class Server {
 			do {
 
 				try {
-					running = System.in.read() == 'k';
+					running = System.in.read() != 'k';
 				} catch (IOException e) {
 				}
 
@@ -101,7 +127,7 @@ public class Server {
 
 		} catch (Exception e1) {
 
-			logger.trace("Couldn't start server.");
+			logger.trace("Couldn't start server.", e1);
 
 		} finally {
 

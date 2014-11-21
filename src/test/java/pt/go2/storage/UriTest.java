@@ -1,5 +1,5 @@
 
-package pt.go2.keystore;
+package pt.go2.storage;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -12,6 +12,18 @@ import static org.hamcrest.CoreMatchers.*;
  *
  */
 public class UriTest {
+
+	@Test
+	public void testDomain() {
+		
+		final Uri u1 = Uri.create("http://abcdefghij.ws/123", false);
+		final Uri u2 = Uri.create("http://www.abcdefghij.ws/123", false);
+		final Uri u3 = Uri.create("http://www.abcdefghij.ws:80/123", false);
+
+		Assert.assertEquals("abcdefghij.ws",u1.domain());
+		Assert.assertEquals("abcdefghij.ws",u2.domain());
+		Assert.assertEquals("abcdefghij.ws",u3.domain());
+	}
 
 	@Test
 	public void testEqual() {
@@ -93,5 +105,4 @@ public class UriTest {
 		
 		Assert.assertThat(u1, is(not(u2)));
 	}
-
 }

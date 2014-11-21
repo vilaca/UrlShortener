@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,20 +17,15 @@ import java.util.regex.Pattern;
 public final class SmartTagParser {
 
 	private static final Pattern tagPattern = Pattern.compile("\\[\\$\\w*\\$\\]");
-	private static final Pattern tagFuncPattern = Pattern.compile("\\[\\$\\w*(.*)\\$\\]");
-	private static final Pattern tagFuncNamePattern = Pattern.compile("^\\w*");
-	private static final Pattern tagFuncParamPattern = Pattern.compile("\\(.*\\)");
 
 	public static byte[] read(final InputStream file) throws IOException {
-		try (final BufferedReader br = new BufferedReader(
-				new InputStreamReader(file));) {
+		try (final BufferedReader br = new BufferedReader(new InputStreamReader(file));) {
 
 			return readFromFile(br);
 		}
 	}
 
-	private static byte[] readFromFile(final BufferedReader br)
-			throws IOException {
+	private static byte[] readFromFile(final BufferedReader br) throws IOException {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -39,7 +33,7 @@ public final class SmartTagParser {
 
 		while (line != null) {
 
-			if (line.isEmpty() || line.charAt(0) == '#') {
+			if (line.trim().isEmpty() || line.charAt(0) == '#') {
 				line = br.readLine();
 				continue;
 			}
@@ -51,43 +45,19 @@ public final class SmartTagParser {
 				String tag = tagMatcher.group();
 				tag = tag.substring(2, tag.length() - 2);
 
-				final String value = Configuration.getProperty("web." + tag);
+				final String value;
 
-				if (value != null)
+				if (tag.equals("date")) {
+
+					value = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
+
+				} else {
+
+					value = Configuration.getProperty("web." + tag);
+				}
+
+				if (value != null) {
 					line = tagMatcher.replaceFirst(value);
-			}
-
-			final Matcher tagFuncMatcher = tagFuncPattern.matcher(line);
-
-			while (tagFuncMatcher.find()) {
-
-				String tag = tagFuncMatcher.group();
-				tag = tag.substring(2, tag.length() - 2);
-
-				final Matcher tagFuncNameMatcher = tagFuncNamePattern
-						.matcher(tag);
-
-				if (!tagFuncNameMatcher.find())
-					break; // wrong positive ?
-
-				final String name = tagFuncNameMatcher.group();
-
-				// add more keywords later?
-				if (name.equals("date")) {
-					final Matcher tagFuncParamMatcher = tagFuncParamPattern
-							.matcher(tag);
-
-					if (!tagFuncParamMatcher.find())
-						break; // wrong positive ?
-
-					String param = tagFuncParamMatcher.group();
-					param = param.substring(1, param.length() - 1);
-
-					final Date now = Calendar.getInstance().getTime();
-
-					final String date = new SimpleDateFormat(param).format(now);
-
-					tagFuncMatcher.replaceFirst(date);
 				}
 			}
 
@@ -101,9 +71,8 @@ public final class SmartTagParser {
 		return sb.toString().getBytes();
 	}
 
-	public static byte[] read(String filename) throws FileNotFoundException,
-			IOException {
-		
+	public static byte[] read(String filename) throws FileNotFoundException, IOException {
+
 		try (final InputStream br = new FileInputStream(filename);) {
 			return read(br);
 		}

@@ -6,39 +6,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.server.Request;
-
+import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.Uri;
+import pt.go2.response.AbstractResponse;
+import pt.go2.response.ErrorResponse;
 import pt.go2.response.HtmlResponse;
+import pt.go2.response.ProcessingResponse;
+import pt.go2.storage.HashKey;
+import pt.go2.storage.KeyValueStore;
+import pt.go2.storage.Uri;
+import pt.go2.storage.Uri.Health;
 
 class UrlHashing extends RequestHandler {
 
-	static private final Logger logger = LogManager.getLogger(UrlHashing.class);
+	final KeyValueStore ks;
+	final UrlHealth health;
 
-	private final Resources vfs;
+	public UrlHashing(Configuration config, BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
+			UrlHealth health) {
 
-	/**
-	 * C'tor
-	 * 
-	 * @param config
-	 * 
-	 * @param config
-	 * @param vfs
-	 * @param accessLog
-	 * @throws IOException
-	 */
-	public UrlHashing(Configuration config, final Resources vfs,
-			BufferedWriter accessLog) {
-		
-		super(config, vfs, accessLog);
-		this.vfs = vfs;
+		super(config, accessLog, errors);
+
+		this.ks = ks;
+		this.health = health;
 	}
 
 	/**
@@ -47,13 +40,62 @@ class UrlHashing extends RequestHandler {
 	 * If Url already exists return hash. If Url wasn't hashed before generate
 	 * hash and add it to value store
 	 */
-	
 	@Override
-	public void handle(String target, Request baseRequest, HttpServletRequest request,
-			HttpServletResponse response) throws IOException, ServletException {
-		
-		baseRequest.setHandled(true);	
-		
+	public void handle(HttpServletRequest request, HttpServletResponse response) {
+
+		Uri uri = urltoHash(request, response);
+
+		if (uri == null)
+			return;
+
+		// try to find hash for url is ks
+
+		final HashKey hk = ks.find(uri);
+
+		if (hk == null) {
+
+			// hash not found, add new
+
+			ks.add(uri);
+			reply(request, response, new ProcessingResponse(), false);
+			health.test(uri, true);
+
+			if (uri.health() == Health.PROCESSING) {
+				uri.setHealth(Health.OK);
+			}
+
+			return;
+		}
+
+		uri = ks.get(hk);
+
+		switch (uri.health()) {
+		case MALWARE:
+			reply(request, response, new ErrorResponse("malware".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+					true);
+			break;
+		case OK:
+			reply(request, response, new HtmlResponse(hk.getBytes()), false);
+			break;
+		case PHISHING:
+			reply(request, response, new ErrorResponse("phishing".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+					true);
+			break;
+		case PROCESSING:
+			reply(request, response, new ProcessingResponse(), false);
+			break;
+		}
+	}
+
+	/**
+	 * Get URL to hash from POST request
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
+
 		try (final InputStream is = request.getInputStream();
 				final InputStreamReader sr = new InputStreamReader(is);
 				final BufferedReader br = new BufferedReader(sr);) {
@@ -63,9 +105,8 @@ class UrlHashing extends RequestHandler {
 			final String postBody = br.readLine();
 
 			if (postBody == null) {
-				reply(request, response, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
-				return;
+				reply(request, response, Error.BAD_REQUEST, false);
+				return null;
 			}
 
 			// format for form content is 'fieldname=value'
@@ -73,47 +114,23 @@ class UrlHashing extends RequestHandler {
 			final int idx = postBody.indexOf('=') + 1;
 
 			if (idx == -1 || postBody.length() - idx < 3) {
-				reply(request, response, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
-				return;
+				reply(request, response, Error.BAD_REQUEST, false);
+				return null;
 			}
 
 			// Parse string into Uri
 
-			final Uri uri = Uri.create(postBody.substring(idx), true);
+			final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
 
 			if (uri == null) {
-				reply(request, response, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
-				return;
+				reply(request, response, Error.BAD_REQUEST, false);
 			}
 
-			// Refuse banned
-
-			if (vfs.isBanned(uri)) {
-				logger.warn("banned: " + uri + " - "
-						+ request.getRemoteAddr());
-				reply(request, response,
-						vfs.get(Resources.Error.FORBIDDEN_PHISHING_AJAX),
-						false);
-				return;
-			}
-
-			// hash Uri
-
-			final byte[] hashedUri = vfs.add(uri);
-
-			if (hashedUri.length == 0) {
-				reply(request, response, vfs.get(Resources.Error.BAD_REQUEST),
-						false);
-				return;
-			}
-
-			reply(request, response, new HtmlResponse(hashedUri), false);
+			return uri;
 
 		} catch (IOException e) {
-			reply(request, response, vfs.get(Resources.Error.BAD_REQUEST), false);
-			return;
+			reply(request, response, Error.BAD_REQUEST, false);
 		}
+		return null;
 	}
 }

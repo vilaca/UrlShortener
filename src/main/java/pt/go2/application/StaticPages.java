@@ -4,39 +4,32 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.server.Request;
-
+import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
-import pt.go2.keystore.HashKey;
-import pt.go2.keystore.Uri;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
+import pt.go2.storage.HashKey;
+import pt.go2.storage.KeyValueStore;
+import pt.go2.storage.Uri;
 
 /**
  * Handles server requests
  */
 class StaticPages extends RequestHandler {
 
-	static final Logger logger = LogManager.getLogger(StaticPages.class);
-
 	final Calendar calendar = Calendar.getInstance();
-	
-	/**
-	 * C'tor
-	 * 
-	 * @param config
-	 * @param vfs
-	 * @param statistics 
-	 * @throws IOException
-	 */
-	public StaticPages(final Configuration config, final Resources vfs,final BufferedWriter accessLog) {
-		super(config, vfs, accessLog);
+
+	final KeyValueStore ks;
+	final Resources res;
+
+	public StaticPages(final Configuration config, final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
+			Resources res) {
+		super(config, accessLog, errors);
+		this.ks = ks;
+		this.res = res;
 	}
 
 	/**
@@ -47,67 +40,48 @@ class StaticPages extends RequestHandler {
 	 * @exception IOException
 	 */
 	@Override
-	public void handle(String target, Request baseRequest,
-			HttpServletRequest request, HttpServletResponse exchange)
-			throws IOException, ServletException {
-
-        baseRequest.setHandled(true);		
-		
-		// we need a host header to continue
-
-		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
-		
-		if (host.isEmpty()) {
-			reply(request, exchange, vfs.get(Resources.Error.BAD_REQUEST), false);
-			return;
-		}
-
-		// redirect to out domain if host header is not correct
-
-		if (config.ENFORCE_DOMAIN != null && !config.ENFORCE_DOMAIN.isEmpty()
-				&& !host.startsWith(config.ENFORCE_DOMAIN)) {
-
-			reply(request, exchange, vfs.get(Resources.Error.REJECT_SUBDOMAIN),
-					false);
-
-			logger.error("Wrong host: " + host);
-			return;
-		}
-
+	public void handle(HttpServletRequest request, HttpServletResponse exchange) {
 		final String requested = getRequestedFilename(request.getRequestURI());
 
 		if (requested.length() == 6) {
 
-			final Uri uri = vfs.get(new HashKey(requested));
+			final Uri uri = ks.get(new HashKey(requested));
 
 			if (uri == null) {
-				reply(request, exchange, vfs.get(Resources.Error.PAGE_NOT_FOUND), true);
+				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
 				return;
 			}
 
-			if (vfs.isBanned(uri)) {
-				logger.warn("banned: " + uri);
-				reply(request, exchange, vfs.get(Resources.Error.FORBIDDEN_PHISHING),
-						true);
-				return;
+			switch (uri.health()) {
+			case PHISHING:
+				reply(request, exchange, Error.FORBIDDEN_PHISHING, true);
+				break;
+			case OK:
+				reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
+				break;
+			case MALWARE:
+				reply(request, exchange, Error.FORBIDDEN_MALWARE, true);
+				break;
+			default:
+				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
 			}
 
-			reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
 			return;
 		}
 
 		AbstractResponse response;
 
 		if (requested.equals("/") && config.PUBLIC != null) {
-			response = vfs.get(config.PUBLIC_ROOT);
+			response = res.get(config.PUBLIC_ROOT);
 		} else {
-			response = vfs.get(requested);
+			response = res.get(requested);
 		}
 
-		if (response == null)
-			response = vfs.get(Resources.Error.PAGE_NOT_FOUND);
-
-		reply(request, exchange, response, true);
+		if (response == null) {
+			reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+		} else {
+			reply(request, exchange, response, true);
+		}
 	}
 
 	/**
