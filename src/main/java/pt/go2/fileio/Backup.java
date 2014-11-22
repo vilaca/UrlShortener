@@ -21,17 +21,11 @@ public class Backup {
 
 	public Backup(final String resumeFolder) throws IOException {
 
-		String filename = generateFilename(resumeFolder);
+		String filename;
 
-		while (new File(filename).exists()) {
-
-			try {
-				Thread.sleep(7);
-			} catch (InterruptedException e) {
-			}
-
+		do {
 			filename = generateFilename(resumeFolder);
-		}
+		} while (new File(filename).exists());
 
 		resumeLog = new BufferedWriter(new FileWriter(filename));
 	}
