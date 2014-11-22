@@ -4,11 +4,10 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import pt.go2.application.Resources;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.GzipResponse;
 
-public class EmbeddedFiles implements FileSystemInterface {
+public class EmbeddedFiles {
 
 	final Map<String, AbstractResponse> pages = new HashMap<>();
 
@@ -16,15 +15,15 @@ public class EmbeddedFiles implements FileSystemInterface {
 
 		final byte[] index, ajax, robots, map, css;
 
-		index = SmartTagParser.read(Resources.class.getResourceAsStream("/index.html"), config);
+		index = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/index.html"), config);
 
-		ajax = SmartTagParser.read(Resources.class.getResourceAsStream("/ajax.js"), config);
+		ajax = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"), config);
 
-		robots = SmartTagParser.read(Resources.class.getResourceAsStream("/robots.txt"), config);
+		robots = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"), config);
 
-		map = SmartTagParser.read(Resources.class.getResourceAsStream("/map.txt"), config);
+		map = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/map.txt"), config);
 
-		css = SmartTagParser.read(Resources.class.getResourceAsStream("/screen.css"), config);
+		css = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/screen.css"), config);
 
 		this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
 
@@ -55,15 +54,6 @@ public class EmbeddedFiles implements FileSystemInterface {
 		}
 	}
 
-	@Override
-	public void start() {
-	}
-
-	@Override
-	public void stop() {
-	}
-
-	@Override
 	public AbstractResponse getFile(String filename) {
 		return pages.get(filename);
 	}

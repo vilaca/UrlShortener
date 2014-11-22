@@ -42,8 +42,6 @@ public class Configuration {
 	// phishing urls database
 	private final String phishtankApiKey;
 
-	private final String publicRoot;
-
 	// redirect status code to be used for short Urls
 	private final int redirect;
 
@@ -81,7 +79,7 @@ public class Configuration {
 		}
 
 		// even if no .properties files were loaded, we still got defaults
-		
+
 		accessLog = getProperty("server.accessLog", "access_log");
 		cacheHint = getPropertyAsInt("server.cache", 2);
 		dbFolder = getResumeFolder();
@@ -89,7 +87,6 @@ public class Configuration {
 		googleVerification = getProperty("google-site-verification", "");
 		host = createInetSocketAddress();
 		phishtankApiKey = getProperty("phishtank-api-key");
-		publicRoot = getProperty("server.public-root");
 		redirect = getPropertyAsInt("server.redirect", 301);
 		safeLookupApiKey = getProperty("safe-lookup-api-key");
 		version = getProperty("server.version", "beta");
@@ -195,10 +192,6 @@ public class Configuration {
 
 	public InetSocketAddress getHost() {
 		return host;
-	}
-
-	public String getPublicRoot() {
-		return publicRoot;
 	}
 
 	public int getRedirect() {

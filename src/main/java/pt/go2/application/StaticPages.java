@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
@@ -23,13 +24,13 @@ class StaticPages extends RequestHandler {
 	final Calendar calendar = Calendar.getInstance();
 
 	final KeyValueStore ks;
-	final Resources res;
+	final EmbeddedFiles files;
 
 	public StaticPages(final Configuration config, final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
-			Resources res) {
+			EmbeddedFiles res) {
 		super(config, accessLog, errors);
 		this.ks = ks;
-		this.res = res;
+		this.files = res;
 	}
 
 	/**
@@ -69,13 +70,7 @@ class StaticPages extends RequestHandler {
 			return;
 		}
 
-		AbstractResponse response;
-
-		if (requested.equals("/") && config.getPublicRoot() != null) {
-			response = res.get(config.getPublicRoot());
-		} else {
-			response = res.get(requested);
-		}
+		final AbstractResponse response = files.getFile(requested);
 
 		if (response == null) {
 			reply(request, exchange, Error.PAGE_NOT_FOUND, true);

@@ -14,6 +14,7 @@ import pt.go2.daemon.BadUrlScanner;
 import pt.go2.daemon.PhishTankInterface;
 import pt.go2.daemon.WatchDog;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.WhiteList;
 import pt.go2.storage.BannedUrlList;
 import pt.go2.storage.KeyValueStore;
@@ -31,12 +32,12 @@ public class Server {
 
 		final KeyValueStore ks;
 		final ErrorPages errors;
-		final Resources res;
+		final EmbeddedFiles res;
 
 		try {
 			ks = new KeyValueStore(config);
-			errors = new ErrorPages();
-			res = new Resources(config);
+			errors = new ErrorPages(config);
+			res = new EmbeddedFiles(config);
 
 		} catch (IOException e3) {
 			logger.fatal(e3);
