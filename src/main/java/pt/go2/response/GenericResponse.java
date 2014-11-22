@@ -9,7 +9,7 @@ public class GenericResponse extends AbstractResponse {
 	final byte[] body;
 	final int error;
 	final String mime;
-	
+
 	public GenericResponse(byte[] body, int error, String mime) {
 		this.body = body;
 		this.error = error;
@@ -37,7 +37,7 @@ public class GenericResponse extends AbstractResponse {
 	public byte[] run(HttpServletResponse exchange) {
 		return body;
 	}
-	
+
 	@Override
 	public String getMimeType() {
 		return mime;
