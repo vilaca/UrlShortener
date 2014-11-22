@@ -5,6 +5,8 @@ package pt.go2.storage;
  */
 public class HashKey {
 
+	public static final int LENGTH = 6;
+	
 	private static final long MAX_HASH = 68719476735L;
 
 	// hash key as Base10
@@ -120,7 +122,7 @@ public class HashKey {
 	 */
 	private void encode64() {
 
-		this.key = new byte[6];
+		this.key = new byte[LENGTH];
 
 		int i = 5;
 		long v = this.hash;

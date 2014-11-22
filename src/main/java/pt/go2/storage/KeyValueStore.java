@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import pt.go2.fileio.Backup;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Restore;
-import pt.go2.fileio.Restore.RestoreItem;
+import pt.go2.fileio.RestoreItem;
 
 /**
  * Handle mappings on URLs to HASHED keys and vice versa
@@ -31,8 +31,8 @@ public class KeyValueStore {
 		final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
 		for (RestoreItem item : restoredItems) {
-			final HashKey hk = new HashKey(item.key);
-			final Uri uri = Uri.create(item.value, false);
+			final HashKey hk = new HashKey(item.getKey());
+			final Uri uri = Uri.create(item.getValue(), false);
 
 			map.put(hk, uri);
 		}

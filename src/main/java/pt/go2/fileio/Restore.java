@@ -7,8 +7,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import pt.go2.storage.HashKey;
 
 /**
  * Restore Urls and their Hashes
@@ -17,20 +20,7 @@ public class Restore {
 
 	private static final Logger LOGGER = LogManager.getLogger(Restore.class);
 
-	private Restore () {}
-	
-	/**
-	 * Class to hold data records from restore files
-	 */
-	public static class RestoreItem {
-
-		public final String key;
-		public final String value;
-
-		public RestoreItem(final String _key, final String _value) {
-			this.key = _key;
-			this.value = _value;
-		}
+	private Restore() {
 	}
 
 	/**
@@ -68,8 +58,8 @@ public class Restore {
 
 					// fields are comma separated [ hash key, URI ]
 
-					final String hashkey = line.substring(0, 6);
-					final String uri = line.substring(7);
+					final String hashkey = line.substring(0, HashKey.LENGTH);
+					final String uri = line.substring(HashKey.LENGTH + 1);
 
 					items.add(new RestoreItem(hashkey, uri));
 
@@ -80,10 +70,10 @@ public class Restore {
 
 			} catch (IOException e) {
 
-				LOGGER.error("Error reading: " + file.getAbsolutePath());
+				LOGGER.error("Error reading: " + file.getAbsolutePath(), e);
 			}
 		}
-		
+
 		return items;
 	}
 }
