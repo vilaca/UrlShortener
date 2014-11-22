@@ -22,7 +22,7 @@ import pt.go2.storage.Uri.Health;
 
 public class UrlHealth {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final long interval = 60 * 60 * 1000; // 1h
 
@@ -49,7 +49,7 @@ public class UrlHealth {
 			test(uri, false);
 
 			if (uri.health() != Health.OK) {
-				logger.trace(uri.toString() + " - " + uri.health().toString());
+				LOGGER.trace(uri.toString() + " - " + uri.health().toString());
 				continue;
 			}
 
@@ -100,7 +100,7 @@ public class UrlHealth {
 
 				uri.setHealth(Health.MALWARE);
 
-				logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
+				LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 
 			} else if (response[j].contains("phishing")) {
 
@@ -108,7 +108,7 @@ public class UrlHealth {
 
 				uri.setHealth(Health.PHISHING);
 
-				logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
+				LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 			}
 		}
 	}
@@ -130,7 +130,7 @@ public class UrlHealth {
 
 		if (banned.isBanned(uri)) {
 			uri.setHealth(Uri.Health.PHISHING);
-			logger.info("Caugh phishing: " + uri);
+			LOGGER.info("Caugh phishing: " + uri);
 			return;
 		}
 
@@ -159,7 +159,7 @@ public class UrlHealth {
 			lookup = sb.toString();
 
 		} catch (UnsupportedEncodingException e) {
-			logger.error("Error: " + uri, e);
+			LOGGER.error("Error: " + uri, e);
 			return;
 		}
 
@@ -169,11 +169,11 @@ public class UrlHealth {
 			response = httpClient.GET(lookup);
 
 		} catch (Exception e) {
-			logger.error("Connecting to : " + lookup, e);
+			LOGGER.error("Connecting to : " + lookup, e);
 			return;
 		}
 
-		logger.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
+		LOGGER.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
 
 		if (response.getStatus() != 200) {
 			return;
@@ -185,7 +185,7 @@ public class UrlHealth {
 			uri.setHealth(Health.PHISHING);
 		}
 
-		logger.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
+		LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
 	}
 
 	private HttpClient createHttpClient(final String lookup) throws Exception {
@@ -226,7 +226,7 @@ public class UrlHealth {
 			case 400:
 			case 401:
 			case 503:
-				logger.error("Error " + r + " in POST safebrowsing lookup API.");
+				LOGGER.error("Error " + r + " in POST safebrowsing lookup API.");
 				return null;
 			}
 
@@ -237,7 +237,7 @@ public class UrlHealth {
 			}
 
 		} catch (Exception e) {
-			logger.error("Error in POST safebrowsing lookup API.", e);
+			LOGGER.error("Error in POST safebrowsing lookup API.", e);
 		}
 
 		return null;

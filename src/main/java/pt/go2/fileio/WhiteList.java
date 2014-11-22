@@ -17,7 +17,8 @@ public class WhiteList {
 
 	private static final String FILENAME = "whitelist";
 
-	static final Logger LOG = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
+
 	final Set<String> whitelist = new HashSet<String>();
 
 	/**
@@ -39,7 +40,7 @@ public class WhiteList {
 
 					continue;
 
-				LOG.info("Adding " + line + " to whitelist.");
+				LOGGER.info("Adding " + line + " to whitelist.");
 
 				wl.whitelist.add(line);
 
@@ -50,7 +51,7 @@ public class WhiteList {
 
 		} catch (IOException e2) {
 
-			LOG.error("Can't read from whitelist file.");
+			LOGGER.error("Can't read from whitelist file.");
 		}
 
 		return null;

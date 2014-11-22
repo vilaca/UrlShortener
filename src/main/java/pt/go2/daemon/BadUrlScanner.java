@@ -12,7 +12,7 @@ import pt.go2.storage.Uri;
 
 public class BadUrlScanner implements WatchDogTask {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	// watchdog sleep time
 
@@ -43,7 +43,7 @@ public class BadUrlScanner implements WatchDogTask {
 
 		final Set<Uri> uris = ks.Uris();
 
-		logger.info(uris.size() + " total stored uris.");
+		LOGGER.info(uris.size() + " total stored uris.");
 
 		ul.test(uris);
 

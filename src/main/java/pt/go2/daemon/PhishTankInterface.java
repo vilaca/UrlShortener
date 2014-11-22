@@ -23,7 +23,7 @@ import pt.go2.storage.Uri;
  */
 public class PhishTankInterface implements WatchDogTask {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	// watchdog sleep time
 
@@ -82,7 +82,7 @@ public class PhishTankInterface implements WatchDogTask {
 
 		final Set<Uri> banned = new HashSet<>(EXPECTED_ENTRIES);
 
-		logger.info("Download starting");
+		LOGGER.info("Download starting");
 
 		HttpClient httpClient = new HttpClient();
 
@@ -91,14 +91,14 @@ public class PhishTankInterface implements WatchDogTask {
 			httpClient.start();
 			response = httpClient.GET(API_URL);
 		} catch (Exception e) {
-			logger.error(e);
+			LOGGER.error(e);
 			return false;
 		}
 
 		final int statusCode = response.getStatus();
 
 		if (statusCode != 200) {
-			logger.error("Error on download: " + statusCode);
+			LOGGER.error("Error on download: " + statusCode);
 			return false;
 		}
 
@@ -124,7 +124,7 @@ public class PhishTankInterface implements WatchDogTask {
 				}
 
 				if (idx == -1 || end == -1) {
-					logger.error("Bad entry: " + entry);
+					LOGGER.error("Bad entry: " + entry);
 					continue;
 				}
 
@@ -134,7 +134,7 @@ public class PhishTankInterface implements WatchDogTask {
 				banned.add(uri);
 			}
 		} catch (IOException e) {
-			logger.error(e);
+			LOGGER.error(e);
 			return false;
 		} finally {
 			try {
@@ -145,7 +145,7 @@ public class PhishTankInterface implements WatchDogTask {
 
 		this.banned.set(banned);
 
-		logger.info("Download exiting");
+		LOGGER.info("Download exiting");
 
 		return true;
 	}

@@ -16,7 +16,7 @@ import pt.go2.response.ErrorResponse;
 
 public class ErrorPages {
 
-	static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	/**
 	 * Canned responses for errors
@@ -54,7 +54,7 @@ public class ErrorPages {
 					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/404.html"), conf),
 							404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
-			logger.fatal("Cannot read 404 page.", e);
+			LOGGER.fatal("Cannot read 404 page.", e);
 			throw e;
 		}
 
@@ -64,7 +64,7 @@ public class ErrorPages {
 					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-phishing.html"),
 							conf), 404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
-			logger.fatal("Cannot read 403-phishing page.", e);
+			LOGGER.fatal("Cannot read 403-phishing page.", e);
 			throw e;
 		}
 
@@ -74,7 +74,7 @@ public class ErrorPages {
 					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-malware.html"),
 							conf), 404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
-			logger.fatal("Cannot read 403-malware page.", e);
+			LOGGER.fatal("Cannot read 403-malware page.", e);
 			throw e;
 		}
 	}

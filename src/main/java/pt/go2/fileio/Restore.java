@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class Restore {
 
-	private static final Logger LOG = LogManager.getLogger(Restore.class);
+	private static final Logger LOGGER = LogManager.getLogger(Restore.class);
 
 	private Restore () {}
 	
@@ -47,7 +47,7 @@ public class Restore {
 			return Collections.emptyList();
 		}
 
-		LOG.trace("Found " + files.length + " restore files.");
+		LOGGER.trace("Found " + files.length + " restore files.");
 
 		List<RestoreItem> items = new ArrayList<RestoreItem>();
 
@@ -58,7 +58,7 @@ public class Restore {
 			try (final FileReader fr = new FileReader(file.getAbsolutePath());
 					final BufferedReader br = new BufferedReader(fr);) {
 
-				LOG.trace("Reading from Resume file: " + file.getName());
+				LOGGER.trace("Reading from Resume file: " + file.getName());
 
 				// read all lines in file
 
@@ -80,7 +80,7 @@ public class Restore {
 
 			} catch (IOException e) {
 
-				LOG.error("Error reading: " + file.getAbsolutePath());
+				LOGGER.error("Error reading: " + file.getAbsolutePath());
 			}
 		}
 		

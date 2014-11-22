@@ -23,7 +23,7 @@ import pt.go2.response.RedirectResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
-	static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	protected final Configuration config;
 	private final BufferedWriter accessLog;
@@ -186,7 +186,7 @@ public abstract class RequestHandler extends AbstractHandler {
 
 			reply(request, response, new RedirectResponse("//" + enforce, 301), false);
 
-			logger.error("Wrong host: " + host);
+			LOGGER.error("Wrong host: " + host);
 			return;
 		}
 

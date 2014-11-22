@@ -16,7 +16,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class WatchDog extends TimerTask {
 
-	static final Logger logger = LogManager.getLogger(WatchDog.class);
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	// watchdog timer
 
@@ -60,7 +60,7 @@ public class WatchDog extends TimerTask {
 			task.refresh();
 		}
 
-		logger.info("Registering. Total tasks: " + tasks.size());
+		LOGGER.info("Registering. Total tasks: " + tasks.size());
 	}
 
 	/**
@@ -69,18 +69,18 @@ public class WatchDog extends TimerTask {
 	@Override
 	synchronized public void run() {
 
-		logger.info("Watchdog woke.");
+		LOGGER.info("Watchdog woke.");
 
 		for (WatchDogTask wt : tasks) {
 
-			logger.info("Checking task: " + wt.name());
+			LOGGER.info("Checking task: " + wt.name());
 
 			if (trigger(wt)) {
 				wt.refresh();
 			}
 		}
 
-		logger.info("Watchdog back to sleep.");
+		LOGGER.info("Watchdog back to sleep.");
 	}
 
 	/**
@@ -92,7 +92,7 @@ public class WatchDog extends TimerTask {
 
 		final Date lastRun = wt.lastRun();
 
-		logger.info("Last run: " + lastRun);
+		LOGGER.info("Last run: " + lastRun);
 
 		if (wt.lastRun() == null) {
 			return true;
@@ -104,7 +104,7 @@ public class WatchDog extends TimerTask {
 		diff = current - lastRun.getTime();
 		left = wt.interval() - TimeUnit.MILLISECONDS.toMinutes(diff);
 
-		logger.info("Minutes to Refresh: " + (left >= 0 ? left : 0));
+		LOGGER.info("Minutes to Refresh: " + (left >= 0 ? left : 0));
 
 		return left <= 0;
 	}

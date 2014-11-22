@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 
 public class BannedUrlList {
 
-	private static final Logger logger = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	// keep the ids off all known entries - supplied by PhishTank
 	// and all the banned Uris
@@ -18,8 +18,7 @@ public class BannedUrlList {
 
 	public void set(Set<Uri> banned) {
 
-		logger.info("Stats - Old: " + this.banned.size() + " New: "
-				+ banned.size());
+		LOGGER.info("Stats - Old: " + this.banned.size() + " New: " + banned.size());
 
 		this.banned = Collections.unmodifiableSet(banned);
 	}

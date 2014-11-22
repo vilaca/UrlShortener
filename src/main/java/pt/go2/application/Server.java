@@ -21,7 +21,7 @@ import pt.go2.storage.KeyValueStore;
 
 public class Server {
 
-	static private final Logger logger = LogManager.getLogger(Server.class);
+	private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
 	/**
 	 * Process initial method
@@ -40,7 +40,7 @@ public class Server {
 			res = new EmbeddedFiles(config);
 
 		} catch (IOException e3) {
-			logger.fatal(e3);
+			LOGGER.fatal(e3);
 			return;
 		}
 
@@ -58,23 +58,23 @@ public class Server {
 
 		watchdog.start(config.getWatchdogWait(), config.getWatchdogInterval());
 
-		logger.trace("Starting server...");
+		LOGGER.trace("Starting server...");
 
 		// log server version
 
-		logger.trace("Preparing to run " + config.getVersion() + ".");
+		LOGGER.trace("Preparing to run " + config.getVersion() + ".");
 
-		logger.trace("Resuming DB from folder: " + config.getDbFolder());
+		LOGGER.trace("Resuming DB from folder: " + config.getDbFolder());
 
 		// create listener
 
-		logger.trace("Creating listener.");
+		LOGGER.trace("Creating listener.");
 
 		final org.eclipse.jetty.server.Server listener;
 
 		listener = new org.eclipse.jetty.server.Server(config.getHost());
 
-		logger.trace("Appending to access log.");
+		LOGGER.trace("Appending to access log.");
 
 		// start access log
 
@@ -88,7 +88,7 @@ public class Server {
 			System.out.println("Access log redirected to console.");
 		}
 
-		logger.trace("Starting virtual file system.");
+		LOGGER.trace("Starting virtual file system.");
 
 		// RequestHandler
 
@@ -111,7 +111,7 @@ public class Server {
 
 			listener.start();
 
-			logger.trace("Listener is Started.");
+			LOGGER.trace("Listener is Started.");
 
 			System.out.println("Server Running. Press [k] to kill listener.");
 			boolean running = true;
@@ -124,11 +124,11 @@ public class Server {
 
 			} while (running);
 
-			logger.trace("Server stopping.");
+			LOGGER.trace("Server stopping.");
 
 		} catch (Exception e1) {
 
-			logger.trace("Couldn't start server.", e1);
+			LOGGER.trace("Couldn't start server.", e1);
 
 		} finally {
 
@@ -141,7 +141,7 @@ public class Server {
 			}
 
 			listener.destroy();
-			logger.trace("Server stopped.");
+			LOGGER.trace("Server stopped.");
 		}
 	}
 }

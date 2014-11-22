@@ -14,7 +14,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class Configuration {
 
-	private static final Logger LOG = LogManager.getLogger();
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final Properties prop = new Properties();
 
@@ -64,18 +64,18 @@ public class Configuration {
 
 		try (InputStream is = Configuration.class.getResourceAsStream("/" + PROPERTIES);) {
 			prop.load(is);
-			LOG.info("Read embedded properties from jar file.");
+			LOGGER.info("Read embedded properties from jar file.");
 		} catch (IOException e) {
-			LOG.info("Could not read properties from jar", e);
+			LOGGER.info("Could not read properties from jar", e);
 		}
 
 		// attempt reading properties/configuration from basedir
 
 		try (InputStream is = new FileInputStream(PROPERTIES);) {
 			prop.load(is);
-			LOG.info("Read properties from current directory.");
+			LOGGER.info("Read properties from current directory.");
 		} catch (IOException e) {
-			LOG.info("Could not read properties from directory", e);
+			LOGGER.info("Could not read properties from directory", e);
 		}
 
 		// even if no .properties files were loaded, we still got defaults
