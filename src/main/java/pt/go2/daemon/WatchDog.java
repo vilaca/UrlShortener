@@ -20,7 +20,7 @@ public class WatchDog extends TimerTask {
 
 	// watchdog timer
 
-	private final Timer watchdog = new Timer();
+	private final Timer timer = new Timer();
 
 	private List<WatchDogTask> tasks = new ArrayList<WatchDogTask>();
 
@@ -34,25 +34,26 @@ public class WatchDog extends TimerTask {
 	 */
 	public void start(long wait, long refresh) {
 
-		wait = TimeUnit.SECONDS.toMillis(wait);
+		long waitms = TimeUnit.SECONDS.toMillis(wait);
 
-		refresh = TimeUnit.MINUTES.toMillis(refresh);
+		long refreshms = TimeUnit.MINUTES.toMillis(refresh);
 
-		watchdog.schedule(this, wait, refresh);
+		timer.schedule(this, waitms, refreshms);
 	}
 
 	/**
 	 * Stop Service
 	 */
 	public void stop() {
-		watchdog.cancel();
-		watchdog.purge();
+		timer.cancel();
+		timer.purge();
 	}
 
-	synchronized public void register(final WatchDogTask task, final boolean runNow) {
+	public synchronized void register(final WatchDogTask task, final boolean runNow) {
 
-		if (task == null)
+		if (task == null) {
 			return;
+		}
 
 		tasks.add(task);
 
@@ -67,7 +68,7 @@ public class WatchDog extends TimerTask {
 	 * Trigger download
 	 */
 	@Override
-	synchronized public void run() {
+	public synchronized void run() {
 
 		LOGGER.info("Watchdog woke.");
 
