@@ -12,9 +12,7 @@ import javax.servlet.http.HttpServletResponse;
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
-import pt.go2.response.ErrorResponse;
-import pt.go2.response.HtmlResponse;
-import pt.go2.response.ProcessingResponse;
+import pt.go2.response.GenericResponse;
 import pt.go2.storage.HashKey;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
@@ -57,7 +55,7 @@ class UrlHashing extends RequestHandler {
 			// hash not found, add new
 
 			ks.add(uri);
-			reply(request, response, new ProcessingResponse(), false);
+			reply(request, response, new GenericResponse(202), false);
 			health.test(uri, true);
 
 			if (uri.health() == Health.PROCESSING) {
@@ -71,18 +69,18 @@ class UrlHashing extends RequestHandler {
 
 		switch (uri.health()) {
 		case MALWARE:
-			reply(request, response, new ErrorResponse("malware".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+			reply(request, response, new GenericResponse("malware".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
 					true);
 			break;
 		case OK:
-			reply(request, response, new HtmlResponse(hk.getBytes()), false);
+			reply(request, response, new GenericResponse(hk.getBytes()), false);
 			break;
 		case PHISHING:
-			reply(request, response, new ErrorResponse("phishing".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
+			reply(request, response, new GenericResponse("phishing".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
 					true);
 			break;
 		case PROCESSING:
-			reply(request, response, new ProcessingResponse(), false);
+			reply(request, response, new GenericResponse(202), false);
 			break;
 		}
 	}

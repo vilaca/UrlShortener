@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.SmartTagParser;
 import pt.go2.response.AbstractResponse;
-import pt.go2.response.ErrorResponse;
+import pt.go2.response.GenericResponse;
 
 // TODO needs improvement
 
@@ -46,12 +46,12 @@ public class ErrorPages {
 	 */
 	public ErrorPages(Configuration conf) throws IOException {
 
-		this.errors.put(Error.BAD_REQUEST, new ErrorResponse("Bad request.".getBytes(), 400,
+		this.errors.put(Error.BAD_REQUEST, new GenericResponse("Bad request.".getBytes(), 400,
 				AbstractResponse.MIME_TEXT_PLAIN));
 
 		try {
 			this.errors.put(Error.PAGE_NOT_FOUND,
-					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/404.html"), conf),
+					new GenericResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/404.html"), conf),
 							404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			LOGGER.fatal("Cannot read 404 page.", e);
@@ -61,7 +61,7 @@ public class ErrorPages {
 		try {
 			this.errors.put(
 					Error.FORBIDDEN_PHISHING,
-					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-phishing.html"),
+					new GenericResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-phishing.html"),
 							conf), 404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			LOGGER.fatal("Cannot read 403-phishing page.", e);
@@ -71,7 +71,7 @@ public class ErrorPages {
 		try {
 			this.errors.put(
 					Error.FORBIDDEN_MALWARE,
-					new ErrorResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-malware.html"),
+					new GenericResponse(SmartTagParser.read(ErrorPages.class.getResourceAsStream("/403-malware.html"),
 							conf), 404, AbstractResponse.MIME_TEXT_HTML));
 		} catch (IOException e) {
 			LOGGER.fatal("Cannot read 403-malware page.", e);

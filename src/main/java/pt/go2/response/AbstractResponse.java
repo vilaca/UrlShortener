@@ -39,7 +39,7 @@ public abstract class AbstractResponse {
 	 * 
 	 * @return
 	 */
-	abstract public int getHttpStatus();
+	public abstract int getHttpStatus();
 
 	/**
 	 * Generate response
