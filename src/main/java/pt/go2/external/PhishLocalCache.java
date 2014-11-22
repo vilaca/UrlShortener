@@ -1,4 +1,4 @@
-package pt.go2.storage;
+package pt.go2.external;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -7,7 +7,9 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BannedUrlList {
+import pt.go2.storage.Uri;
+
+public class PhishLocalCache {
 
 	private static final Logger LOGGER = LogManager.getLogger();
 

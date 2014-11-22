@@ -13,10 +13,12 @@ import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 import pt.go2.daemon.BadUrlScanner;
 import pt.go2.daemon.PhishTankInterface;
 import pt.go2.daemon.WatchDog;
+import pt.go2.external.PhishLocalCache;
+import pt.go2.external.PhishTankDownloader;
+import pt.go2.external.SafeBrowsingLookup;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.WhiteList;
-import pt.go2.storage.BannedUrlList;
 import pt.go2.storage.KeyValueStore;
 
 public class Server {
@@ -45,12 +47,14 @@ public class Server {
 		}
 
 		final WhiteList whitelist = WhiteList.create();
-		final BannedUrlList banned = new BannedUrlList();
+		final PhishLocalCache banned = new PhishLocalCache();
+		final PhishTankDownloader phishdl = new PhishTankDownloader(config.getPhishtankApiKey(), banned);
+		final SafeBrowsingLookup sbl = new SafeBrowsingLookup(config.getSafeLookupApiKey());
 
-		final UrlHealth ul = new UrlHealth(config, whitelist, banned);
+		final UrlHealth ul = new UrlHealth(whitelist, banned, sbl);
 
 		final WatchDog watchdog = new WatchDog();
-		final PhishTankInterface pi = PhishTankInterface.create(config, banned);
+		final PhishTankInterface pi = new PhishTankInterface(phishdl);
 		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
 
 		watchdog.register(pi, true);
