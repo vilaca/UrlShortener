@@ -13,10 +13,9 @@ import org.eclipse.jetty.http.HttpStatus;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.GenericResponse;
 
-// TODO needs improvement
-
 public class ErrorPages {
 
+	private static final int BUFFER_SIZE = 4096;
 	private static final Logger LOGGER = LogManager.getLogger();
 
 	/**
@@ -27,16 +26,6 @@ public class ErrorPages {
 	}
 
 	private final Map<Error, AbstractResponse> errors = new EnumMap<>(Error.class);
-
-	/**
-	 * Return error response
-	 * 
-	 * @param badRequest
-	 * @return
-	 */
-	public AbstractResponse get(Error error) {
-		return errors.get(error);
-	}
 
 	/**
 	 * Cache error responses
@@ -78,9 +67,19 @@ public class ErrorPages {
 		}
 	}
 
+	/**
+	 * Return error response
+	 * 
+	 * @param badRequest
+	 * @return
+	 */
+	public AbstractResponse get(Error error) {
+		return errors.get(error);
+	}
+
 	private byte[] read(InputStream is) throws IOException {
 
-		final byte[] buffer = new byte[4096];
+		final byte[] buffer = new byte[BUFFER_SIZE];
 		int read;
 
 		final ByteArrayOutputStream output = new ByteArrayOutputStream();

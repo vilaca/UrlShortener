@@ -11,6 +11,7 @@ import pt.go2.response.GzipResponse;
 
 public class EmbeddedFiles {
 
+	private static final int BUFFER = 4096;
 	final Map<String, AbstractResponse> pages = new HashMap<>();
 
 	public EmbeddedFiles(Configuration config) throws IOException {
@@ -60,7 +61,7 @@ public class EmbeddedFiles {
 
 	private byte[] read(InputStream is) throws IOException {
 
-		final byte[] buffer = new byte[4096];
+		final byte[] buffer = new byte[BUFFER];
 		int read;
 
 		final ByteArrayOutputStream output = new ByteArrayOutputStream();
