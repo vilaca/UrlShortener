@@ -19,7 +19,7 @@ public class WhiteList {
 
 	private static final Logger LOGGER = LogManager.getLogger();
 
-	final Set<String> whitelist = new HashSet<String>();
+	final Set<String> entries = new HashSet<String>();
 
 	/**
 	 * Create WhiteList
@@ -36,28 +36,26 @@ public class WhiteList {
 
 			while ((line = br.readLine()) != null) {
 
-				if (line.isEmpty() || line.startsWith("#"))
-
+				if (line.isEmpty() || line.startsWith("#")) {
 					continue;
+				}
 
 				LOGGER.info("Adding " + line + " to whitelist.");
 
-				wl.whitelist.add(line);
-
-				// next line
+				wl.entries.add(line);
 			}
 
 			return wl;
 
 		} catch (IOException e2) {
 
-			LOGGER.error("Can't read from whitelist file.");
+			LOGGER.error("Can't read from whitelist file.", e2);
 		}
 
 		return null;
 	}
 
 	public boolean contains(String url) {
-		return whitelist.contains(url);
+		return entries.contains(url);
 	}
 }
