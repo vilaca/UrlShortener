@@ -77,7 +77,7 @@ public class UrlHealth {
 
 			String[] response = sbl.safeBrowsingLookup(sb.toString());
 
-			if (response == null) {
+			if (response.length == 0) {
 				continue;
 			}
 
