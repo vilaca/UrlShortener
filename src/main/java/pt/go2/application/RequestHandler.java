@@ -16,8 +16,8 @@ import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
-import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
 
@@ -70,7 +70,8 @@ public abstract class RequestHandler extends AbstractHandler {
 		printLogMessage(status, request, exchange, response, body.length);
 	}
 
-	protected void reply(HttpServletRequest request, HttpServletResponse exchange, Error badRequest, boolean cache) {
+	protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
+			boolean cache) {
 		reply(request, exchange, errors.get(badRequest), cache);
 	}
 
@@ -174,7 +175,7 @@ public abstract class RequestHandler extends AbstractHandler {
 		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
 
 		if (host.isEmpty()) {
-			reply(request, response, Error.BAD_REQUEST, false);
+			reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
 			return;
 		}
 

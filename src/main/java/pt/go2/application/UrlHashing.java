@@ -11,8 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 
-import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
+import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.GenericResponse;
 import pt.go2.storage.HashKey;
@@ -105,7 +105,7 @@ class UrlHashing extends RequestHandler {
 			final String postBody = br.readLine();
 
 			if (postBody == null) {
-				reply(request, response, Error.BAD_REQUEST, false);
+				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
 				return null;
 			}
 
@@ -114,7 +114,7 @@ class UrlHashing extends RequestHandler {
 			final int idx = postBody.indexOf('=') + 1;
 
 			if (idx == -1 || postBody.length() - idx < 3) {
-				reply(request, response, Error.BAD_REQUEST, false);
+				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
 				return null;
 			}
 
@@ -123,13 +123,13 @@ class UrlHashing extends RequestHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
 
 			if (uri == null) {
-				reply(request, response, Error.BAD_REQUEST, false);
+				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
 			}
 
 			return uri;
 
 		} catch (IOException e) {
-			reply(request, response, Error.BAD_REQUEST, false);
+			reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
 		}
 		return null;
 	}

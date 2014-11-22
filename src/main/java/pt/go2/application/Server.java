@@ -18,6 +18,7 @@ import pt.go2.external.PhishTankDownloader;
 import pt.go2.external.SafeBrowsingLookup;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
+import pt.go2.fileio.ErrorPages;
 import pt.go2.fileio.WhiteList;
 import pt.go2.storage.KeyValueStore;
 
@@ -38,7 +39,7 @@ public class Server {
 
 		try {
 			ks = new KeyValueStore(config);
-			errors = new ErrorPages(config);
+			errors = new ErrorPages();
 			res = new EmbeddedFiles(config);
 
 		} catch (IOException e3) {

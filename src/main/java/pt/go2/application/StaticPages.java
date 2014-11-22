@@ -7,9 +7,9 @@ import java.util.Calendar;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
+import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
@@ -49,22 +49,22 @@ class StaticPages extends RequestHandler {
 			final Uri uri = ks.get(new HashKey(requested));
 
 			if (uri == null) {
-				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+				reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
 				return;
 			}
 
 			switch (uri.health()) {
 			case PHISHING:
-				reply(request, exchange, Error.FORBIDDEN_PHISHING, true);
+				reply(request, exchange, ErrorPages.Error.PHISHING, true);
 				break;
 			case OK:
 				reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
 				break;
 			case MALWARE:
-				reply(request, exchange, Error.FORBIDDEN_MALWARE, true);
+				reply(request, exchange, ErrorPages.Error.MALWARE, true);
 				break;
 			default:
-				reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+				reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
 			}
 
 			return;
@@ -73,7 +73,7 @@ class StaticPages extends RequestHandler {
 		final AbstractResponse response = files.getFile(requested);
 
 		if (response == null) {
-			reply(request, exchange, Error.PAGE_NOT_FOUND, true);
+			reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
 		} else {
 			reply(request, exchange, response, true);
 		}

@@ -1,6 +1,8 @@
 package pt.go2.fileio;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -13,17 +15,15 @@ public class EmbeddedFiles {
 
 	public EmbeddedFiles(Configuration config) throws IOException {
 
-		final byte[] index, ajax, robots, map, css;
+		final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
 
-		index = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/index.html"), config);
+		final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
 
-		ajax = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"), config);
+		final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
 
-		robots = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"), config);
+		final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
 
-		map = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/map.txt"), config);
-
-		css = SmartTagParser.read(EmbeddedFiles.class.getResourceAsStream("/screen.css"), config);
+		final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
 
 		this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
 
@@ -57,4 +57,19 @@ public class EmbeddedFiles {
 	public AbstractResponse getFile(String filename) {
 		return pages.get(filename);
 	}
+
+	private byte[] read(InputStream is) throws IOException {
+
+		final byte[] buffer = new byte[4096];
+		int read;
+
+		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		while ((read = is.read(buffer)) != -1) {
+			output.write(buffer, 0, read);
+		}
+
+		return output.toByteArray();
+	}
+
 }
