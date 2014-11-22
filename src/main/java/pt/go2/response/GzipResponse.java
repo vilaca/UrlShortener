@@ -6,11 +6,17 @@ import java.util.zip.GZIPOutputStream;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.http.HttpStatus;
+
 /**
  * @author vilaca
  * 
  */
 public class GzipResponse extends AbstractResponse {
+
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	final byte[] body;
 	final byte[] zipBody;
@@ -42,7 +48,10 @@ public class GzipResponse extends AbstractResponse {
 			return baos.toByteArray();
 
 		} catch (IOException e) {
-			return null;
+
+			LOGGER.error(e);
+
+			return new byte[0];
 		}
 	}
 
@@ -53,7 +62,7 @@ public class GzipResponse extends AbstractResponse {
 	 */
 	@Override
 	public int getHttpStatus() {
-		return 200;
+		return HttpStatus.OK_200;
 	}
 
 	/*
@@ -76,7 +85,7 @@ public class GzipResponse extends AbstractResponse {
 	@Override
 	public byte[] run(HttpServletResponse exchange) {
 
-		if (this.zipBody != null && clientAcceptsZip(exchange)) {
+		if (this.zipBody.length > 0 && clientAcceptsZip(exchange)) {
 			zipped = true;
 			return zipBody;
 		}
