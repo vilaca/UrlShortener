@@ -17,6 +17,9 @@ import org.apache.commons.validator.routines.UrlValidator;
  */
 public class Uri {
 
+	private static final String HTTP = "http://";
+	private static final String HTTPS = "https://";
+
 	public enum Health {
 
 		OK, PROCESSING, PHISHING, MALWARE;
@@ -28,23 +31,8 @@ public class Uri {
 	private volatile Health health;
 	private Date updated;
 
-	public static Uri create(final String str, final boolean validate) {
-		return create(str, validate, Health.OK);
-	}
-
-	public static Uri create(String str, final boolean validate, Health state) {
-
-		str = normalizeUrl(str);
-
-		if (validate && !new UrlValidator(new String[] { "http", "https", "" }).isValid(str)) {
-			return null;
-		}
-
-		return new Uri(str, state);
-	}
-
 	/**
-	 * User create method instead
+	 * Use create method instead
 	 * 
 	 * @param str
 	 * @param state
@@ -55,32 +43,48 @@ public class Uri {
 		this.health = state;
 	}
 
+	public static Uri create(final String str, final boolean validate) {
+		return create(str, validate, Health.OK);
+	}
+
+	public static Uri create(String str, final boolean validate, Health state) {
+
+		final String normalized = normalizeUrl(str);
+
+		if (validate && !new UrlValidator(new String[] { "http", "https", "" }).isValid(normalized)) {
+			return null;
+		}
+
+		return new Uri(normalized, state);
+	}
+
 	@Override
 	public int hashCode() {
 		return hashcode;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(Object other) {
 
-		if (obj == null) {
+		if (other == null) {
 			return false;
 		}
 
-		if (obj == this) {
+		if (other == this) {
 			return true;
 		}
 
-		if (obj.getClass() != getClass()) {
+		if (other.getClass() != getClass()) {
 			return false;
 		}
 
-		byte[] inner = ((Uri) obj).inner;
+		byte[] otherInner = ((Uri) other).inner;
 
-		if (this.inner.length != inner.length)
+		if (this.inner.length != otherInner.length) {
 			return false;
+		}
 
-		return Arrays.equals(this.inner, inner);
+		return Arrays.equals(this.inner, otherInner);
 	}
 
 	@Override
@@ -95,9 +99,9 @@ public class Uri {
 	 * @param url
 	 * @return
 	 */
-	private static String normalizeUrl(String input) {
+	private static String normalizeUrl(String raw) {
 
-		input = input.trim();
+		String input = raw.trim();
 
 		final int idxDomain;
 
@@ -107,17 +111,17 @@ public class Uri {
 			input = input.substring(0, input.length() - 1);
 		}
 
-		if (input.startsWith("https://")) {
+		if (input.startsWith(HTTPS)) {
 
-			idxDomain = input.substring("https://".length()).indexOf("/") + "https://".length();
+			idxDomain = input.substring(HTTPS.length()).indexOf("/") + HTTPS.length();
 
-		} else if (input.startsWith("http://")) {
+		} else if (input.startsWith(HTTP)) {
 
-			idxDomain = input.substring("http://".length()).indexOf("/") + "http://".length();
+			idxDomain = input.substring(HTTP.length()).indexOf("/") + HTTP.length();
 
 		} else {
-			input = "http://" + input;
-			idxDomain = input.substring("http://".length()).indexOf("/") + "http://".length();
+			input = HTTP + input;
+			idxDomain = input.substring(HTTP.length()).indexOf("/") + HTTP.length();
 		}
 
 		// make sure domain and TLD are lower case
@@ -150,7 +154,7 @@ public class Uri {
 		// remove https/http
 		int i = uri.indexOf("//");
 		if (i != -1) {
-			uri = uri.substring(i + 2);
+			uri = uri.substring(i + "//".length());
 		}
 
 		// remove file path

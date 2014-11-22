@@ -41,7 +41,7 @@ public class BadUrlScanner implements WatchDogTask {
 	@Override
 	public synchronized void refresh() {
 
-		final Set<Uri> uris = ks.Uris();
+		final Set<Uri> uris = ks.uris();
 
 		LOGGER.info(uris.size() + " total stored uris.");
 

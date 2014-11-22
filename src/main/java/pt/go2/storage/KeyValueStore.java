@@ -17,6 +17,8 @@ import pt.go2.fileio.RestoreItem;
  */
 public class KeyValueStore {
 
+	private static final int MAX_HASHING_RETRIES = 10;
+
 	private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
 
 	private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
@@ -55,7 +57,7 @@ public class KeyValueStore {
 		while (map.contains(hk)) {
 
 			retries++;
-			if (retries > 10) {
+			if (retries > MAX_HASHING_RETRIES) {
 				// give up
 				LOGGER.warn("Giving up rehashing " + uri);
 				return new byte[0];
@@ -74,7 +76,7 @@ public class KeyValueStore {
 
 		} catch (IOException e) {
 
-			LOGGER.error("Could not write to the resume log :(");
+			LOGGER.error("Could not write to the resume log.", e);
 
 			map.remove(hk, uri);
 
@@ -104,7 +106,7 @@ public class KeyValueStore {
 		return map.get(haskey);
 	}
 
-	public Set<Uri> Uris() {
+	public Set<Uri> uris() {
 		return map.getKeys();
 	}
 

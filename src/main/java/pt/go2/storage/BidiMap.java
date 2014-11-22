@@ -10,7 +10,7 @@ import java.util.Set;
  * @param <H>
  * @param <U>
  */
-class BidiMap<H,U> {
+class BidiMap<H, U> {
 
 	// hash to URL
 	private final Map<H, U> hash2Url;
@@ -19,14 +19,13 @@ class BidiMap<H,U> {
 	private final Map<U, H> url2Hash;
 
 	public BidiMap() {
-		this.hash2Url = new HashMap<H,U>();
-		this.url2Hash = new HashMap<U,H>();
+		this.hash2Url = new HashMap<H, U>();
+		this.url2Hash = new HashMap<U, H>();
 	}
 
-	synchronized void put(H hk, U uri)
-	{
+	synchronized void put(H hk, U uri) {
 		this.hash2Url.put(hk, uri);
-		this.url2Hash.put(uri, hk);		
+		this.url2Hash.put(uri, hk);
 	}
 
 	synchronized H getUrl2Hash(U uri) {
@@ -40,7 +39,7 @@ class BidiMap<H,U> {
 	synchronized boolean contains(HashKey hk) {
 		return hash2Url.containsKey(hk);
 	}
-	
+
 	synchronized void remove(HashKey hk, Uri uri) {
 		hash2Url.remove(hk);
 		url2Hash.remove(uri);

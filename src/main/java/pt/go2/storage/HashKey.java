@@ -5,8 +5,18 @@ package pt.go2.storage;
  */
 public class HashKey {
 
+	private static final int SIXBITS = 6;
+
+	private static final int BASE_64 = 64;
+
+	private static final int ALPHABET_SIZE = 26;
+
+	private static final int UPPERANDLOWERCASE = ALPHABET_SIZE * 2;
+
+	private static final int UPPERANDLOWERCASEANDNUMERALS = UPPERANDLOWERCASE + 10;
+
 	public static final int LENGTH = 6;
-	
+
 	private static final long MAX_HASH = 68719476735L;
 
 	// hash key as Base10
@@ -32,8 +42,6 @@ public class HashKey {
 
 		this.key = key.getBytes();
 
-		long hash = 0;
-
 		for (byte b : this.key) {
 
 			long inc;
@@ -42,23 +50,22 @@ public class HashKey {
 				inc = b - 'a';
 
 			} else if (b >= 'A' && b <= 'Z') {
-				inc = b - 'A' + 26;
+				inc = b - 'A' + ALPHABET_SIZE;
 
 			} else if (b >= '0' && b <= '9') {
-				inc = b - '0' + 52;
+				inc = b - '0' + UPPERANDLOWERCASE;
 
 			} else if (b == '_') {
-				inc = 62;
+
+				inc = UPPERANDLOWERCASEANDNUMERALS;
 
 			} else {
-				inc = 63;
+				inc = BASE_64 - 1;
 			}
 
-			hash *= 64;
+			hash *= BASE_64;
 			hash += inc;
 		}
-
-		this.hash = hash;
 	}
 
 	/**
@@ -96,8 +103,8 @@ public class HashKey {
 
 		// internal hash is long, while hashCode() is int
 
-		HashKey hash = (HashKey) obj;
-		return this.hash == hash.hash;
+		HashKey hk = (HashKey) obj;
+		return this.hash == hk.hash;
 	}
 
 	@Override
@@ -124,21 +131,21 @@ public class HashKey {
 
 		this.key = new byte[LENGTH];
 
-		int i = 5;
+		int i = LENGTH - 1;
 		long v = this.hash;
 
 		while (i >= 0) {
 
-			long b = v & (64 - 1);
-			v >>= 6;
+			long b = v & (BASE_64 - 1);
+			v >>= SIXBITS;
 
-			if (b < 26) {
+			if (b < ALPHABET_SIZE) {
 				b += 'a';
-			} else if (b < 52) {
-				b += -26 + 'A';
-			} else if (b < 62) {
-				b += -52 + '0';
-			} else if (b == 62) {
+			} else if (b < UPPERANDLOWERCASE) {
+				b += -ALPHABET_SIZE + 'A';
+			} else if (b < UPPERANDLOWERCASEANDNUMERALS) {
+				b += -UPPERANDLOWERCASE + '0';
+			} else if (b == UPPERANDLOWERCASEANDNUMERALS) {
 				b = '_';
 			} else {
 				b = '-';
