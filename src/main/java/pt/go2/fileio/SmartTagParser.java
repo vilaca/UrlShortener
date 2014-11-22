@@ -18,14 +18,15 @@ public final class SmartTagParser {
 
 	private static final Pattern tagPattern = Pattern.compile("\\[\\$\\w*\\$\\]");
 
-	public static byte[] read(final InputStream file) throws IOException {
+	public static byte[] read(final InputStream file, Configuration conf) throws IOException {
+
 		try (final BufferedReader br = new BufferedReader(new InputStreamReader(file));) {
 
-			return readFromFile(br);
+			return readFromFile(br, conf);
 		}
 	}
 
-	private static byte[] readFromFile(final BufferedReader br) throws IOException {
+	private static byte[] readFromFile(final BufferedReader br, Configuration conf) throws IOException {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -53,7 +54,7 @@ public final class SmartTagParser {
 
 				} else {
 
-					value = Configuration.getProperty("web." + tag);
+					value = conf.getProperty("web." + tag);
 				}
 
 				if (value != null) {
@@ -71,10 +72,10 @@ public final class SmartTagParser {
 		return sb.toString().getBytes();
 	}
 
-	public static byte[] read(String filename) throws FileNotFoundException, IOException {
+	public static byte[] read(String filename, Configuration conf) throws FileNotFoundException, IOException {
 
 		try (final InputStream br = new FileInputStream(filename);) {
-			return read(br);
+			return read(br, conf);
 		}
 	}
 }

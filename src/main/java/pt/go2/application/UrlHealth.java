@@ -140,7 +140,7 @@ public class UrlHealth {
 	}
 
 	private boolean canUseSafeBrowsingLookup() {
-		return conf.SAFE_LOOKUP_API_KEY != null && !conf.SAFE_LOOKUP_API_KEY.isEmpty();
+		return conf.getSafeLookupApiKey() != null && !conf.getSafeLookupApiKey().isEmpty();
 	}
 
 	private void safeBrowsingLookup(Uri uri) {
@@ -152,7 +152,7 @@ public class UrlHealth {
 			final StringBuffer sb = new StringBuffer();
 
 			sb.append("https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key=");
-			sb.append(conf.SAFE_LOOKUP_API_KEY);
+			sb.append(conf.getSafeLookupApiKey());
 			sb.append("&url=");
 			sb.append(URLEncoder.encode(uri.toString(), "ASCII"));
 
@@ -208,7 +208,7 @@ public class UrlHealth {
 	private String[] safeBrowsingLookup(String body) {
 
 		final String lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key="
-				+ conf.SAFE_LOOKUP_API_KEY;
+				+ conf.getSafeLookupApiKey();
 
 		try {
 

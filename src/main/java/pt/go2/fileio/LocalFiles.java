@@ -21,26 +21,29 @@ import pt.go2.response.GzipResponse;
 
 public class LocalFiles implements FileSystemInterface, Runnable {
 
-	static final Logger logger = LogManager
-			.getLogger(FileSystemInterface.class);
+	static final Logger logger = LogManager.getLogger(FileSystemInterface.class);
 
 	private final Map<String, AbstractResponse> pages = new ConcurrentHashMap<>();
+
+	private final Configuration conf;
 
 	private final int trim;
 
 	private volatile boolean running;
 	private final WatchService watchService;
 
-	public LocalFiles(Configuration config) throws IOException {
+	public LocalFiles(Configuration conf) throws IOException {
 
-		this.trim = config.PUBLIC.length() + 1;
+		this.conf = conf;
+
+		this.trim = conf.getPublicRoot().length() + 1;
 
 		this.watchService = FileSystems.getDefault().newWatchService();
 
 		final List<Path> files = new ArrayList<>();
 		final List<Path> directories = new ArrayList<>();
 
-		FileCrawler.crawl(config.PUBLIC, directories, files);
+		FileCrawler.crawl(conf.getPublicRoot(), directories, files);
 
 		for (Path path : files) {
 
@@ -49,9 +52,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 		for (Path path : directories) {
 			try {
-				path.register(watchService,
-						StandardWatchEventKinds.ENTRY_CREATE,
-						StandardWatchEventKinds.ENTRY_MODIFY,
+				path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE, StandardWatchEventKinds.ENTRY_MODIFY,
 						StandardWatchEventKinds.ENTRY_DELETE);
 			} catch (IOException e) {
 				logger.warn("Could not registed directory: " + path.toString());
@@ -103,8 +104,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 				final WatchEvent<Path> watchEventPath = (WatchEvent<Path>) watchEvent;
 				final Path filename = watchEventPath.context();
 
-				if (kind == StandardWatchEventKinds.ENTRY_CREATE
-						|| kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+				if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_MODIFY) {
 					addStaticPage(filename);
 				}
 
@@ -163,8 +163,7 @@ public class LocalFiles implements FileSystemInterface, Runnable {
 
 		try {
 
-			this.pages.put(filename.substring(trim), new GzipResponse(
-					SmartTagParser.read(filename), mimeType));
+			this.pages.put(filename.substring(trim), new GzipResponse(SmartTagParser.read(filename, conf), mimeType));
 
 		} catch (IOException e) {
 

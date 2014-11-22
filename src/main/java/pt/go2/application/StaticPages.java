@@ -71,8 +71,8 @@ class StaticPages extends RequestHandler {
 
 		AbstractResponse response;
 
-		if (requested.equals("/") && config.PUBLIC != null) {
-			response = res.get(config.PUBLIC_ROOT);
+		if (requested.equals("/") && config.getPublicRoot() != null) {
+			response = res.get(config.getPublicRoot());
 		} else {
 			response = res.get(requested);
 		}

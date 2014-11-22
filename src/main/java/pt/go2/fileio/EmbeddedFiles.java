@@ -16,15 +16,15 @@ public class EmbeddedFiles implements FileSystemInterface {
 
 		final byte[] index, ajax, robots, map, css;
 
-		index = SmartTagParser.read(Resources.class.getResourceAsStream("/index.html"));
+		index = SmartTagParser.read(Resources.class.getResourceAsStream("/index.html"), config);
 
-		ajax = SmartTagParser.read(Resources.class.getResourceAsStream("/ajax.js"));
+		ajax = SmartTagParser.read(Resources.class.getResourceAsStream("/ajax.js"), config);
 
-		robots = SmartTagParser.read(Resources.class.getResourceAsStream("/robots.txt"));
+		robots = SmartTagParser.read(Resources.class.getResourceAsStream("/robots.txt"), config);
 
-		map = SmartTagParser.read(Resources.class.getResourceAsStream("/map.txt"));
+		map = SmartTagParser.read(Resources.class.getResourceAsStream("/map.txt"), config);
 
-		css = SmartTagParser.read(Resources.class.getResourceAsStream("/screen.css"));
+		css = SmartTagParser.read(Resources.class.getResourceAsStream("/screen.css"), config);
 
 		this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
 
@@ -36,10 +36,10 @@ public class EmbeddedFiles implements FileSystemInterface {
 
 		this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
 
-		if (!config.GOOGLE_VERIFICATION.isEmpty()) {
-			this.pages.put(config.GOOGLE_VERIFICATION, new GzipResponse(
-					("google-site-verification: " + config.GOOGLE_VERIFICATION).getBytes(),
-					AbstractResponse.MIME_TEXT_PLAIN));
+		if (!config.getGoogleVerification().isEmpty()) {
+			this.pages.put(config.getGoogleVerification(),
+					new GzipResponse(("google-site-verification: " + config.getGoogleVerification()).getBytes(),
+							AbstractResponse.MIME_TEXT_PLAIN));
 		}
 
 		// check if all pages created

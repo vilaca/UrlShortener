@@ -55,15 +55,15 @@ public class Server {
 		watchdog.register(pi, true);
 		watchdog.register(bad, false);
 
-		watchdog.start(config.WATCHDOG_WAIT,config.WATCHDOG_INTERVAL);
+		watchdog.start(config.getWatchdogWait(), config.getWatchdogInterval());
 
 		logger.trace("Starting server...");
 
 		// log server version
 
-		logger.trace("Preparing to run " + config.VERSION + ".");
+		logger.trace("Preparing to run " + config.getVersion() + ".");
 
-		logger.trace("Resuming DB from folder: " + config.DATABASE_FOLDER);
+		logger.trace("Resuming DB from folder: " + config.getDbFolder());
 
 		// create listener
 
@@ -71,7 +71,7 @@ public class Server {
 
 		final org.eclipse.jetty.server.Server listener;
 
-		listener = new org.eclipse.jetty.server.Server(config.HOST);
+		listener = new org.eclipse.jetty.server.Server(config.getHost());
 
 		logger.trace("Appending to access log.");
 
@@ -81,7 +81,7 @@ public class Server {
 
 		try {
 
-			final FileWriter file = new FileWriter(config.ACCESS_LOG, true);
+			final FileWriter file = new FileWriter(config.getAccessLog(), true);
 			accessLog = new BufferedWriter(file);
 		} catch (IOException e) {
 			System.out.println("Access log redirected to console.");

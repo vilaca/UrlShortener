@@ -20,12 +20,12 @@ public class Resources {
 	 * C'tor
 	 * 
 	 * @param ks
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public Resources(Configuration config) throws IOException {
 
 		try {
-			if (config.PUBLIC == null) {
+			if (config.getPublicRoot() == null) {
 
 				pages = new EmbeddedFiles(config);
 			} else {

@@ -26,9 +26,9 @@ public class KeyValueStore {
 
 	public KeyValueStore(final Configuration config) throws IOException {
 
-		this.backupFile = new Backup(config.DATABASE_FOLDER);
+		this.backupFile = new Backup(config.getDbFolder());
 
-		final List<RestoreItem> restoredItems = Restore.start(config.DATABASE_FOLDER);
+		final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
 		for (RestoreItem item : restoredItems) {
 			final HashKey hk = new HashKey(item.key);

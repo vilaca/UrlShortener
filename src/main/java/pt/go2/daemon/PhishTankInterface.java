@@ -49,14 +49,13 @@ public class PhishTankInterface implements WatchDogTask {
 	 * @param config
 	 * @return
 	 */
-	public static PhishTankInterface create(Configuration config,
-			BannedUrlList banned) {
+	public static PhishTankInterface create(Configuration config, BannedUrlList banned) {
 
-		if (config.PHISHTANK_API_KEY == null) {
+		if (config.getPhishtankApiKey() == null) {
 			return null;
 		}
 
-		return new PhishTankInterface(config.PHISHTANK_API_KEY, banned);
+		return new PhishTankInterface(config.getPhishtankApiKey(), banned);
 	}
 
 	/**
@@ -103,8 +102,7 @@ public class PhishTankInterface implements WatchDogTask {
 			return false;
 		}
 
-		final ByteArrayInputStream ba = new ByteArrayInputStream(
-				response.getContent());
+		final ByteArrayInputStream ba = new ByteArrayInputStream(response.getContent());
 
 		final BufferedReader br = new BufferedReader(new InputStreamReader(ba));
 
@@ -160,8 +158,7 @@ public class PhishTankInterface implements WatchDogTask {
 	 */
 	private PhishTankInterface(final String apiKey, BannedUrlList banned) {
 
-		API_URL = "http://data.phishtank.com/data/" + apiKey
-				+ "/online-valid.csv";
+		API_URL = "http://data.phishtank.com/data/" + apiKey + "/online-valid.csv";
 
 		this.banned = banned;
 	}
