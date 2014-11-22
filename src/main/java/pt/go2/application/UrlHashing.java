@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.HttpStatus;
+
 import pt.go2.application.ErrorPages.Error;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.AbstractResponse;
@@ -55,7 +57,7 @@ class UrlHashing extends RequestHandler {
 			// hash not found, add new
 
 			ks.add(uri);
-			reply(request, response, new GenericResponse(202), false);
+			reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
 			health.test(uri, true);
 
 			if (uri.health() == Health.PROCESSING) {
