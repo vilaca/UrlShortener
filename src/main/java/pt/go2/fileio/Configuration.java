@@ -57,15 +57,24 @@ public class Configuration {
 
     /**
      * Read configuration
+     * 
+     * @throws IOException
      */
-    public Configuration() {
+    public Configuration() throws IOException {
 
         // attempt reading properties/configuration from JAR
 
+        boolean readProperties = false;
+
         try (InputStream is = Configuration.class.getResourceAsStream("/" + PROPERTIES);) {
+
             prop.load(is);
+            readProperties = true;
+
             LOGGER.info("Read embedded properties from jar file.");
+
         } catch (final IOException e) {
+
             LOGGER.info("Could not read properties from jar", e);
         }
 
@@ -75,23 +84,31 @@ public class Configuration {
             prop.load(is);
             LOGGER.info("Read properties from current directory.");
         } catch (final IOException e) {
+
             LOGGER.info("Could not read properties from directory", e);
+
+            if (!readProperties) {
+                throw new IOException(e);
+            }
         }
 
         // even if no .properties files were loaded, we still got defaults
 
-        accessLog = getProperty("server.accessLog", "access_log");
-        cacheHint = getPropertyAsInt("server.cache", 2);
-        dbFolder = getResumeFolder();
-        enforceDomain = getProperty("enforce-domain", null);
-        googleVerification = getProperty("google-site-verification", "");
         host = createInetSocketAddress();
+        accessLog = prop.getProperty("server.accessLog");
+        version = prop.getProperty("server.version");
+        cacheHint = getPropertyAsInt("server.cache");
+        redirect = getPropertyAsInt("server.redirect");
+
+        dbFolder = getResumeFolder();
+        enforceDomain = getProperty("server.domain");
+
+        googleVerification = getProperty("google-site-verification");
         phishtankApiKey = getProperty("phishtank-api-key");
-        redirect = getPropertyAsInt("server.redirect", 301);
         safeLookupApiKey = getProperty("safe-lookup-api-key");
-        version = getProperty("server.version", "beta");
-        watchdogWait = getPropertyAsInt("watchdog.wait", 5);
-        watchdogInterval = getPropertyAsInt("watchdog.interval", 16);
+
+        watchdogWait = getPropertyAsInt("watchdog.wait");
+        watchdogInterval = getPropertyAsInt("watchdog.interval");
     }
 
     /**
@@ -110,34 +127,6 @@ public class Configuration {
                 return null;
             }
         }
-        return value;
-    }
-
-    private int getPropertyAsInt(final String key, final int defaultValue) {
-
-        final String value = prop.getProperty(key);
-
-        if (value != null) {
-            try {
-                return Integer.parseInt(value);
-
-            } catch (final NumberFormatException nfe) {
-                return defaultValue;
-            }
-        }
-
-        return defaultValue;
-    }
-
-    private String getProperty(final String key, final String defaultValue) {
-
-        final String value = getProperty(key);
-
-        if (value == null || value.isEmpty()) {
-
-            return defaultValue;
-        }
-
         return value;
     }
 
@@ -161,9 +150,13 @@ public class Configuration {
         // both parameters are optional
 
         final String addr = prop.getProperty("server.host");
-        final int port = getPropertyAsInt("server.port", 80);
+        final int port = getPropertyAsInt("server.port");
 
         return addr == null ? new InetSocketAddress(port) : new InetSocketAddress(addr, port);
+    }
+
+    private int getPropertyAsInt(String property) {
+        return Integer.valueOf(prop.getProperty(property));
     }
 
     public String getAccessLog() {

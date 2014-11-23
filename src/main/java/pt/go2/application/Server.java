@@ -34,13 +34,14 @@ public class Server {
      */
     public static void main(final String[] args) {
 
-        final Configuration config = new Configuration();
+        final Configuration config;
 
         final KeyValueStore ks;
         final ErrorPages errors;
         final EmbeddedFiles res;
 
         try {
+            config = new Configuration();
             ks = new KeyValueStore(config);
             errors = new ErrorPages();
             res = new EmbeddedFiles(config);
@@ -158,5 +159,4 @@ public class Server {
 
         LOGGER.info("Server stopped.");
     }
-
 }
