@@ -67,7 +67,6 @@ public abstract class RequestHandler extends AbstractHandler {
 
             LOGGER.error("Error while streaming the response.", e);
 
-            // TODO ???
             status = HttpStatus.INTERNAL_SERVER_ERROR_500;
         }
 
