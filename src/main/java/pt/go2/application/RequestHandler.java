@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
@@ -63,11 +64,13 @@ public abstract class RequestHandler extends AbstractHandler {
 
 		} catch (IOException e) {
 
+			LOGGER.error("Error while streaming the response.", e);
+
 			// TODO ???
-			status = 500;
+			status = HttpStatus.INTERNAL_SERVER_ERROR_500;
 		}
 
-		printLogMessage(status, request, exchange, response, body.length);
+		printLogMessage(status, request, body.length);
 	}
 
 	protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
@@ -85,12 +88,10 @@ public abstract class RequestHandler extends AbstractHandler {
 	 */
 	private void setHeaders(HttpServletResponse exchange, final AbstractResponse response, final boolean cache) {
 
-		// TODO ? does this still work ?
 		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
 
 		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
 
-		// TODO only static files should be cached
 		if (cache) {
 
 			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
@@ -119,8 +120,7 @@ public abstract class RequestHandler extends AbstractHandler {
 	 * @param params
 	 * @param response
 	 */
-	protected void printLogMessage(int status, HttpServletRequest request, HttpServletResponse exchange,
-			final AbstractResponse response, final int size) {
+	protected void printLogMessage(int status, HttpServletRequest request, final int size) {
 
 		final StringBuilder sb = new StringBuilder();
 
@@ -150,17 +150,15 @@ public abstract class RequestHandler extends AbstractHandler {
 
 		final String output = sb.toString();
 
-		if (accessLog == null) {
-			System.out.print(output);
-			return;
-		}
-
-		try {
-			synchronized (this) {
-				accessLog.write(output);
-				accessLog.flush();
+		if (accessLog != null) {
+			try {
+				synchronized (this) {
+					accessLog.write(output);
+					accessLog.flush();
+				}
+			} catch (IOException e) {
+				LOGGER.error("Issue on access log.", e);
 			}
-		} catch (IOException e) {
 		}
 	}
 
@@ -185,7 +183,7 @@ public abstract class RequestHandler extends AbstractHandler {
 
 		if (enforce != null && !enforce.isEmpty() && !host.startsWith(enforce)) {
 
-			reply(request, response, new RedirectResponse("//" + enforce, 301), false);
+			reply(request, response, new RedirectResponse("//" + enforce, HttpStatus.MOVED_PERMANENTLY_301), false);
 
 			LOGGER.error("Wrong host: " + host);
 			return;
@@ -194,5 +192,5 @@ public abstract class RequestHandler extends AbstractHandler {
 		handle(request, response);
 	}
 
-	abstract public void handle(HttpServletRequest req, HttpServletResponse res);
+	public abstract void handle(HttpServletRequest req, HttpServletResponse res);
 }
