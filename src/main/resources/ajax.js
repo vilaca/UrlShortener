@@ -28,11 +28,11 @@ function inputError() {
 
 function inputForbidden(reason) {
     f.v.style.borderColor = 'red'
-    
-    if ( reason==='malware' )
-    	error.innerHTML = 'Forbidden URL - Suspected Malware'
-    else if ( reason==='phishing' )
-    	error.innerHTML = 'Forbidden URL - Suspected Phishing'
+
+    if (reason === 'malware')
+        error.innerHTML = 'Forbidden URL - Suspected Malware'
+    else if (reason === 'phishing')
+        error.innerHTML = 'Forbidden URL - Suspected Phishing'
 
 }
 
@@ -51,7 +51,6 @@ function clearError() {
     error.innerHTML = '&nbsp;'
 }
 
-
 function submit(su) {
 
 
@@ -64,15 +63,13 @@ function submit(su) {
 
             if (http.status == 200) {
                 if (http.responseText !== '') {
-                	error.innerHTML = ''
-                    // place result in form and select text
+                    error.innerHTML = ''
+                        // place result in form and select text
                     f.v.value = 'go2.pt' + http.responseText
                     f.v.focus()
                     f.v.select()
-                }
-                else
-                {
-                	error.innerHTML = 'Please try again.'
+                } else {
+                    error.innerHTML = 'Please try again.'
                 }
             } else if (http.status == 202) {
                 submit(su)
@@ -89,7 +86,7 @@ function submit(su) {
     http.open('POST', '/new/', true)
 
     http.send('v=' + su)
-    
+
     error.innerHTML = 'Processing...'
 }
 
