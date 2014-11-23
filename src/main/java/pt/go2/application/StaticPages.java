@@ -1,6 +1,5 @@
 package pt.go2.application;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
@@ -26,18 +25,18 @@ class StaticPages extends RequestHandler {
     final KeyValueStore ks;
     final EmbeddedFiles files;
 
-    public StaticPages(final Configuration config, final BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
-            EmbeddedFiles res) {
-        super(config, accessLog, errors);
+    public StaticPages(final Configuration config, ErrorPages errors, KeyValueStore ks, EmbeddedFiles res) {
+        super(config, errors);
+
         this.ks = ks;
         this.files = res;
     }
 
     /**
      * Handle request, parse URI filename from request into page resource
-     * 
+     *
      * @param
-     * 
+     *
      * @exception IOException
      */
     @Override
@@ -81,9 +80,9 @@ class StaticPages extends RequestHandler {
 
     /**
      * Parse requested filename from URI
-     * 
+     *
      * @param path
-     * 
+     *
      * @return Requested filename
      */
     private String getRequestedFilename(final String path) {

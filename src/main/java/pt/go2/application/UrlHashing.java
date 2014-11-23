@@ -1,7 +1,6 @@
 package pt.go2.application;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,10 +30,9 @@ class UrlHashing extends RequestHandler {
     final KeyValueStore ks;
     final UrlHealth health;
 
-    public UrlHashing(Configuration config, BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
-            UrlHealth health) {
+    public UrlHashing(Configuration config, ErrorPages errors, KeyValueStore ks, UrlHealth health) {
 
-        super(config, accessLog, errors);
+        super(config, errors);
 
         this.ks = ks;
         this.health = health;

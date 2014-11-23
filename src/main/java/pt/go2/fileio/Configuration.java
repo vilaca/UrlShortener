@@ -21,9 +21,6 @@ public class Configuration {
     // resource file locations on JAR
     private static final String PROPERTIES = "application.properties";
 
-    // apache style access log
-    private final String accessLog;
-
     // Amount of time static pages should be cached
     private final int cacheHint;
 
@@ -96,7 +93,6 @@ public class Configuration {
         // even if no .properties files were loaded, we still got defaults
 
         host = createInetSocketAddress();
-        accessLog = prop.getProperty("server.accessLog");
         version = prop.getProperty("server.version");
         cacheHint = getPropertyAsInt("server.cache");
         redirect = getPropertyAsInt("server.redirect");
@@ -158,10 +154,6 @@ public class Configuration {
 
     private int getPropertyAsInt(String property) {
         return Integer.valueOf(prop.getProperty(property));
-    }
-
-    public String getAccessLog() {
-        return accessLog;
     }
 
     public int getCacheHint() {

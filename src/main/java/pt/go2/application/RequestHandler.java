@@ -1,6 +1,5 @@
 package pt.go2.application;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -26,14 +25,13 @@ import pt.go2.response.RedirectResponse;
 public abstract class RequestHandler extends AbstractHandler {
 
     private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger ACCESSLOGGER = LogManager.getLogger("accesslogger");
 
     protected final Configuration config;
-    private final BufferedWriter accessLog;
     private final ErrorPages errors;
 
-    public RequestHandler(Configuration config, BufferedWriter accessLog, ErrorPages errors) {
+    public RequestHandler(Configuration config, ErrorPages errors) {
 
-        this.accessLog = accessLog;
         this.config = config;
         this.errors = errors;
     }
@@ -70,7 +68,7 @@ public abstract class RequestHandler extends AbstractHandler {
             status = HttpStatus.INTERNAL_SERVER_ERROR_500;
         }
 
-        printLogMessage(status, request, body.length);
+        ACCESSLOGGER.trace(printLogMessage(status, request, body.length));
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
@@ -119,8 +117,9 @@ public abstract class RequestHandler extends AbstractHandler {
      *
      * @param params
      * @param response
+     * @return
      */
-    protected void printLogMessage(int status, HttpServletRequest request, final int size) {
+    protected String printLogMessage(int status, HttpServletRequest request, final int size) {
 
         final StringBuilder sb = new StringBuilder();
 
@@ -146,20 +145,8 @@ public abstract class RequestHandler extends AbstractHandler {
         sb.append(referer == null ? "-" : referer);
 
         sb.append("\" \"" + agent + "\"");
-        sb.append(System.getProperty("line.separator"));
 
-        final String output = sb.toString();
-
-        if (accessLog != null) {
-            try {
-                synchronized (this) {
-                    accessLog.write(output);
-                    accessLog.flush();
-                }
-            } catch (final IOException e) {
-                LOGGER.error("Issue on access log.", e);
-            }
-        }
+        return sb.toString();
     }
 
     @Override

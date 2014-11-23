@@ -1,7 +1,5 @@
 package pt.go2.application;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.logging.log4j.LogManager;
@@ -33,6 +31,10 @@ public class Server {
      * Process initial method
      */
     public static void main(final String[] args) {
+
+        LOGGER.trace("Starting server...");
+
+        // log server version
 
         final Configuration config;
 
@@ -67,10 +69,6 @@ public class Server {
 
         watchdog.start(config.getWatchdogWait(), config.getWatchdogInterval());
 
-        LOGGER.trace("Starting server...");
-
-        // log server version
-
         LOGGER.trace("Preparing to run " + config.getVersion() + ".");
 
         LOGGER.trace("Resuming DB from folder: " + config.getDbFolder());
@@ -83,32 +81,15 @@ public class Server {
 
         listener = new org.eclipse.jetty.server.Server(config.getHost());
 
-        LOGGER.trace("Appending to access log.");
-
-        // start access log
-
-        BufferedWriter accessLog = null;
-
-        try {
-            // TODO
-            final FileWriter file = new FileWriter(config.getAccessLog(), true);
-            accessLog = new BufferedWriter(file);
-        } catch (final IOException e) {
-
-            LOGGER.error("Error creating access log.", e);
-        }
-
-        LOGGER.trace("Starting virtual file system.");
-
         // RequestHandler
 
         final ContextHandler root = new ContextHandler();
         root.setContextPath("/");
-        root.setHandler(new StaticPages(config, accessLog, errors, ks, res));
+        root.setHandler(new StaticPages(config, errors, ks, res));
 
         final ContextHandler novo = new ContextHandler();
         novo.setContextPath("/new/");
-        novo.setHandler(new UrlHashing(config, accessLog, errors, ks, ul));
+        novo.setHandler(new UrlHashing(config, errors, ks, ul));
 
         final ContextHandlerCollection contexts = new ContextHandlerCollection();
         contexts.setHandlers(new Handler[] { novo, root });
@@ -144,16 +125,6 @@ public class Server {
         } while (running);
 
         LOGGER.trace("Server stopping.");
-
-        // Destroy server
-        try {
-            if (accessLog != null) {
-                accessLog.close();
-            }
-        } catch (final IOException e) {
-
-            LOGGER.error("Access log error.", e);
-        }
 
         listener.destroy();
 
