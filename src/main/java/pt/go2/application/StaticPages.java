@@ -44,7 +44,7 @@ class StaticPages extends RequestHandler {
 	public void handle(HttpServletRequest request, HttpServletResponse exchange) {
 		final String requested = getRequestedFilename(request.getRequestURI());
 
-		if (requested.length() == 6) {
+		if (requested.length() == HashKey.LENGTH) {
 
 			final Uri uri = ks.get(new HashKey(requested));
 
@@ -58,7 +58,7 @@ class StaticPages extends RequestHandler {
 				reply(request, exchange, ErrorPages.Error.PHISHING, true);
 				break;
 			case OK:
-				reply(request, exchange, new RedirectResponse(uri.toString(), 301), true);
+				reply(request, exchange, new RedirectResponse(uri.toString(), config.getRedirect()), true);
 				break;
 			case MALWARE:
 				reply(request, exchange, ErrorPages.Error.MALWARE, true);
@@ -90,7 +90,7 @@ class StaticPages extends RequestHandler {
 
 		// split into tokens
 
-		if (path.equals("/")) {
+		if ("/".equals(path)) {
 			return path;
 		}
 
