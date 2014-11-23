@@ -82,24 +82,12 @@ public class PhishTankDownloader {
 
             while ((entry = br.readLine()) != null) {
 
-                int idx = entry.indexOf(',') + 1, end;
+                final Uri uri = parseLineIntoUri(entry);
 
-                if (entry.charAt(idx) == '"') {
-                    idx++;
-                    end = entry.indexOf('"', idx);
-                } else {
-                    end = entry.indexOf(',', idx);
+                if (uri != null) {
+
+                    newList.add(uri);
                 }
-
-                if (idx == -1 || end == -1) {
-                    LOGGER.error("Bad entry: " + entry);
-                    continue;
-                }
-
-                final Uri uri;
-                uri = Uri.create(entry.substring(idx, end), false);
-
-                newList.add(uri);
             }
         } catch (final IOException e) {
             LOGGER.error(e);
@@ -117,6 +105,25 @@ public class PhishTankDownloader {
         LOGGER.info("Download exiting");
 
         return true;
+    }
+
+    private Uri parseLineIntoUri(String entry) {
+
+        int idx = entry.indexOf(',') + 1, end;
+
+        if (entry.charAt(idx) == '"') {
+            idx++;
+            end = entry.indexOf('"', idx);
+        } else {
+            end = entry.indexOf(',', idx);
+        }
+
+        if (idx == -1 || end == -1) {
+            LOGGER.error("Bad entry: " + entry);
+            return null;
+        }
+
+        return Uri.create(entry.substring(idx, end), false);
     }
 
 }
