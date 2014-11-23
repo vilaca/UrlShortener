@@ -36,7 +36,7 @@ public class EmbeddedFiles {
 
         this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
 
-        if (!config.getGoogleVerification().isEmpty()) {
+        if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
             this.pages.put(config.getGoogleVerification(),
                     new GzipResponse(("google-site-verification: " + config.getGoogleVerification()).getBytes(),
                             AbstractResponse.MIME_TEXT_PLAIN));
