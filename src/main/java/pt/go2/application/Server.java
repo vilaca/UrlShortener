@@ -26,6 +26,9 @@ public class Server {
 
 	private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
+	private Server() {
+	}
+
 	/**
 	 * Process initial method
 	 */
@@ -86,11 +89,12 @@ public class Server {
 		BufferedWriter accessLog = null;
 
 		try {
-
+			// TODO
 			final FileWriter file = new FileWriter(config.getAccessLog(), true);
 			accessLog = new BufferedWriter(file);
 		} catch (IOException e) {
-			System.out.println("Access log redirected to console.");
+
+			LOGGER.error("Error creating access log.", e);
 		}
 
 		LOGGER.trace("Starting virtual file system.");
@@ -116,37 +120,43 @@ public class Server {
 
 			listener.start();
 
-			LOGGER.trace("Listener is Started.");
-
-			System.out.println("Server Running. Press [k] to kill listener.");
-			boolean running = true;
-			do {
-
-				try {
-					running = System.in.read() != 'k';
-				} catch (IOException e) {
-				}
-
-			} while (running);
-
-			LOGGER.trace("Server stopping.");
-
 		} catch (Exception e1) {
 
-			LOGGER.trace("Couldn't start server.", e1);
+			LOGGER.error("Server start error.", e1);
+			return;
+		}
 
-		} finally {
+		LOGGER.info("Server Running. Press [k] to kill listener.");
 
-			// Destroy server
+		boolean running = true;
+		do {
+
 			try {
-				if (accessLog != null) {
-					accessLog.close();
-				}
+
+				running = System.in.read() != 'k';
+
 			} catch (IOException e) {
+
+				LOGGER.error(e);
 			}
 
-			listener.destroy();
-			LOGGER.trace("Server stopped.");
+		} while (running);
+
+		LOGGER.trace("Server stopping.");
+
+		// Destroy server
+		try {
+			if (accessLog != null) {
+				accessLog.close();
+			}
+		} catch (IOException e) {
+
+			LOGGER.error("Access log error.", e);
 		}
+
+		listener.destroy();
+
+		LOGGER.info("Server stopped.");
 	}
+
 }
