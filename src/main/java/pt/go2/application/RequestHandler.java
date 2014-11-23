@@ -25,7 +25,9 @@ import pt.go2.response.RedirectResponse;
 public abstract class RequestHandler extends AbstractHandler {
 
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final Logger ACCESSLOGGER = LogManager.getLogger("accesslogger");
+
+    // only for access_log file
+    private static final Logger LOG = LogManager.getLogger("accesslogger");
 
     protected final Configuration config;
     private final ErrorPages errors;
@@ -68,7 +70,7 @@ public abstract class RequestHandler extends AbstractHandler {
             status = HttpStatus.INTERNAL_SERVER_ERROR_500;
         }
 
-        ACCESSLOGGER.trace(printLogMessage(status, request, body.length));
+        LOG.trace(printLogMessage(status, request, body.length));
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
