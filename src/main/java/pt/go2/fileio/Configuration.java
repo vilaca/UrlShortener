@@ -153,7 +153,7 @@ public class Configuration {
     }
 
     private int getPropertyAsInt(String property) {
-        return Integer.valueOf(prop.getProperty(property));
+        return Integer.parseInt(prop.getProperty(property));
     }
 
     public int getCacheHint() {
