@@ -18,6 +18,8 @@ import pt.go2.storage.Uri.Health;
 
 public class SafeBrowsingLookup {
 
+	private static final int MAX_ALLOWED = 500;
+
 	private static final String PHISHING = "phishing";
 
 	private static final String MALWARE = "malware";
@@ -80,14 +82,17 @@ public class SafeBrowsingLookup {
 	}
 
 	public void safeBrowsingLookup(final List<Uri> lookuplist) {
-		for (int i = 0; i < lookuplist.size();) {
+
+		int i = 0;
+
+		while (i < lookuplist.size()) {
 
 			// prepare a list of a max of 500 URIs
 
 			final StringBuilder sb = new StringBuilder();
 
 			int j;
-			for (j = 0; j < 500 && i < lookuplist.size(); i++, j++) {
+			for (j = 0; j < MAX_ALLOWED && i < lookuplist.size(); i++, j++) {
 				sb.append(lookuplist.get(i).toString());
 				sb.append("\n");
 			}
@@ -149,27 +154,32 @@ public class SafeBrowsingLookup {
 
 			final int r = httpResponse.getStatus();
 
-			switch (r) {
-			case HttpStatus.OK_200:
-				LOGGER.info("Some issues...");
-				break;
-			case HttpStatus.NO_CONTENT_204:
-				LOGGER.info("No issues...");
-				return new String[0];
-			case HttpStatus.BAD_REQUEST_400:
-			case HttpStatus.UNAUTHORIZED_401:
-			case HttpStatus.SERVICE_UNAVAILABLE_503:
-			default:
-				LOGGER.error("Error " + r + " in POST safebrowsing lookup API.");
-				return new String[0];
-			}
-
-			return prepareResponse(httpResponse);
+			return handleResponse(httpResponse, r);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in POST safebrowsing lookup API.", e);
 			return new String[0];
 		}
+	}
+
+	private String[] handleResponse(final ContentResponse httpResponse, final int r) {
+
+		switch (r) {
+		case HttpStatus.OK_200:
+			LOGGER.info("Some issues...");
+			break;
+		case HttpStatus.NO_CONTENT_204:
+			LOGGER.info("No issues...");
+			return new String[0];
+		case HttpStatus.BAD_REQUEST_400:
+		case HttpStatus.UNAUTHORIZED_401:
+		case HttpStatus.SERVICE_UNAVAILABLE_503:
+		default:
+			LOGGER.error("Error " + r + " in POST safebrowsing lookup API.");
+			return new String[0];
+		}
+
+		return prepareResponse(httpResponse);
 	}
 
 	private String[] prepareResponse(final ContentResponse httpResponse) {
