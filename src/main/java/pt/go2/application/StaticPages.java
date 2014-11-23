@@ -85,15 +85,15 @@ class StaticPages extends RequestHandler {
      *
      * @return Requested filename
      */
-    private String getRequestedFilename(final String path) {
+    private String getRequestedFilename(String path) {
 
         // split into tokens
 
-        if ("/".equals(path)) {
-            return path;
+        if (path.isEmpty() || "/".equals(path)) {
+            return "/";
         }
 
-        final int idx = path.indexOf('/', 1);
+        final int idx = path.indexOf("/", 1);
 
         return idx == -1 ? path.substring(1) : path.substring(1, idx);
     }
