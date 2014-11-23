@@ -16,9 +16,9 @@ import pt.go2.storage.Uri.Health;
 
 public class UrlHealth {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final int ONE_HOUR = 60 * 60 * 1000;
 
-	private final long interval = 60 * 60 * 1000; // 1h
+	private static final Logger LOGGER = LogManager.getLogger();
 
 	private final PhishLocalCache banned;
 	private final WhiteList whitelist;
@@ -44,52 +44,25 @@ public class UrlHealth {
 
 			if (uri.health() != Health.OK) {
 				LOGGER.trace(uri.toString() + " - " + uri.health().toString());
-				continue;
-			}
 
-			// remember files that still need to be checked
+			} else if (sbl.canUseSafeBrowsingLookup()) {
 
-			if (sbl.canUseSafeBrowsingLookup()) {
+				// remember files that still need to be checked
+
 				lookuplist.add(uri);
 			}
 		}
 
 		// prepare list for safebrowsing lookup
 
-		for (int i = 0; i < lookuplist.size();) {
-
-			// prepare a list of a max of 500 URIs
-
-			final StringBuilder sb = new StringBuilder();
-
-			int j;
-			for (j = 0; j < 500 && i < lookuplist.size(); i++, j++) {
-				sb.append(lookuplist.get(i).toString());
-				sb.append("\n");
-			}
-
-			// prepend n of records into list
-
-			sb.insert(0, "\n");
-			sb.insert(0, j);
-
-			// response is an array, a entry for each URI
-
-			String[] response = sbl.safeBrowsingLookup(sb.toString());
-
-			if (response.length == 0) {
-				continue;
-			}
-
-			sbl.markBadUris(lookuplist, response);
-		}
+		sbl.safeBrowsingLookup(lookuplist);
 	}
 
 	public void test(Uri uri, boolean useSafeBrowsing) {
 
 		final long now = new Date().getTime();
 
-		if (now - uri.lastChecked() < interval) {
+		if (now - uri.lastChecked() < ONE_HOUR) {
 			return;
 		}
 

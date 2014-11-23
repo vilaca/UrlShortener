@@ -30,32 +30,6 @@ public class SafeBrowsingLookup {
 		this.apiKey = apiKey;
 	}
 
-	public void markBadUris(final List<Uri> lookuplist, String[] response) {
-		for (int j = 0; j < response.length; j++) {
-
-			if (response[j].contains(MALWARE)) {
-
-				final Uri uri = lookuplist.get(j);
-
-				uri.setHealth(Health.MALWARE);
-
-				logBadUri(uri);
-
-			} else if (response[j].contains(PHISHING)) {
-
-				final Uri uri = lookuplist.get(j);
-
-				uri.setHealth(Health.PHISHING);
-
-				logBadUri(uri);
-			}
-		}
-	}
-
-	private void logBadUri(final Uri uri) {
-		LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
-	}
-
 	public boolean canUseSafeBrowsingLookup() {
 		return apiKey != null && !apiKey.isEmpty();
 	}
@@ -105,7 +79,63 @@ public class SafeBrowsingLookup {
 		logBadUri(uri);
 	}
 
-	public String[] safeBrowsingLookup(String body) {
+	public void safeBrowsingLookup(final List<Uri> lookuplist) {
+		for (int i = 0; i < lookuplist.size();) {
+
+			// prepare a list of a max of 500 URIs
+
+			final StringBuilder sb = new StringBuilder();
+
+			int j;
+			for (j = 0; j < 500 && i < lookuplist.size(); i++, j++) {
+				sb.append(lookuplist.get(i).toString());
+				sb.append("\n");
+			}
+
+			// prepend n of records into list
+
+			sb.insert(0, "\n");
+			sb.insert(0, j);
+
+			// response is an array, a entry for each URI
+
+			String[] response = lookup(sb.toString());
+
+			if (response.length == 0) {
+				continue;
+			}
+
+			markBadUris(lookuplist, response);
+		}
+	}
+
+	private void markBadUris(final List<Uri> lookuplist, String[] response) {
+		for (int j = 0; j < response.length; j++) {
+
+			if (response[j].contains(MALWARE)) {
+
+				final Uri uri = lookuplist.get(j);
+
+				uri.setHealth(Health.MALWARE);
+
+				logBadUri(uri);
+
+			} else if (response[j].contains(PHISHING)) {
+
+				final Uri uri = lookuplist.get(j);
+
+				uri.setHealth(Health.PHISHING);
+
+				logBadUri(uri);
+			}
+		}
+	}
+
+	private void logBadUri(final Uri uri) {
+		LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
+	}
+
+	private String[] lookup(String body) {
 
 		final String lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key="
 				+ apiKey;
