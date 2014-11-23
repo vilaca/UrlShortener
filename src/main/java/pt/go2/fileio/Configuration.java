@@ -31,7 +31,7 @@ public class Configuration {
     private final String dbFolder;
 
     // site domain
-    private final String enforceDomain;
+    private final String domain;
 
     // Google validation for webmaster tools site
     private final String googleVerification;
@@ -57,7 +57,7 @@ public class Configuration {
 
     /**
      * Read configuration
-     * 
+     *
      * @throws IOException
      */
     public Configuration() throws IOException {
@@ -66,26 +66,27 @@ public class Configuration {
 
         boolean readProperties = false;
 
-        try (InputStream is = Configuration.class.getResourceAsStream("/" + PROPERTIES);) {
+        try (final InputStream baseProperties = Configuration.class.getResourceAsStream("/" + PROPERTIES)) {
 
-            prop.load(is);
+            prop.load(baseProperties);
             readProperties = true;
-
-            LOGGER.info("Read embedded properties from jar file.");
 
         } catch (final IOException e) {
 
-            LOGGER.info("Could not read properties from jar", e);
+            LOGGER.info("Could not read base properties from jar", e);
         }
 
         // attempt reading properties/configuration from basedir
 
-        try (InputStream is = new FileInputStream(PROPERTIES);) {
-            prop.load(is);
-            LOGGER.info("Read properties from current directory.");
+        try (InputStream additionalProperties = new FileInputStream(PROPERTIES);) {
+
+            prop.load(additionalProperties);
+
+            LOGGER.info("Read additional properties from current directory.");
+
         } catch (final IOException e) {
 
-            LOGGER.info("Could not read properties from directory", e);
+            LOGGER.info("Could not read additonal properties from directory", e);
 
             if (!readProperties) {
                 throw new IOException(e);
@@ -101,7 +102,7 @@ public class Configuration {
         redirect = getPropertyAsInt("server.redirect");
 
         dbFolder = getResumeFolder();
-        enforceDomain = getProperty("server.domain");
+        domain = getProperty("server.domain");
 
         googleVerification = getProperty("google-site-verification");
         phishtankApiKey = getProperty("phishtank-api-key");
@@ -171,8 +172,8 @@ public class Configuration {
         return dbFolder;
     }
 
-    public String getEnforceDomain() {
-        return enforceDomain;
+    public String getDomain() {
+        return domain;
     }
 
     public String getGoogleVerification() {

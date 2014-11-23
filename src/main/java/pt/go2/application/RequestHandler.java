@@ -178,9 +178,9 @@ public abstract class RequestHandler extends AbstractHandler {
             return;
         }
 
-        // redirect to out domain if host header is not correct
+        // redirect to domain if host header is not correct
 
-        final String enforce = config.getEnforceDomain();
+        final String enforce = config.getDomain();
 
         if (enforce != null && !enforce.isEmpty() && !host.startsWith(enforce)) {
 
