@@ -8,7 +8,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Backup;
-import pt.go2.fileio.Configuration;
 import pt.go2.fileio.Restore;
 import pt.go2.fileio.RestoreItem;
 
@@ -26,11 +25,11 @@ public class KeyValueStore {
     // log for restoring hash->url
     private final Backup backupFile;
 
-    public KeyValueStore(final Configuration config) throws IOException {
+    public KeyValueStore(String dbFolder) throws IOException {
 
-        this.backupFile = new Backup(config.getDbFolder());
+        this.backupFile = new Backup(dbFolder);
 
-        final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
+        final List<RestoreItem> restoredItems = Restore.start(dbFolder);
 
         for (final RestoreItem item : restoredItems) {
             final HashKey hk = new HashKey(item.getKey());

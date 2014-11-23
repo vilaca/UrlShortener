@@ -44,7 +44,7 @@ public class Server {
 
         try {
             config = new Configuration();
-            ks = new KeyValueStore(config);
+            ks = new KeyValueStore(config.getDbFolder());
             errors = new ErrorPages();
             res = new EmbeddedFiles(config);
 
