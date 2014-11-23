@@ -18,200 +18,200 @@ import pt.go2.storage.Uri.Health;
 
 public class SafeBrowsingLookup {
 
-	private static final int MAX_ALLOWED = 500;
+    private static final int MAX_ALLOWED = 500;
 
-	private static final String PHISHING = "phishing";
+    private static final String PHISHING = "phishing";
 
-	private static final String MALWARE = "malware";
+    private static final String MALWARE = "malware";
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	private final String apiKey;
+    private final String apiKey;
 
-	public SafeBrowsingLookup(String apiKey) {
-		this.apiKey = apiKey;
-	}
+    public SafeBrowsingLookup(String apiKey) {
+        this.apiKey = apiKey;
+    }
 
-	public boolean canUseSafeBrowsingLookup() {
-		return apiKey != null && !apiKey.isEmpty();
-	}
+    public boolean canUseSafeBrowsingLookup() {
+        return apiKey != null && !apiKey.isEmpty();
+    }
 
-	public void safeBrowsingLookup(Uri uri) {
+    public void safeBrowsingLookup(Uri uri) {
 
-		final String lookup;
+        final String lookup;
 
-		try {
+        try {
 
-			final StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
 
-			sb.append("https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key=");
-			sb.append(apiKey);
-			sb.append("&url=");
-			sb.append(URLEncoder.encode(uri.toString(), "ASCII"));
+            sb.append("https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key=");
+            sb.append(apiKey);
+            sb.append("&url=");
+            sb.append(URLEncoder.encode(uri.toString(), "ASCII"));
 
-			lookup = sb.toString();
+            lookup = sb.toString();
 
-		} catch (UnsupportedEncodingException e) {
-			LOGGER.error("Error: " + uri, e);
-			return;
-		}
+        } catch (final UnsupportedEncodingException e) {
+            LOGGER.error("Error: " + uri, e);
+            return;
+        }
 
-		final ContentResponse response;
-		try {
-			final HttpClient httpClient = createHttpClient(lookup);
-			response = httpClient.GET(lookup);
+        final ContentResponse response;
+        try {
+            final HttpClient httpClient = createHttpClient(lookup);
+            response = httpClient.GET(lookup);
 
-		} catch (Exception e) {
-			LOGGER.error("Connecting to : " + lookup, e);
-			return;
-		}
+        } catch (final Exception e) {
+            LOGGER.error("Connecting to : " + lookup, e);
+            return;
+        }
 
-		LOGGER.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
+        LOGGER.info("Google SB Lookup API returns " + response.getStatus() + " for " + uri.toString());
 
-		if (response.getStatus() != HttpStatus.OK_200) {
-			return;
-		}
+        if (response.getStatus() != HttpStatus.OK_200) {
+            return;
+        }
 
-		if (response.getContentAsString().contains(MALWARE)) {
-			uri.setHealth(Health.MALWARE);
-		} else {
-			uri.setHealth(Health.PHISHING);
-		}
+        if (response.getContentAsString().contains(MALWARE)) {
+            uri.setHealth(Health.MALWARE);
+        } else {
+            uri.setHealth(Health.PHISHING);
+        }
 
-		logBadUri(uri);
-	}
+        logBadUri(uri);
+    }
 
-	public void safeBrowsingLookup(final List<Uri> lookuplist) {
+    public void safeBrowsingLookup(final List<Uri> lookuplist) {
 
-		int i = 0;
+        int i = 0;
 
-		while (i < lookuplist.size()) {
+        while (i < lookuplist.size()) {
 
-			// prepare a list of a max of 500 URIs
+            // prepare a list of a max of 500 URIs
 
-			final StringBuilder sb = new StringBuilder();
+            final StringBuilder sb = new StringBuilder();
 
-			int j;
-			for (j = 0; j < MAX_ALLOWED && i < lookuplist.size(); i++, j++) {
-				sb.append(lookuplist.get(i).toString());
-				sb.append("\n");
-			}
+            int j;
+            for (j = 0; j < MAX_ALLOWED && i < lookuplist.size(); i++, j++) {
+                sb.append(lookuplist.get(i).toString());
+                sb.append("\n");
+            }
 
-			// prepend n of records into list
+            // prepend n of records into list
 
-			sb.insert(0, "\n");
-			sb.insert(0, j);
+            sb.insert(0, "\n");
+            sb.insert(0, j);
 
-			// response is an array, a entry for each URI
+            // response is an array, a entry for each URI
 
-			String[] response = lookup(sb.toString());
+            final String[] response = lookup(sb.toString());
 
-			if (response.length == 0) {
-				continue;
-			}
+            if (response.length == 0) {
+                continue;
+            }
 
-			markBadUris(lookuplist, response);
-		}
-	}
+            markBadUris(lookuplist, response);
+        }
+    }
 
-	private void markBadUris(final List<Uri> lookuplist, String[] response) {
-		for (int j = 0; j < response.length; j++) {
+    private void markBadUris(final List<Uri> lookuplist, String[] response) {
+        for (int j = 0; j < response.length; j++) {
 
-			if (response[j].contains(MALWARE)) {
+            if (response[j].contains(MALWARE)) {
 
-				final Uri uri = lookuplist.get(j);
+                final Uri uri = lookuplist.get(j);
 
-				uri.setHealth(Health.MALWARE);
+                uri.setHealth(Health.MALWARE);
 
-				logBadUri(uri);
+                logBadUri(uri);
 
-			} else if (response[j].contains(PHISHING)) {
+            } else if (response[j].contains(PHISHING)) {
 
-				final Uri uri = lookuplist.get(j);
+                final Uri uri = lookuplist.get(j);
 
-				uri.setHealth(Health.PHISHING);
+                uri.setHealth(Health.PHISHING);
 
-				logBadUri(uri);
-			}
-		}
-	}
+                logBadUri(uri);
+            }
+        }
+    }
 
-	private void logBadUri(final Uri uri) {
-		LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
-	}
+    private void logBadUri(final Uri uri) {
+        LOGGER.trace("Uri: " + uri.toString() + " H: " + uri.health().toString());
+    }
 
-	private String[] lookup(String body) {
+    private String[] lookup(String body) {
 
-		final String lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key="
-				+ apiKey;
+        final String lookup = "https://sb-ssl.google.com/safebrowsing/api/lookup?client=go2pt&appver=1.0.0&pver=3.1&key="
+                + apiKey;
 
-		try {
+        try {
 
-			final HttpClient httpClient = createHttpClient(lookup);
+            final HttpClient httpClient = createHttpClient(lookup);
 
-			final ContentResponse httpResponse = httpClient.POST(lookup)
-					.content(new BytesContentProvider(body.getBytes()), "text/plain").send();
+            final ContentResponse httpResponse = httpClient.POST(lookup)
+                    .content(new BytesContentProvider(body.getBytes()), "text/plain").send();
 
-			final int r = httpResponse.getStatus();
+            final int r = httpResponse.getStatus();
 
-			return handleResponse(httpResponse, r);
+            return handleResponse(httpResponse, r);
 
-		} catch (Exception e) {
-			LOGGER.error("Error in POST safebrowsing lookup API.", e);
-			return new String[0];
-		}
-	}
+        } catch (final Exception e) {
+            LOGGER.error("Error in POST safebrowsing lookup API.", e);
+            return new String[0];
+        }
+    }
 
-	private String[] handleResponse(final ContentResponse httpResponse, final int r) {
+    private String[] handleResponse(final ContentResponse httpResponse, final int r) {
 
-		switch (r) {
-		case HttpStatus.OK_200:
-			LOGGER.info("Some issues...");
-			break;
-		case HttpStatus.NO_CONTENT_204:
-			LOGGER.info("No issues...");
-			return new String[0];
-		case HttpStatus.BAD_REQUEST_400:
-		case HttpStatus.UNAUTHORIZED_401:
-		case HttpStatus.SERVICE_UNAVAILABLE_503:
-		default:
-			LOGGER.error("Error " + r + " in POST safebrowsing lookup API.");
-			return new String[0];
-		}
+        switch (r) {
+        case HttpStatus.OK_200:
+            LOGGER.info("Some issues...");
+            break;
+        case HttpStatus.NO_CONTENT_204:
+            LOGGER.info("No issues...");
+            return new String[0];
+        case HttpStatus.BAD_REQUEST_400:
+        case HttpStatus.UNAUTHORIZED_401:
+        case HttpStatus.SERVICE_UNAVAILABLE_503:
+        default:
+            LOGGER.error("Error " + r + " in POST safebrowsing lookup API.");
+            return new String[0];
+        }
 
-		return prepareResponse(httpResponse);
-	}
+        return prepareResponse(httpResponse);
+    }
 
-	private String[] prepareResponse(final ContentResponse httpResponse) {
+    private String[] prepareResponse(final ContentResponse httpResponse) {
 
-		final String response = httpResponse.getContentAsString();
+        final String response = httpResponse.getContentAsString();
 
-		if (response.contains(MALWARE) || response.contains(PHISHING)) {
-			return response.split("\n");
-		}
+        if (response.contains(MALWARE) || response.contains(PHISHING)) {
+            return response.split("\n");
+        }
 
-		return new String[0];
-	}
+        return new String[0];
+    }
 
-	private HttpClient createHttpClient(final String lookup) throws IOException {
+    private HttpClient createHttpClient(final String lookup) throws IOException {
 
-		final HttpClient httpClient;
+        final HttpClient httpClient;
 
-		if (lookup.startsWith("https://")) {
-			httpClient = new HttpClient(new SslContextFactory());
-		} else {
-			httpClient = new HttpClient();
-		}
+        if (lookup.startsWith("https://")) {
+            httpClient = new HttpClient(new SslContextFactory());
+        } else {
+            httpClient = new HttpClient();
+        }
 
-		httpClient.setFollowRedirects(false);
+        httpClient.setFollowRedirects(false);
 
-		try {
-			httpClient.start();
-		} catch (Exception e) {
-			LOGGER.error(e);
-			throw new IOException(e.getMessage());
-		}
+        try {
+            httpClient.start();
+        } catch (final Exception e) {
+            LOGGER.error(e);
+            throw new IOException(e.getMessage());
+        }
 
-		return httpClient;
-	}
+        return httpClient;
+    }
 }

@@ -7,23 +7,23 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class RedirectResponse extends AbstractResponse {
 
-	private final String redirect;
-	private final int status;
+    private final String redirect;
+    private final int status;
 
-	public RedirectResponse(final String redirect, final int status) {
+    public RedirectResponse(final String redirect, final int status) {
 
-		this.redirect = redirect;
-		this.status = status;
-	}
+        this.redirect = redirect;
+        this.status = status;
+    }
 
-	@Override
-	public int getHttpStatus() {
-		return status;
-	}
+    @Override
+    public int getHttpStatus() {
+        return status;
+    }
 
-	@Override
-	public byte[] run(HttpServletResponse exchange) {
-		exchange.setHeader(RESPONSE_HEADER_LOCATION, redirect);
-		return new byte[] {};
-	}
+    @Override
+    public byte[] run(HttpServletResponse exchange) {
+        exchange.setHeader(RESPONSE_HEADER_LOCATION, redirect);
+        return new byte[] {};
+    }
 }

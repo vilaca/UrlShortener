@@ -7,11 +7,11 @@ import java.util.Date;
  */
 public interface WatchDogTask {
 
-	void refresh();
-	
-	Date lastRun();
-	
-	long interval();
+    void refresh();
 
-	String name();
+    Date lastRun();
+
+    long interval();
+
+    String name();
 }

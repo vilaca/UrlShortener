@@ -11,28 +11,28 @@ import pt.go2.storage.Uri;
 
 public class PhishLocalCache {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	// keep the ids off all known entries - supplied by PhishTank
-	// and all the banned Uris
+    // keep the ids off all known entries - supplied by PhishTank
+    // and all the banned Uris
 
-	private volatile Set<Uri> banned = new HashSet<>(0);
+    private volatile Set<Uri> banned = new HashSet<>(0);
 
-	public void set(Set<Uri> banned) {
+    public void set(Set<Uri> banned) {
 
-		LOGGER.info("Stats - Old: " + this.banned.size() + " New: " + banned.size());
+        LOGGER.info("Stats - Old: " + this.banned.size() + " New: " + banned.size());
 
-		this.banned = Collections.unmodifiableSet(banned);
-	}
+        this.banned = Collections.unmodifiableSet(banned);
+    }
 
-	/**
-	 * Check if Uri is banned
-	 * 
-	 * @param uri
-	 * @return
-	 */
-	public boolean isBanned(final Uri uri) {
+    /**
+     * Check if Uri is banned
+     *
+     * @param uri
+     * @return
+     */
+    public boolean isBanned(final Uri uri) {
 
-		return banned.contains(uri);
-	}
+        return banned.contains(uri);
+    }
 }

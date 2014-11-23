@@ -24,139 +24,139 @@ import pt.go2.storage.KeyValueStore;
 
 public class Server {
 
-	private static final Logger LOGGER = LogManager.getLogger(Server.class);
+    private static final Logger LOGGER = LogManager.getLogger(Server.class);
 
-	private Server() {
-	}
+    private Server() {
+    }
 
-	/**
-	 * Process initial method
-	 */
-	public static void main(final String[] args) {
+    /**
+     * Process initial method
+     */
+    public static void main(final String[] args) {
 
-		final Configuration config = new Configuration();
+        final Configuration config = new Configuration();
 
-		final KeyValueStore ks;
-		final ErrorPages errors;
-		final EmbeddedFiles res;
+        final KeyValueStore ks;
+        final ErrorPages errors;
+        final EmbeddedFiles res;
 
-		try {
-			ks = new KeyValueStore(config);
-			errors = new ErrorPages();
-			res = new EmbeddedFiles(config);
+        try {
+            ks = new KeyValueStore(config);
+            errors = new ErrorPages();
+            res = new EmbeddedFiles(config);
 
-		} catch (IOException e3) {
-			LOGGER.fatal(e3);
-			return;
-		}
+        } catch (final IOException e3) {
+            LOGGER.fatal(e3);
+            return;
+        }
 
-		final WhiteList whitelist = WhiteList.create();
-		final PhishLocalCache banned = new PhishLocalCache();
-		final PhishTankDownloader phishdl = new PhishTankDownloader(config.getPhishtankApiKey(), banned);
-		final SafeBrowsingLookup sbl = new SafeBrowsingLookup(config.getSafeLookupApiKey());
+        final WhiteList whitelist = WhiteList.create();
+        final PhishLocalCache banned = new PhishLocalCache();
+        final PhishTankDownloader phishdl = new PhishTankDownloader(config.getPhishtankApiKey(), banned);
+        final SafeBrowsingLookup sbl = new SafeBrowsingLookup(config.getSafeLookupApiKey());
 
-		final UrlHealth ul = new UrlHealth(whitelist, banned, sbl);
+        final UrlHealth ul = new UrlHealth(whitelist, banned, sbl);
 
-		final WatchDog watchdog = new WatchDog();
-		final PhishTankInterface pi = new PhishTankInterface(phishdl);
-		final BadUrlScanner bad = new BadUrlScanner(ks, ul);
+        final WatchDog watchdog = new WatchDog();
+        final PhishTankInterface pi = new PhishTankInterface(phishdl);
+        final BadUrlScanner bad = new BadUrlScanner(ks, ul);
 
-		watchdog.register(pi, true);
-		watchdog.register(bad, false);
+        watchdog.register(pi, true);
+        watchdog.register(bad, false);
 
-		watchdog.start(config.getWatchdogWait(), config.getWatchdogInterval());
+        watchdog.start(config.getWatchdogWait(), config.getWatchdogInterval());
 
-		LOGGER.trace("Starting server...");
+        LOGGER.trace("Starting server...");
 
-		// log server version
+        // log server version
 
-		LOGGER.trace("Preparing to run " + config.getVersion() + ".");
+        LOGGER.trace("Preparing to run " + config.getVersion() + ".");
 
-		LOGGER.trace("Resuming DB from folder: " + config.getDbFolder());
+        LOGGER.trace("Resuming DB from folder: " + config.getDbFolder());
 
-		// create listener
+        // create listener
 
-		LOGGER.trace("Creating listener.");
+        LOGGER.trace("Creating listener.");
 
-		final org.eclipse.jetty.server.Server listener;
+        final org.eclipse.jetty.server.Server listener;
 
-		listener = new org.eclipse.jetty.server.Server(config.getHost());
+        listener = new org.eclipse.jetty.server.Server(config.getHost());
 
-		LOGGER.trace("Appending to access log.");
+        LOGGER.trace("Appending to access log.");
 
-		// start access log
+        // start access log
 
-		BufferedWriter accessLog = null;
+        BufferedWriter accessLog = null;
 
-		try {
-			// TODO
-			final FileWriter file = new FileWriter(config.getAccessLog(), true);
-			accessLog = new BufferedWriter(file);
-		} catch (IOException e) {
+        try {
+            // TODO
+            final FileWriter file = new FileWriter(config.getAccessLog(), true);
+            accessLog = new BufferedWriter(file);
+        } catch (final IOException e) {
 
-			LOGGER.error("Error creating access log.", e);
-		}
+            LOGGER.error("Error creating access log.", e);
+        }
 
-		LOGGER.trace("Starting virtual file system.");
+        LOGGER.trace("Starting virtual file system.");
 
-		// RequestHandler
+        // RequestHandler
 
-		final ContextHandler root = new ContextHandler();
-		root.setContextPath("/");
-		root.setHandler(new StaticPages(config, accessLog, errors, ks, res));
+        final ContextHandler root = new ContextHandler();
+        root.setContextPath("/");
+        root.setHandler(new StaticPages(config, accessLog, errors, ks, res));
 
-		final ContextHandler novo = new ContextHandler();
-		novo.setContextPath("/new/");
-		novo.setHandler(new UrlHashing(config, accessLog, errors, ks, ul));
+        final ContextHandler novo = new ContextHandler();
+        novo.setContextPath("/new/");
+        novo.setHandler(new UrlHashing(config, accessLog, errors, ks, ul));
 
-		ContextHandlerCollection contexts = new ContextHandlerCollection();
-		contexts.setHandlers(new Handler[] { novo, root });
+        final ContextHandlerCollection contexts = new ContextHandlerCollection();
+        contexts.setHandlers(new Handler[] { novo, root });
 
-		listener.setHandler(contexts);
+        listener.setHandler(contexts);
 
-		try {
+        try {
 
-			// start server
+            // start server
 
-			listener.start();
+            listener.start();
 
-		} catch (Exception e1) {
+        } catch (final Exception e1) {
 
-			LOGGER.error("Server start error.", e1);
-			return;
-		}
+            LOGGER.error("Server start error.", e1);
+            return;
+        }
 
-		LOGGER.info("Server Running. Press [k] to kill listener.");
+        LOGGER.info("Server Running. Press [k] to kill listener.");
 
-		boolean running = true;
-		do {
+        boolean running = true;
+        do {
 
-			try {
+            try {
 
-				running = System.in.read() != 'k';
+                running = System.in.read() != 'k';
 
-			} catch (IOException e) {
+            } catch (final IOException e) {
 
-				LOGGER.error(e);
-			}
+                LOGGER.error(e);
+            }
 
-		} while (running);
+        } while (running);
 
-		LOGGER.trace("Server stopping.");
+        LOGGER.trace("Server stopping.");
 
-		// Destroy server
-		try {
-			if (accessLog != null) {
-				accessLog.close();
-			}
-		} catch (IOException e) {
+        // Destroy server
+        try {
+            if (accessLog != null) {
+                accessLog.close();
+            }
+        } catch (final IOException e) {
 
-			LOGGER.error("Access log error.", e);
-		}
+            LOGGER.error("Access log error.", e);
+        }
 
-		listener.destroy();
+        listener.destroy();
 
-		LOGGER.info("Server stopped.");
-	}
+        LOGGER.info("Server stopped.");
+    }
 
 }

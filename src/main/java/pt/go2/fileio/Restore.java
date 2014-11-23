@@ -18,62 +18,62 @@ import pt.go2.storage.HashKey;
  */
 public class Restore {
 
-	private static final Logger LOGGER = LogManager.getLogger(Restore.class);
+    private static final Logger LOGGER = LogManager.getLogger(Restore.class);
 
-	private Restore() {
-	}
+    private Restore() {
+    }
 
-	/**
-	 * Load hashes from disk and turn on logging
-	 * 
-	 * @param folder
-	 * @throws IOException
-	 */
-	public static List<RestoreItem> start(String folder) {
+    /**
+     * Load hashes from disk and turn on logging
+     *
+     * @param folder
+     * @throws IOException
+     */
+    public static List<RestoreItem> start(String folder) {
 
-		final File[] files = new File(folder).listFiles();
+        final File[] files = new File(folder).listFiles();
 
-		if (files == null || files.length == 0) {
-			return Collections.emptyList();
-		}
+        if (files == null || files.length == 0) {
+            return Collections.emptyList();
+        }
 
-		LOGGER.trace("Found " + files.length + " restore files.");
+        LOGGER.trace("Found " + files.length + " restore files.");
 
-		List<RestoreItem> items = new ArrayList<RestoreItem>();
+        final List<RestoreItem> items = new ArrayList<RestoreItem>();
 
-		for (final File file : files) {
+        for (final File file : files) {
 
-			// load all data from each file
+            // load all data from each file
 
-			try (final FileReader fr = new FileReader(file.getAbsolutePath());
-					final BufferedReader br = new BufferedReader(fr);) {
+            try (final FileReader fr = new FileReader(file.getAbsolutePath());
+                    final BufferedReader br = new BufferedReader(fr);) {
 
-				LOGGER.trace("Reading from Resume file: " + file.getName());
+                LOGGER.trace("Reading from Resume file: " + file.getName());
 
-				// read all lines in file
+                // read all lines in file
 
-				String line = br.readLine();
+                String line = br.readLine();
 
-				while (line != null) {
+                while (line != null) {
 
-					// fields are comma separated [ hash key, URI ]
+                    // fields are comma separated [ hash key, URI ]
 
-					final String hashkey = line.substring(0, HashKey.LENGTH);
-					final String uri = line.substring(HashKey.LENGTH + 1);
+                    final String hashkey = line.substring(0, HashKey.LENGTH);
+                    final String uri = line.substring(HashKey.LENGTH + 1);
 
-					items.add(new RestoreItem(hashkey, uri));
+                    items.add(new RestoreItem(hashkey, uri));
 
-					// next line
+                    // next line
 
-					line = br.readLine();
-				}
+                    line = br.readLine();
+                }
 
-			} catch (IOException e) {
+            } catch (final IOException e) {
 
-				LOGGER.error("Error reading: " + file.getAbsolutePath(), e);
-			}
-		}
+                LOGGER.error("Error reading: " + file.getAbsolutePath(), e);
+            }
+        }
 
-		return items;
-	}
+        return items;
+    }
 }

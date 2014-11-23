@@ -15,47 +15,47 @@ import org.apache.logging.log4j.Logger;
  */
 public class WhiteList {
 
-	private static final String FILENAME = "whitelist";
+    private static final String FILENAME = "whitelist";
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	final Set<String> entries = new HashSet<String>();
+    final Set<String> entries = new HashSet<String>();
 
-	/**
-	 * Create WhiteList
-	 */
-	public static WhiteList create() {
+    /**
+     * Create WhiteList
+     */
+    public static WhiteList create() {
 
-		try (InputStream is = Configuration.class.getResourceAsStream("/" + FILENAME);) {
+        try (InputStream is = Configuration.class.getResourceAsStream("/" + FILENAME);) {
 
-			final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-			final BufferedReader br = new BufferedReader(isr);
-			final WhiteList wl = new WhiteList();
+            final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+            final BufferedReader br = new BufferedReader(isr);
+            final WhiteList wl = new WhiteList();
 
-			String line;
+            String line;
 
-			while ((line = br.readLine()) != null) {
+            while ((line = br.readLine()) != null) {
 
-				if (line.isEmpty() || line.startsWith("#")) {
-					continue;
-				}
+                if (line.isEmpty() || line.startsWith("#")) {
+                    continue;
+                }
 
-				LOGGER.info("Adding " + line + " to whitelist.");
+                LOGGER.info("Adding " + line + " to whitelist.");
 
-				wl.entries.add(line);
-			}
+                wl.entries.add(line);
+            }
 
-			return wl;
+            return wl;
 
-		} catch (IOException e2) {
+        } catch (final IOException e2) {
 
-			LOGGER.error("Can't read from whitelist file.", e2);
-		}
+            LOGGER.error("Can't read from whitelist file.", e2);
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	public boolean contains(String url) {
-		return entries.contains(url);
-	}
+    public boolean contains(String url) {
+        return entries.contains(url);
+    }
 }

@@ -11,66 +11,66 @@ import pt.go2.response.GzipResponse;
 
 public class EmbeddedFiles {
 
-	private static final int BUFFER = 4096;
-	final Map<String, AbstractResponse> pages = new HashMap<>();
+    private static final int BUFFER = 4096;
+    final Map<String, AbstractResponse> pages = new HashMap<>();
 
-	public EmbeddedFiles(Configuration config) throws IOException {
+    public EmbeddedFiles(Configuration config) throws IOException {
 
-		final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
+        final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
 
-		final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
+        final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
 
-		final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
+        final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
 
-		final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
+        final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
 
-		final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
+        final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
 
-		this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
+        this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
 
-		this.pages.put("ajax.js", new GzipResponse(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
+        this.pages.put("ajax.js", new GzipResponse(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
 
-		this.pages.put("robots.txt", new GzipResponse(robots, AbstractResponse.MIME_TEXT_PLAIN));
+        this.pages.put("robots.txt", new GzipResponse(robots, AbstractResponse.MIME_TEXT_PLAIN));
 
-		this.pages.put("sitemap.xml", new GzipResponse(map, AbstractResponse.MIME_TEXT_XML));
+        this.pages.put("sitemap.xml", new GzipResponse(map, AbstractResponse.MIME_TEXT_XML));
 
-		this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
+        this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
 
-		if (!config.getGoogleVerification().isEmpty()) {
-			this.pages.put(config.getGoogleVerification(),
-					new GzipResponse(("google-site-verification: " + config.getGoogleVerification()).getBytes(),
-							AbstractResponse.MIME_TEXT_PLAIN));
-		}
+        if (!config.getGoogleVerification().isEmpty()) {
+            this.pages.put(config.getGoogleVerification(),
+                    new GzipResponse(("google-site-verification: " + config.getGoogleVerification()).getBytes(),
+                            AbstractResponse.MIME_TEXT_PLAIN));
+        }
 
-		// check if all pages created
+        // check if all pages created
 
-		for (String page : this.pages.keySet()) {
+        for (final String page : this.pages.keySet()) {
 
-			final AbstractResponse response = this.pages.get(page);
+            final AbstractResponse response = this.pages.get(page);
 
-			if (response == null) {
+            if (response == null) {
 
-				throw new IOException("Failed to load page " + page);
-			}
-		}
-	}
+                throw new IOException("Failed to load page " + page);
+            }
+        }
+    }
 
-	public AbstractResponse getFile(String filename) {
-		return pages.get(filename);
-	}
+    public AbstractResponse getFile(String filename) {
+        return pages.get(filename);
+    }
 
-	private byte[] read(InputStream is) throws IOException {
+    private byte[] read(InputStream is) throws IOException {
 
-		final byte[] buffer = new byte[BUFFER];
-		int read;
+        final byte[] buffer = new byte[BUFFER];
+        int read;
 
-		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+        final ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-		while ((read = is.read(buffer)) != -1) {
-			output.write(buffer, 0, read);
-		}
+        while ((read = is.read(buffer)) != -1) {
+            output.write(buffer, 0, read);
+        }
 
-		return output.toByteArray();
-	}
+        return output.toByteArray();
+    }
 
 }

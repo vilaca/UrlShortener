@@ -17,104 +17,104 @@ import pt.go2.fileio.RestoreItem;
  */
 public class KeyValueStore {
 
-	private static final int MAX_HASHING_RETRIES = 10;
+    private static final int MAX_HASHING_RETRIES = 10;
 
-	private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
+    private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
 
-	private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
+    private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
 
-	// log for restoring hash->url
-	private final Backup backupFile;
+    // log for restoring hash->url
+    private final Backup backupFile;
 
-	public KeyValueStore(final Configuration config) throws IOException {
+    public KeyValueStore(final Configuration config) throws IOException {
 
-		this.backupFile = new Backup(config.getDbFolder());
+        this.backupFile = new Backup(config.getDbFolder());
 
-		final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
+        final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
-		for (RestoreItem item : restoredItems) {
-			final HashKey hk = new HashKey(item.getKey());
-			final Uri uri = Uri.create(item.getValue(), false);
+        for (final RestoreItem item : restoredItems) {
+            final HashKey hk = new HashKey(item.getKey());
+            final Uri uri = Uri.create(item.getValue(), false);
 
-			map.put(hk, uri);
-		}
-	}
+            map.put(hk, uri);
+        }
+    }
 
-	/**
-	 * Add URL to key store
-	 * 
-	 * @param uri
-	 * 
-	 * @return
-	 */
-	public synchronized byte[] add(final Uri uri) {
+    /**
+     * Add URL to key store
+     *
+     * @param uri
+     *
+     * @return
+     */
+    public synchronized byte[] add(final Uri uri) {
 
-		int retries = 0;
-		HashKey hk = new HashKey();
+        int retries = 0;
+        HashKey hk = new HashKey();
 
-		// loop if hash already being used
+        // loop if hash already being used
 
-		while (map.contains(hk)) {
+        while (map.contains(hk)) {
 
-			retries++;
-			if (retries > MAX_HASHING_RETRIES) {
-				// give up
-				LOGGER.warn("Giving up rehashing " + uri);
-				return new byte[0];
-			} else if (retries > 1) {
-				LOGGER.warn("Rehashing " + uri + " / " + retries + "try.");
-			}
+            retries++;
+            if (retries > MAX_HASHING_RETRIES) {
+                // give up
+                LOGGER.warn("Giving up rehashing " + uri);
+                return new byte[0];
+            } else if (retries > 1) {
+                LOGGER.warn("Rehashing " + uri + " / " + retries + "try.");
+            }
 
-			hk = new HashKey();
-		}
+            hk = new HashKey();
+        }
 
-		map.put(hk, uri);
+        map.put(hk, uri);
 
-		try {
+        try {
 
-			backupFile.write(hk, uri);
+            backupFile.write(hk, uri);
 
-		} catch (IOException e) {
+        } catch (final IOException e) {
 
-			LOGGER.error("Could not write to the resume log.", e);
+            LOGGER.error("Could not write to the resume log.", e);
 
-			map.remove(hk, uri);
+            map.remove(hk, uri);
 
-			return new byte[0];
-		}
+            return new byte[0];
+        }
 
-		return hk.getBytes();
-	}
+        return hk.getBytes();
+    }
 
-	/**
-	 * Close Backup
-	 * 
-	 * @throws IOException
-	 */
-	public void close() throws IOException {
-		backupFile.close();
-	}
+    /**
+     * Close Backup
+     *
+     * @throws IOException
+     */
+    public void close() throws IOException {
+        backupFile.close();
+    }
 
-	/**
-	 * get redirect based on hashkey
-	 * 
-	 * @param filename
-	 * @return
-	 */
-	public Uri get(final HashKey haskey) {
+    /**
+     * get redirect based on hashkey
+     *
+     * @param filename
+     * @return
+     */
+    public Uri get(final HashKey haskey) {
 
-		return map.get(haskey);
-	}
+        return map.get(haskey);
+    }
 
-	public Set<Uri> uris() {
-		return map.getKeys();
-	}
+    public Set<Uri> uris() {
+        return map.getKeys();
+    }
 
-	public HashKey find(Uri uri) {
-		return map.getUrl2Hash(uri);
-	}
+    public HashKey find(Uri uri) {
+        return map.getUrl2Hash(uri);
+    }
 
-	public byte[] get(Uri uri) {
-		return map.getUrl2Hash(uri).getBytes();
-	}
+    public byte[] get(Uri uri) {
+        return map.getUrl2Hash(uri).getBytes();
+    }
 }

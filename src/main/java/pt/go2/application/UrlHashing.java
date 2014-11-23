@@ -24,126 +24,126 @@ import pt.go2.storage.Uri.Health;
 
 class UrlHashing extends RequestHandler {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	private static final int MINIMUM_URL_SIZE = 3;
+    private static final int MINIMUM_URL_SIZE = 3;
 
-	final KeyValueStore ks;
-	final UrlHealth health;
+    final KeyValueStore ks;
+    final UrlHealth health;
 
-	public UrlHashing(Configuration config, BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
-			UrlHealth health) {
+    public UrlHashing(Configuration config, BufferedWriter accessLog, ErrorPages errors, KeyValueStore ks,
+            UrlHealth health) {
 
-		super(config, accessLog, errors);
+        super(config, accessLog, errors);
 
-		this.ks = ks;
-		this.health = health;
-	}
+        this.ks = ks;
+        this.health = health;
+    }
 
-	/**
-	 * Handle shortening of Urls.
-	 * 
-	 * If Url already exists return hash. If Url wasn't hashed before generate
-	 * hash and add it to value store
-	 */
-	@Override
-	public void handle(HttpServletRequest request, HttpServletResponse response) {
+    /**
+     * Handle shortening of Urls.
+     *
+     * If Url already exists return hash. If Url wasn't hashed before generate
+     * hash and add it to value store
+     */
+    @Override
+    public void handle(HttpServletRequest request, HttpServletResponse response) {
 
-		Uri uri = urltoHash(request, response);
+        Uri uri = urltoHash(request, response);
 
-		if (uri == null) {
-			return;
-		}
+        if (uri == null) {
+            return;
+        }
 
-		// try to find hash for url is ks
+        // try to find hash for url is ks
 
-		final HashKey hk = ks.find(uri);
+        final HashKey hk = ks.find(uri);
 
-		if (hk == null) {
+        if (hk == null) {
 
-			// hash not found, add new
+            // hash not found, add new
 
-			ks.add(uri);
-			reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
-			health.test(uri, true);
+            ks.add(uri);
+            reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
+            health.test(uri, true);
 
-			if (uri.health() == Health.PROCESSING) {
-				uri.setHealth(Health.OK);
-			}
+            if (uri.health() == Health.PROCESSING) {
+                uri.setHealth(Health.OK);
+            }
 
-			return;
-		}
+            return;
+        }
 
-		uri = ks.get(hk);
+        uri = ks.get(hk);
 
-		switch (uri.health()) {
-		case MALWARE:
-			reply(request, response, new GenericResponse("malware".getBytes(), HttpStatus.FORBIDDEN_403,
-					AbstractResponse.MIME_TEXT_PLAIN), true);
-			break;
-		case OK:
-			reply(request, response, new GenericResponse(hk.getBytes()), false);
-			break;
-		case PHISHING:
-			reply(request, response, new GenericResponse("phishing".getBytes(), HttpStatus.FORBIDDEN_403,
-					AbstractResponse.MIME_TEXT_PLAIN), true);
-			break;
-		case PROCESSING:
-			reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
-			break;
-		default:
-			reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-			break;
-		}
-	}
+        switch (uri.health()) {
+        case MALWARE:
+            reply(request, response, new GenericResponse("malware".getBytes(), HttpStatus.FORBIDDEN_403,
+                    AbstractResponse.MIME_TEXT_PLAIN), true);
+            break;
+        case OK:
+            reply(request, response, new GenericResponse(hk.getBytes()), false);
+            break;
+        case PHISHING:
+            reply(request, response, new GenericResponse("phishing".getBytes(), HttpStatus.FORBIDDEN_403,
+                    AbstractResponse.MIME_TEXT_PLAIN), true);
+            break;
+        case PROCESSING:
+            reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
+            break;
+        default:
+            reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+            break;
+        }
+    }
 
-	/**
-	 * Get URL to hash from POST request
-	 * 
-	 * @param request
-	 * @param response
-	 * @return
-	 */
-	private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
+    /**
+     * Get URL to hash from POST request
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
 
-		try (final InputStream is = request.getInputStream();
-				final InputStreamReader sr = new InputStreamReader(is);
-				final BufferedReader br = new BufferedReader(sr);) {
+        try (final InputStream is = request.getInputStream();
+                final InputStreamReader sr = new InputStreamReader(is);
+                final BufferedReader br = new BufferedReader(sr);) {
 
-			// read body content
+            // read body content
 
-			final String postBody = br.readLine();
+            final String postBody = br.readLine();
 
-			if (postBody == null) {
-				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
-				return null;
-			}
+            if (postBody == null) {
+                reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
+                return null;
+            }
 
-			// format for form content is 'fieldname=value'
+            // format for form content is 'fieldname=value'
 
-			final int idx = postBody.indexOf('=') + 1;
+            final int idx = postBody.indexOf('=') + 1;
 
-			if (idx == -1 || postBody.length() - idx < MINIMUM_URL_SIZE) {
-				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
-				return null;
-			}
+            if (idx == -1 || postBody.length() - idx < MINIMUM_URL_SIZE) {
+                reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
+                return null;
+            }
 
-			// Parse string into Uri
+            // Parse string into Uri
 
-			final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
+            final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
 
-			if (uri == null) {
-				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
-			}
+            if (uri == null) {
+                reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
+            }
 
-			return uri;
+            return uri;
 
-		} catch (IOException e) {
-			
-			LOGGER.error(e);
-			reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
-		}
+        } catch (final IOException e) {
 
-		return null;
-	}
+            LOGGER.error(e);
+            reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
+        }
+
+        return null;
+    }
 }

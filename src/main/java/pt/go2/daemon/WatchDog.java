@@ -16,97 +16,97 @@ import org.apache.logging.log4j.Logger;
  */
 public class WatchDog extends TimerTask {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	// watchdog timer
+    // watchdog timer
 
-	private final Timer timer = new Timer();
+    private final Timer timer = new Timer();
 
-	private List<WatchDogTask> tasks = new ArrayList<WatchDogTask>();
+    private final List<WatchDogTask> tasks = new ArrayList<WatchDogTask>();
 
-	/**
-	 * Start service
-	 * 
-	 * @param wait
-	 *            wait interval (seconds)
-	 * @param refresh
-	 *            Refresh interval (minutes)
-	 */
-	public void start(long wait, long refresh) {
+    /**
+     * Start service
+     *
+     * @param wait
+     *            wait interval (seconds)
+     * @param refresh
+     *            Refresh interval (minutes)
+     */
+    public void start(long wait, long refresh) {
 
-		long waitms = TimeUnit.SECONDS.toMillis(wait);
+        final long waitms = TimeUnit.SECONDS.toMillis(wait);
 
-		long refreshms = TimeUnit.MINUTES.toMillis(refresh);
+        final long refreshms = TimeUnit.MINUTES.toMillis(refresh);
 
-		timer.schedule(this, waitms, refreshms);
-	}
+        timer.schedule(this, waitms, refreshms);
+    }
 
-	/**
-	 * Stop Service
-	 */
-	public void stop() {
-		timer.cancel();
-		timer.purge();
-	}
+    /**
+     * Stop Service
+     */
+    public void stop() {
+        timer.cancel();
+        timer.purge();
+    }
 
-	public synchronized void register(final WatchDogTask task, final boolean runNow) {
+    public synchronized void register(final WatchDogTask task, final boolean runNow) {
 
-		if (task == null) {
-			return;
-		}
+        if (task == null) {
+            return;
+        }
 
-		tasks.add(task);
+        tasks.add(task);
 
-		if (runNow) {
-			task.refresh();
-		}
+        if (runNow) {
+            task.refresh();
+        }
 
-		LOGGER.info("Registering. Total tasks: " + tasks.size());
-	}
+        LOGGER.info("Registering. Total tasks: " + tasks.size());
+    }
 
-	/**
-	 * Trigger download
-	 */
-	@Override
-	public synchronized void run() {
+    /**
+     * Trigger download
+     */
+    @Override
+    public synchronized void run() {
 
-		LOGGER.info("Watchdog woke.");
+        LOGGER.info("Watchdog woke.");
 
-		for (WatchDogTask wt : tasks) {
+        for (final WatchDogTask wt : tasks) {
 
-			LOGGER.info("Checking task: " + wt.name());
+            LOGGER.info("Checking task: " + wt.name());
 
-			if (trigger(wt)) {
-				wt.refresh();
-			}
-		}
+            if (trigger(wt)) {
+                wt.refresh();
+            }
+        }
 
-		LOGGER.info("Watchdog back to sleep.");
-	}
+        LOGGER.info("Watchdog back to sleep.");
+    }
 
-	/**
-	 * Calculate if its time to trigger the download
-	 * 
-	 * @return
-	 */
-	private boolean trigger(final WatchDogTask wt) {
+    /**
+     * Calculate if its time to trigger the download
+     *
+     * @return
+     */
+    private boolean trigger(final WatchDogTask wt) {
 
-		final Date lastRun = wt.lastRun();
+        final Date lastRun = wt.lastRun();
 
-		LOGGER.info("Last run: " + lastRun);
+        LOGGER.info("Last run: " + lastRun);
 
-		if (wt.lastRun() == null) {
-			return true;
-		}
+        if (wt.lastRun() == null) {
+            return true;
+        }
 
-		final long current, diff, left;
+        final long current, diff, left;
 
-		current = Calendar.getInstance().getTimeInMillis();
-		diff = current - lastRun.getTime();
-		left = wt.interval() - TimeUnit.MILLISECONDS.toMinutes(diff);
+        current = Calendar.getInstance().getTimeInMillis();
+        diff = current - lastRun.getTime();
+        left = wt.interval() - TimeUnit.MILLISECONDS.toMinutes(diff);
 
-		LOGGER.info("Minutes to Refresh: " + (left >= 0 ? left : 0));
+        LOGGER.info("Minutes to Refresh: " + (left >= 0 ? left : 0));
 
-		return left <= 0;
-	}
+        return left <= 0;
+    }
 }

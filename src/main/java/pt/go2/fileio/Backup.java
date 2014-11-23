@@ -15,43 +15,43 @@ import pt.go2.storage.Uri;
  */
 public class Backup {
 
-	private final Calendar cal = Calendar.getInstance();
+    private final Calendar cal = Calendar.getInstance();
 
-	private final BufferedWriter resumeLog;
+    private final BufferedWriter resumeLog;
 
-	public Backup(final String resumeFolder) throws IOException {
+    public Backup(final String resumeFolder) throws IOException {
 
-		String filename;
+        String filename;
 
-		do {
-			filename = generateFilename(resumeFolder);
-		} while (new File(filename).exists());
+        do {
+            filename = generateFilename(resumeFolder);
+        } while (new File(filename).exists());
 
-		resumeLog = new BufferedWriter(new FileWriter(filename));
-	}
+        resumeLog = new BufferedWriter(new FileWriter(filename));
+    }
 
-	private String generateFilename(final String resumeFolder) {
-		return resumeFolder + String.valueOf(cal.getTimeInMillis());
-	}
+    private String generateFilename(final String resumeFolder) {
+        return resumeFolder + String.valueOf(cal.getTimeInMillis());
+    }
 
-	public void write(final HashKey hk, final Uri uri) throws IOException {
+    public void write(final HashKey hk, final Uri uri) throws IOException {
 
-		final StringBuilder sb = new StringBuilder();
+        final StringBuilder sb = new StringBuilder();
 
-		sb.append(hk.toString());
-		sb.append(",");
-		sb.append(uri.toString());
-		sb.append(System.getProperty("line.separator"));
+        sb.append(hk.toString());
+        sb.append(",");
+        sb.append(uri.toString());
+        sb.append(System.getProperty("line.separator"));
 
-		synchronized (this) {
-			resumeLog.write(sb.toString());
-			resumeLog.flush();
-		}
-	}
+        synchronized (this) {
+            resumeLog.write(sb.toString());
+            resumeLog.flush();
+        }
+    }
 
-	public void close() throws IOException {
+    public void close() throws IOException {
 
-		resumeLog.flush();
-		resumeLog.close();
-	}
+        resumeLog.flush();
+        resumeLog.close();
+    }
 }

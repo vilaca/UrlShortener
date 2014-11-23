@@ -16,107 +16,107 @@ import pt.go2.storage.Uri;
 
 public class PhishTankDownloader {
 
-	private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger();
 
-	// expected entries on API - used to avoid resizing in loop
+    // expected entries on API - used to avoid resizing in loop
 
-	private static final int EXPECTED_ENTRIES = 15000;
+    private static final int EXPECTED_ENTRIES = 15000;
 
-	private final String apiUrl;
+    private final String apiUrl;
 
-	private final PhishLocalCache banned;
+    private final PhishLocalCache banned;
 
-	/**
-	 * C'tor use factory method instead
-	 * 
-	 * @param apiKey
-	 * @param banned2
-	 */
-	public PhishTankDownloader(final String apiKey, PhishLocalCache banned) {
+    /**
+     * C'tor use factory method instead
+     *
+     * @param apiKey
+     * @param banned2
+     */
+    public PhishTankDownloader(final String apiKey, PhishLocalCache banned) {
 
-		apiUrl = "http://data.phishtank.com/data/" + apiKey + "/online-valid.csv";
+        apiUrl = "http://data.phishtank.com/data/" + apiKey + "/online-valid.csv";
 
-		this.banned = banned;
-	}
+        this.banned = banned;
+    }
 
-	/**
-	 * Call API and parse response
-	 * 
-	 * @return
-	 * 
-	 * @throws ClientProtocolException
-	 * @throws IOException
-	 * @throws TruncatedChunkException
-	 */
-	public boolean download() {
+    /**
+     * Call API and parse response
+     *
+     * @return
+     *
+     * @throws ClientProtocolException
+     * @throws IOException
+     * @throws TruncatedChunkException
+     */
+    public boolean download() {
 
-		final Set<Uri> newList = new HashSet<>(EXPECTED_ENTRIES);
+        final Set<Uri> newList = new HashSet<>(EXPECTED_ENTRIES);
 
-		LOGGER.info("Download starting");
+        LOGGER.info("Download starting");
 
-		HttpClient httpClient = new HttpClient();
+        final HttpClient httpClient = new HttpClient();
 
-		ContentResponse response;
-		try {
-			httpClient.start();
-			response = httpClient.GET(apiUrl);
-		} catch (Exception e) {
-			LOGGER.error(e);
-			return false;
-		}
+        ContentResponse response;
+        try {
+            httpClient.start();
+            response = httpClient.GET(apiUrl);
+        } catch (final Exception e) {
+            LOGGER.error(e);
+            return false;
+        }
 
-		final int statusCode = response.getStatus();
+        final int statusCode = response.getStatus();
 
-		if (statusCode != HttpStatus.OK_200) {
-			LOGGER.error("Error on download: " + statusCode);
-			return false;
-		}
+        if (statusCode != HttpStatus.OK_200) {
+            LOGGER.error("Error on download: " + statusCode);
+            return false;
+        }
 
-		final BufferedReader br = new BufferedReader(new StringReader(response.getContentAsString()));
+        final BufferedReader br = new BufferedReader(new StringReader(response.getContentAsString()));
 
-		try {
+        try {
 
-			// skip header
-			br.readLine();
-			String entry;
+            // skip header
+            br.readLine();
+            String entry;
 
-			while ((entry = br.readLine()) != null) {
+            while ((entry = br.readLine()) != null) {
 
-				int idx = entry.indexOf(',') + 1, end;
+                int idx = entry.indexOf(',') + 1, end;
 
-				if (entry.charAt(idx) == '"') {
-					idx++;
-					end = entry.indexOf('"', idx);
-				} else {
-					end = entry.indexOf(',', idx);
-				}
+                if (entry.charAt(idx) == '"') {
+                    idx++;
+                    end = entry.indexOf('"', idx);
+                } else {
+                    end = entry.indexOf(',', idx);
+                }
 
-				if (idx == -1 || end == -1) {
-					LOGGER.error("Bad entry: " + entry);
-					continue;
-				}
+                if (idx == -1 || end == -1) {
+                    LOGGER.error("Bad entry: " + entry);
+                    continue;
+                }
 
-				final Uri uri;
-				uri = Uri.create(entry.substring(idx, end), false);
+                final Uri uri;
+                uri = Uri.create(entry.substring(idx, end), false);
 
-				newList.add(uri);
-			}
-		} catch (IOException e) {
-			LOGGER.error(e);
-			return false;
-		} finally {
-			try {
-				br.close();
-			} catch (IOException e) {
-				LOGGER.error(e);
-			}
-		}
+                newList.add(uri);
+            }
+        } catch (final IOException e) {
+            LOGGER.error(e);
+            return false;
+        } finally {
+            try {
+                br.close();
+            } catch (final IOException e) {
+                LOGGER.error(e);
+            }
+        }
 
-		this.banned.set(newList);
+        this.banned.set(newList);
 
-		LOGGER.info("Download exiting");
+        LOGGER.info("Download exiting");
 
-		return true;
-	}
+        return true;
+    }
 
 }
