@@ -26,10 +26,10 @@ public class WhiteList {
      */
     public static WhiteList create() {
 
-        try (InputStream is = Configuration.class.getResourceAsStream("/" + FILENAME);) {
+        try ( final InputStream is = Configuration.class.getResourceAsStream("/" + FILENAME);
+                final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
+                final BufferedReader br = new BufferedReader(isr);) {
 
-            final InputStreamReader isr = new InputStreamReader(is, "UTF-8");
-            final BufferedReader br = new BufferedReader(isr);
             final WhiteList wl = new WhiteList();
 
             String line;
