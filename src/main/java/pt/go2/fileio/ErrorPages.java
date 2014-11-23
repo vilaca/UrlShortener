@@ -15,14 +15,15 @@ import pt.go2.response.GenericResponse;
 
 public class ErrorPages {
 
-	private static final int BUFFER_SIZE = 4096;
 	private static final Logger LOGGER = LogManager.getLogger();
+
+	private static final int BUFFER_SIZE = 4096;
 
 	/**
 	 * Canned responses for errors
 	 */
 	public enum Error {
-		PAGE_NOT_FOUND, BAD_REQUEST, PHISHING, MALWARE
+		PAGE_NOT_FOUND, PHISHING, MALWARE
 	}
 
 	private final Map<Error, AbstractResponse> errors = new EnumMap<>(Error.class);
@@ -35,9 +36,6 @@ public class ErrorPages {
 	 * @throws IOException
 	 */
 	public ErrorPages() throws IOException {
-
-		this.errors.put(Error.BAD_REQUEST, new GenericResponse("Bad request.".getBytes(), HttpStatus.BAD_REQUEST_400,
-				AbstractResponse.MIME_TEXT_PLAIN));
 
 		try {
 			this.errors.put(Error.PAGE_NOT_FOUND,

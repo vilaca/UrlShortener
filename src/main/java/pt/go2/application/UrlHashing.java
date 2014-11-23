@@ -9,6 +9,8 @@ import java.io.InputStreamReader;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
 import pt.go2.fileio.Configuration;
@@ -21,6 +23,10 @@ import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
 
 class UrlHashing extends RequestHandler {
+
+	private static final Logger LOGGER = LogManager.getLogger();
+
+	private static final int MINIMUM_URL_SIZE = 3;
 
 	final KeyValueStore ks;
 	final UrlHealth health;
@@ -45,8 +51,9 @@ class UrlHashing extends RequestHandler {
 
 		Uri uri = urltoHash(request, response);
 
-		if (uri == null)
+		if (uri == null) {
 			return;
+		}
 
 		// try to find hash for url is ks
 
@@ -71,18 +78,21 @@ class UrlHashing extends RequestHandler {
 
 		switch (uri.health()) {
 		case MALWARE:
-			reply(request, response, new GenericResponse("malware".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
-					true);
+			reply(request, response, new GenericResponse("malware".getBytes(), HttpStatus.FORBIDDEN_403,
+					AbstractResponse.MIME_TEXT_PLAIN), true);
 			break;
 		case OK:
 			reply(request, response, new GenericResponse(hk.getBytes()), false);
 			break;
 		case PHISHING:
-			reply(request, response, new GenericResponse("phishing".getBytes(), 403, AbstractResponse.MIME_TEXT_PLAIN),
-					true);
+			reply(request, response, new GenericResponse("phishing".getBytes(), HttpStatus.FORBIDDEN_403,
+					AbstractResponse.MIME_TEXT_PLAIN), true);
 			break;
 		case PROCESSING:
-			reply(request, response, new GenericResponse(202), false);
+			reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
+			break;
+		default:
+			reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
 			break;
 		}
 	}
@@ -105,7 +115,7 @@ class UrlHashing extends RequestHandler {
 			final String postBody = br.readLine();
 
 			if (postBody == null) {
-				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
+				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
 				return null;
 			}
 
@@ -113,8 +123,8 @@ class UrlHashing extends RequestHandler {
 
 			final int idx = postBody.indexOf('=') + 1;
 
-			if (idx == -1 || postBody.length() - idx < 3) {
-				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
+			if (idx == -1 || postBody.length() - idx < MINIMUM_URL_SIZE) {
+				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
 				return null;
 			}
 
@@ -123,14 +133,17 @@ class UrlHashing extends RequestHandler {
 			final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
 
 			if (uri == null) {
-				reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
+				reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
 			}
 
 			return uri;
 
 		} catch (IOException e) {
-			reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
+			
+			LOGGER.error(e);
+			reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
 		}
+
 		return null;
 	}
 }

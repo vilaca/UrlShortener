@@ -20,6 +20,7 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
+import pt.go2.response.GenericResponse;
 import pt.go2.response.RedirectResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
@@ -173,7 +174,7 @@ public abstract class RequestHandler extends AbstractHandler {
 		final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
 
 		if (host.isEmpty()) {
-			reply(request, response, ErrorPages.Error.BAD_REQUEST, false);
+			reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
 			return;
 		}
 

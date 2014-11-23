@@ -76,7 +76,7 @@ function submit(su) {
                 }
             } else if (http.status == 202) {
                 submit(su)
-            } else if (http.status == 400) {
+            } else if (http.status == 400 || http.status == 500) {
                 inputError()
             } else if (http.status == 403) {
                 inputForbidden(http.responseText)
