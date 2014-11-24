@@ -39,7 +39,7 @@ public class PhishTankInterface implements WatchDogTask {
 
     @Override
     public Date lastRun() {
-        return lastDownload;
+        return lastDownload == null ? null : new Date(lastDownload.getTime());
     }
 
     @Override

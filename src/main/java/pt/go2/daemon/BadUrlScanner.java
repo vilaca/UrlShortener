@@ -52,7 +52,7 @@ public class BadUrlScanner implements WatchDogTask {
 
     @Override
     public Date lastRun() {
-        return lastRun;
+        return lastRun == null ? null : new Date(lastRun.getTime());
     }
 
     @Override
