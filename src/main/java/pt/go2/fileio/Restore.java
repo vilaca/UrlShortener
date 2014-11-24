@@ -52,9 +52,9 @@ public class Restore {
 
                 // read all lines in file
 
-                String line = br.readLine();
+                String line;
 
-                while (line != null) {
+                while ((line = br.readLine()) != null) {
 
                     // fields are comma separated [ hash key, URI ]
 
@@ -62,10 +62,6 @@ public class Restore {
                     final String uri = line.substring(HashKey.LENGTH + 1);
 
                     items.add(new RestoreItem(hashkey, uri));
-
-                    // next line
-
-                    line = br.readLine();
                 }
 
             } catch (final IOException e) {

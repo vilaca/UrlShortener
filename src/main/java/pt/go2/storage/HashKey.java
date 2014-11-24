@@ -1,5 +1,7 @@
 package pt.go2.storage;
 
+import java.io.UnsupportedEncodingException;
+
 /**
  * Each Hashkey unequivocally identifies an Url
  */
@@ -37,10 +39,12 @@ public class HashKey {
      *
      * @param key
      *            base64 key/hash
+     *
+     * @throws UnsupportedEncodingException
      */
-    public HashKey(final String key) {
+    public HashKey(final String hk) throws UnsupportedEncodingException {
 
-        this.key = key.getBytes();
+        this.key = hk.getBytes("US-ASCII");
 
         for (final byte b : this.key) {
 
