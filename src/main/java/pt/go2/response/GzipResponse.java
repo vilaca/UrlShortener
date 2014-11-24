@@ -32,7 +32,7 @@ public class GzipResponse extends AbstractResponse {
      */
     public GzipResponse(byte[] body, String mime) {
 
-        this.body = body;
+        this.body = body.clone();
         this.zipBody = zipBody(body);
         this.mime = mime;
     }
@@ -58,7 +58,7 @@ public class GzipResponse extends AbstractResponse {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see pt.go2.application.HttpResponse#getHttpErrorCode()
      */
     @Override
@@ -68,7 +68,7 @@ public class GzipResponse extends AbstractResponse {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see pt.go2.application.HttpResponse#getMimeType()
      */
     @Override
@@ -78,7 +78,7 @@ public class GzipResponse extends AbstractResponse {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see
      * pt.go2.application.HttpResponse#getBody(com.sun.net.httpserver.HttpExchange
      * )
@@ -105,7 +105,7 @@ public class GzipResponse extends AbstractResponse {
 
     /*
      * (non-Javadoc)
-     *
+     * 
      * @see pt.go2.application.HttpResponse#isZipped()
      */
     @Override
