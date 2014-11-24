@@ -81,14 +81,14 @@ class UrlHashing extends RequestHandler {
 
         switch (uri.health()) {
         case MALWARE:
-            reply(request, response, new GenericResponse("malware".getBytes(), HttpStatus.FORBIDDEN_403,
+            reply(request, response, new GenericResponse("malware", HttpStatus.FORBIDDEN_403,
                     AbstractResponse.MIME_TEXT_PLAIN), true);
             break;
         case OK:
-            reply(request, response, new GenericResponse(hk.getBytes()), false);
+            reply(request, response, new GenericResponse(hk.toString()), false);
             break;
         case PHISHING:
-            reply(request, response, new GenericResponse("phishing".getBytes(), HttpStatus.FORBIDDEN_403,
+            reply(request, response, new GenericResponse("phishing", HttpStatus.FORBIDDEN_403,
                     AbstractResponse.MIME_TEXT_PLAIN), true);
             break;
         case PROCESSING:

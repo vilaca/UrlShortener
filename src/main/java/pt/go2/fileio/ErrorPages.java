@@ -1,8 +1,6 @@
 package pt.go2.fileio;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.EnumMap;
 import java.util.Map;
 
@@ -16,8 +14,6 @@ import pt.go2.response.GenericResponse;
 public class ErrorPages {
 
     private static final Logger LOGGER = LogManager.getLogger();
-
-    private static final int BUFFER_SIZE = 4096;
 
     /**
      * Canned responses for errors
@@ -38,9 +34,9 @@ public class ErrorPages {
     public ErrorPages() throws IOException {
 
         try {
-            this.errors.put(Error.PAGE_NOT_FOUND,
-                    new GenericResponse(read(ErrorPages.class.getResourceAsStream("/404.html")),
-                            HttpStatus.NOT_FOUND_404, AbstractResponse.MIME_TEXT_HTML));
+            this.errors.put(Error.PAGE_NOT_FOUND, new GenericResponse(
+                    ErrorPages.class.getResourceAsStream("/404.html"), HttpStatus.NOT_FOUND_404,
+                    AbstractResponse.MIME_TEXT_HTML));
         } catch (final IOException e) {
             LOGGER.fatal("Cannot read 404 page.", e);
             throw e;
@@ -48,7 +44,7 @@ public class ErrorPages {
 
         try {
             this.errors.put(Error.PHISHING,
-                    new GenericResponse(read(ErrorPages.class.getResourceAsStream("/404-phishing.html")),
+                    new GenericResponse(ErrorPages.class.getResourceAsStream("/404-phishing.html"),
                             HttpStatus.NOT_FOUND_404, AbstractResponse.MIME_TEXT_HTML));
         } catch (final IOException e) {
             LOGGER.fatal("Cannot read 404-phishing page.", e);
@@ -57,7 +53,7 @@ public class ErrorPages {
 
         try {
             this.errors.put(Error.MALWARE,
-                    new GenericResponse(read(ErrorPages.class.getResourceAsStream("/404-malware.html")),
+                    new GenericResponse(ErrorPages.class.getResourceAsStream("/404-malware.html"),
                             HttpStatus.NOT_FOUND_404, AbstractResponse.MIME_TEXT_HTML));
         } catch (final IOException e) {
             LOGGER.fatal("Cannot read 404-malware page.", e);
@@ -73,19 +69,5 @@ public class ErrorPages {
      */
     public AbstractResponse get(Error error) {
         return errors.get(error);
-    }
-
-    private byte[] read(InputStream is) throws IOException {
-
-        final byte[] buffer = new byte[BUFFER_SIZE];
-        int read;
-
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        while ((read = is.read(buffer)) != -1) {
-            output.write(buffer, 0, read);
-        }
-
-        return output.toByteArray();
     }
 }
