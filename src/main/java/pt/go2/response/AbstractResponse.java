@@ -1,5 +1,8 @@
 package pt.go2.response;
 
+import java.io.IOException;
+
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -42,12 +45,27 @@ public abstract class AbstractResponse {
     public abstract int getHttpStatus();
 
     /**
+     * Http Status code for response
+     *
+     * @return
+     */
+    protected abstract byte[] getBody();
+
+    /**
      * Generate response
      *
      * @param exchange
      * @return
+     * @throws IOException
      */
-    public abstract byte[] run(final HttpServletResponse exchange);
+    public void run(final HttpServletResponse exchange) throws IOException {
+
+        try (ServletOutputStream stream = exchange.getOutputStream()) {
+
+            stream.write(getBody());
+            stream.flush();
+        }
+    }
 
     /**
      * Implementations should override mime type when necessary

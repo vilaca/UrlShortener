@@ -1,5 +1,7 @@
 package pt.go2.response;
 
+import java.io.IOException;
+
 import javax.servlet.http.HttpServletResponse;
 
 /**
@@ -22,8 +24,13 @@ public class RedirectResponse extends AbstractResponse {
     }
 
     @Override
-    public byte[] run(HttpServletResponse exchange) {
+    public void run(HttpServletResponse exchange) throws IOException {
         exchange.setHeader(RESPONSE_HEADER_LOCATION, redirect);
-        return new byte[] {};
+        super.run(exchange);
+    }
+
+    @Override
+    protected byte[] getBody() {
+        return new byte[0];
     }
 }

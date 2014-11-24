@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -50,18 +49,15 @@ public abstract class RequestHandler extends AbstractHandler {
     protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
             final AbstractResponse response, final boolean cache) {
 
-        final byte[] body = response.run(exchange);
-
-        int status = response.getHttpStatus();
-
         setHeaders(exchange, response, cache);
 
-        exchange.setStatus(status);
+        int status;
 
-        try (ServletOutputStream stream = exchange.getOutputStream()) {
+        try {
 
-            stream.write(body);
-            stream.flush();
+            response.run(exchange);
+
+            status = response.getHttpStatus();
 
         } catch (final IOException e) {
 
@@ -70,7 +66,9 @@ public abstract class RequestHandler extends AbstractHandler {
             status = HttpStatus.INTERNAL_SERVER_ERROR_500;
         }
 
-        LOG.trace(printLogMessage(status, request, body.length));
+        exchange.setStatus(status);
+
+        LOG.trace(printLogMessage(status, request, exchange.getBufferSize()));
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,

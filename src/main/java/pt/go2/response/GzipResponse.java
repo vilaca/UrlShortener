@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.zip.GZIPOutputStream;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.logging.log4j.LogManager;
@@ -83,15 +84,23 @@ public class GzipResponse extends AbstractResponse {
      * )
      */
     @Override
-    public byte[] run(HttpServletResponse exchange) {
+    public void run(HttpServletResponse exchange) throws IOException {
+
+        final byte[] content;
 
         if (this.zipBody.length > 0 && clientAcceptsZip(exchange)) {
             zipped = true;
-            return zipBody;
+            content = zipBody;
+        } else {
+            zipped = false;
+            content = body;
         }
 
-        zipped = false;
-        return body;
+        try (ServletOutputStream stream = exchange.getOutputStream()) {
+
+            stream.write(content);
+            stream.flush();
+        }
     }
 
     /*
@@ -116,5 +125,10 @@ public class GzipResponse extends AbstractResponse {
         final String header = exchange.getHeader(REQUEST_HEADER_ACCEPT_ENCODING);
 
         return header != null && header.indexOf("gzip") != -1;
+    }
+
+    @Override
+    protected byte[] getBody() {
+        return new byte[0];
     }
 }

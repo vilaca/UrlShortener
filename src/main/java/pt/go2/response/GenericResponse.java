@@ -1,7 +1,5 @@
 package pt.go2.response;
 
-import javax.servlet.http.HttpServletResponse;
-
 import org.eclipse.jetty.http.HttpStatus;
 
 public class GenericResponse extends AbstractResponse {
@@ -11,7 +9,7 @@ public class GenericResponse extends AbstractResponse {
     final String mime;
 
     public GenericResponse(byte[] body, int error, String mime) {
-        this.body = body;
+        this.body = body.clone();
         this.error = error;
         this.mime = mime;
     }
@@ -23,7 +21,7 @@ public class GenericResponse extends AbstractResponse {
     }
 
     public GenericResponse(byte[] body) {
-        this.body = body;
+        this.body = body.clone();
         this.error = HttpStatus.OK_200;
         this.mime = MIME_TEXT_PLAIN;
     }
@@ -34,12 +32,12 @@ public class GenericResponse extends AbstractResponse {
     }
 
     @Override
-    public byte[] run(HttpServletResponse exchange) {
-        return body;
+    public String getMimeType() {
+        return mime;
     }
 
     @Override
-    public String getMimeType() {
-        return mime;
+    protected byte[] getBody() {
+        return body;
     }
 }
