@@ -69,15 +69,6 @@ public class HashKey {
     }
 
     /**
-     * Get key in base64 format as a byte array
-     *
-     * @return key
-     */
-    public byte[] getBytes() {
-        return this.key;
-    }
-
-    /**
      * Get hashcode as integer
      *
      */
