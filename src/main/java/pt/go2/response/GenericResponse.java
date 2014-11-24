@@ -3,6 +3,7 @@ package pt.go2.response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -14,8 +15,8 @@ public class GenericResponse extends AbstractResponse {
     final int error;
     final String mime;
 
-    public GenericResponse(String content, int error, String mime) {
-        this.body = content.getBytes();
+    public GenericResponse(String content, String encoding, int error, String mime) throws UnsupportedEncodingException {
+        this.body = content.getBytes(encoding);
         this.error = error;
         this.mime = mime;
     }
@@ -26,8 +27,8 @@ public class GenericResponse extends AbstractResponse {
         this.mime = MIME_TEXT_PLAIN;
     }
 
-    public GenericResponse(String content) {
-        this.body = content.getBytes();
+    public GenericResponse(String content, String encoding) throws UnsupportedEncodingException {
+        this.body = content.getBytes(encoding);
         this.error = HttpStatus.OK_200;
         this.mime = MIME_TEXT_PLAIN;
     }

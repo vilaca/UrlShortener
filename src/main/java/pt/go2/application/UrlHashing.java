@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -79,24 +80,29 @@ class UrlHashing extends RequestHandler {
 
         uri = ks.get(hk);
 
-        switch (uri.health()) {
-        case MALWARE:
-            reply(request, response, new GenericResponse("malware", HttpStatus.FORBIDDEN_403,
-                    AbstractResponse.MIME_TEXT_PLAIN), true);
-            break;
-        case OK:
-            reply(request, response, new GenericResponse(hk.toString()), false);
-            break;
-        case PHISHING:
-            reply(request, response, new GenericResponse("phishing", HttpStatus.FORBIDDEN_403,
-                    AbstractResponse.MIME_TEXT_PLAIN), true);
-            break;
-        case PROCESSING:
-            reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
-            break;
-        default:
+        try {
+            switch (uri.health()) {
+            case MALWARE:
+                reply(request, response, new GenericResponse("malware", "US-ASCII", HttpStatus.FORBIDDEN_403,
+                        AbstractResponse.MIME_TEXT_PLAIN), true);
+                break;
+            case OK:
+                reply(request, response, new GenericResponse(hk.toString(), "US-ASCII"), false);
+                break;
+            case PHISHING:
+                reply(request, response, new GenericResponse("phishing", "US-ASCII", HttpStatus.FORBIDDEN_403,
+                        AbstractResponse.MIME_TEXT_PLAIN), true);
+                break;
+            case PROCESSING:
+                reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
+                break;
+            default:
+                reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+                break;
+            }
+        } catch (final UnsupportedEncodingException e) {
             reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-            break;
+            LOGGER.error(e);
         }
     }
 
