@@ -119,8 +119,4 @@ public class KeyValueStore {
     public HashKey find(Uri uri) {
         return map.getUrl2Hash(uri);
     }
-
-    public byte[] get(Uri uri) {
-        return map.getUrl2Hash(uri).getBytes();
-    }
 }
