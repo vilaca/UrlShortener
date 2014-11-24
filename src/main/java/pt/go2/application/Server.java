@@ -14,6 +14,7 @@ import pt.go2.daemon.WatchDog;
 import pt.go2.external.PhishLocalCache;
 import pt.go2.external.PhishTankDownloader;
 import pt.go2.external.SafeBrowsingLookup;
+import pt.go2.external.UrlHealth;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;

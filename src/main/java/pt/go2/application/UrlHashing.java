@@ -12,6 +12,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
+import pt.go2.external.UrlHealth;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;

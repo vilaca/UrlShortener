@@ -71,7 +71,14 @@ public class KeyValueStore {
 
         try {
 
-            backupFile.write(hk, uri);
+            final StringBuilder sb = new StringBuilder();
+
+            sb.append(hk.toString());
+            sb.append(",");
+            sb.append(uri.toString());
+            sb.append(System.getProperty("line.separator"));
+
+            backupFile.write(sb.toString());
 
         } catch (final IOException e) {
 

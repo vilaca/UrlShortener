@@ -6,9 +6,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 
-import pt.go2.storage.HashKey;
-import pt.go2.storage.Uri;
-
 /**
  * Persist Urls and their Hashes so they can be later restored w/ the Restore
  * class
@@ -34,17 +31,10 @@ public class Backup {
         return resumeFolder + String.valueOf(cal.getTimeInMillis());
     }
 
-    public void write(final HashKey hk, final Uri uri) throws IOException {
-
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append(hk.toString());
-        sb.append(",");
-        sb.append(uri.toString());
-        sb.append(System.getProperty("line.separator"));
+    public void write(String record) throws IOException {
 
         synchronized (this) {
-            resumeLog.write(sb.toString());
+            resumeLog.write(record);
             resumeLog.flush();
         }
     }

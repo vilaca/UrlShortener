@@ -1,4 +1,4 @@
-package pt.go2.application;
+package pt.go2.external;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -8,8 +8,6 @@ import java.util.Set;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.external.PhishLocalCache;
-import pt.go2.external.SafeBrowsingLookup;
 import pt.go2.fileio.WhiteList;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
