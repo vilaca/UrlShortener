@@ -46,7 +46,7 @@ public class KeyValueStore {
      *
      * @return
      */
-    public synchronized byte[] add(final Uri uri) {
+    public synchronized boolean add(final Uri uri) {
 
         int retries = 0;
         HashKey hk = new HashKey();
@@ -59,7 +59,7 @@ public class KeyValueStore {
             if (retries > MAX_HASHING_RETRIES) {
                 // give up
                 LOGGER.warn("Giving up rehashing " + uri);
-                return new byte[0];
+                return false;
             } else if (retries > 1) {
                 LOGGER.warn("Rehashing " + uri + " / " + retries + "try.");
             }
@@ -86,10 +86,10 @@ public class KeyValueStore {
 
             map.remove(hk, uri);
 
-            return new byte[0];
+            return false;
         }
 
-        return hk.getBytes();
+        return true;
     }
 
     /**

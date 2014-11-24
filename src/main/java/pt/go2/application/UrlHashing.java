@@ -62,7 +62,11 @@ class UrlHashing extends RequestHandler {
 
             // hash not found, add new
 
-            ks.add(uri);
+            if (!ks.add(uri)) {
+                reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+                return;
+            }
+
             reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
             health.test(uri, true);
 
