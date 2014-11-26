@@ -15,6 +15,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import pt.go2.fileio.AccessLogger;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
@@ -23,10 +24,10 @@ import pt.go2.response.RedirectResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
     // only for access_log file
-    private static final Logger LOG = LogManager.getLogger("accesslogger");
+    private static final Logger LOG = LogManager.getLogger();
+
+    private static final AccessLogger ACCESSLOG = new AccessLogger();
 
     protected final Configuration config;
     private final ErrorPages errors;
@@ -61,14 +62,14 @@ public abstract class RequestHandler extends AbstractHandler {
 
         } catch (final IOException e) {
 
-            LOGGER.error("Error while streaming the response.", e);
+            LOG.error("Error while streaming the response.", e);
 
             status = HttpStatus.INTERNAL_SERVER_ERROR_500;
         }
 
         exchange.setStatus(status);
 
-        LOG.trace(printLogMessage(status, request, exchange.getBufferSize()));
+        ACCESSLOG.log(printLogMessage(status, request, exchange.getBufferSize()));
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
@@ -172,7 +173,7 @@ public abstract class RequestHandler extends AbstractHandler {
 
             reply(request, response, new RedirectResponse("//" + enforce, HttpStatus.MOVED_PERMANENTLY_301), false);
 
-            LOGGER.error("Wrong host: " + host);
+            LOG.error("Wrong host: " + host);
             return;
         }
 
