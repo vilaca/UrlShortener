@@ -102,11 +102,6 @@ public class HashKey {
         return this.hash == hk.hash;
     }
 
-    @Override
-    public String toString() {
-        return new String(key);
-    }
-
     /**
      * Generate a "random" hashkey
      */
