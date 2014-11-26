@@ -2,8 +2,9 @@ package pt.go2.fileio;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.util.Calendar;
 
 /**
@@ -24,7 +25,9 @@ public class Backup {
             filename = generateFilename(resumeFolder);
         } while (new File(filename).exists());
 
-        resumeLog = new BufferedWriter(new FileWriter(filename));
+        final OutputStreamWriter osw = new OutputStreamWriter(new FileOutputStream(filename), "US-ASCII");
+
+        resumeLog = new BufferedWriter(osw);
     }
 
     private String generateFilename(final String resumeFolder) {

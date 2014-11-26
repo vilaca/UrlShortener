@@ -2,8 +2,9 @@ package pt.go2.fileio;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,8 +46,8 @@ public class Restore {
 
             // load all data from each file
 
-            try (final FileReader fr = new FileReader(file.getAbsolutePath());
-                    final BufferedReader br = new BufferedReader(fr);) {
+            try (InputStreamReader isr = new InputStreamReader(new FileInputStream(file.getAbsolutePath()), "US-ASCII");
+                    BufferedReader br = new BufferedReader(isr);) {
 
                 LOGGER.trace("Reading from Resume file: " + file.getName());
 
