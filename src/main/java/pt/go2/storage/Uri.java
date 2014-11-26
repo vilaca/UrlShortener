@@ -1,9 +1,12 @@
 package pt.go2.storage;
 
+import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
 import java.util.Date;
 
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Immutable ASCII string
@@ -16,6 +19,8 @@ import org.apache.commons.validator.routines.UrlValidator;
  * in c'tor for faster lookups in Map
  */
 public class Uri {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final String HTTP = "http://";
     private static final String HTTPS = "https://";
@@ -34,11 +39,11 @@ public class Uri {
     /**
      * Use create method instead
      *
-     * @param str
+     * @param bs
      * @param state
      */
-    private Uri(final String str, final Health state) {
-        inner = str.getBytes();
+    private Uri(final byte[] bs, final Health state) {
+        inner = bs;
         hashcode = Arrays.hashCode(inner);
         this.health = state;
     }
@@ -55,7 +60,12 @@ public class Uri {
             return null;
         }
 
-        return new Uri(normalized, state);
+        try {
+            return new Uri(normalized.getBytes("US_ASCII"), state);
+        } catch (final UnsupportedEncodingException e) {
+            LOGGER.error("ERROR decoding URI.", e);
+            return null;
+        }
     }
 
     @Override
@@ -85,11 +95,6 @@ public class Uri {
         }
 
         return Arrays.equals(this.inner, otherInner);
-    }
-
-    @Override
-    public String toString() {
-        return new String(inner);
     }
 
     /**
