@@ -7,7 +7,7 @@ import java.io.UnsupportedEncodingException;
  */
 public class HashKey {
 
-    private static final int SIXBITS = 6;
+    private static final int BASE64_WORD_LENGHT = 6;
 
     private static final int BASE_64 = 64;
 
@@ -127,7 +127,7 @@ public class HashKey {
         while (i >= 0) {
 
             long b = v & BASE_64 - 1;
-            v >>= SIXBITS;
+            v >>= BASE64_WORD_LENGHT;
 
             if (b < ALPHABET_SIZE) {
                 b += 'a';
