@@ -1,2 +1,6 @@
 language: java
 script: ant compile
+jdk:
+ - Oracle JDK 8
+ - Oracle JDK 7
+ - OpenJDK 7 
