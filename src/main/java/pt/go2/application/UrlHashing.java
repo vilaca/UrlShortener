@@ -116,7 +116,7 @@ class UrlHashing extends RequestHandler {
     private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
 
         try (final InputStream is = request.getInputStream();
-                final InputStreamReader sr = new InputStreamReader(is);
+                final InputStreamReader sr = new InputStreamReader(is, "UTF-8");
                 final BufferedReader br = new BufferedReader(sr);) {
 
             // read body content

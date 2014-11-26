@@ -150,7 +150,7 @@ public class SafeBrowsingLookup {
             final HttpClient httpClient = createHttpClient(lookup);
 
             final ContentResponse httpResponse = httpClient.POST(lookup)
-                    .content(new BytesContentProvider(body.getBytes()), "text/plain").send();
+                    .content(new BytesContentProvider(body.getBytes("US-ASCII")), "text/plain").send();
 
             final int r = httpResponse.getStatus();
 

@@ -37,9 +37,10 @@ public class EmbeddedFiles {
         this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
 
         if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
-            this.pages.put(config.getGoogleVerification(),
-                    new GzipResponse(("google-site-verification: " + config.getGoogleVerification()).getBytes(),
-                            AbstractResponse.MIME_TEXT_PLAIN));
+            this.pages.put(
+                    config.getGoogleVerification(),
+                    new GzipResponse(("google-site-verification: " + config.getGoogleVerification())
+                            .getBytes("US-ASCII"), AbstractResponse.MIME_TEXT_PLAIN));
         }
 
         // check if all pages created
