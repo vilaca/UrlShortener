@@ -61,7 +61,7 @@ public class Uri {
         }
 
         try {
-            return new Uri(normalized.getBytes("US_ASCII"), state);
+            return new Uri(normalized.getBytes("US-ASCII"), state);
         } catch (final UnsupportedEncodingException e) {
             LOGGER.error("ERROR decoding URI.", e);
             return null;
