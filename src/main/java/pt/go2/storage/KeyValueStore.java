@@ -67,8 +67,6 @@ public class KeyValueStore {
             hk = new HashKey();
         }
 
-        map.put(hk, uri);
-
         try {
 
             final StringBuilder sb = new StringBuilder();
@@ -84,10 +82,10 @@ public class KeyValueStore {
 
             LOGGER.error("Could not write to the resume log.", e);
 
-            map.remove(hk, uri);
-
             return false;
         }
+
+        map.put(hk, uri);
 
         return true;
     }
