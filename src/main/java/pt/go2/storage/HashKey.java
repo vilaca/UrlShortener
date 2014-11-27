@@ -2,10 +2,15 @@ package pt.go2.storage;
 
 import java.io.UnsupportedEncodingException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Each Hashkey unequivocally identifies an Url
  */
 public class HashKey {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private static final int BASE64_WORD_LENGHT = 6;
 
@@ -100,6 +105,16 @@ public class HashKey {
 
         final HashKey hk = (HashKey) obj;
         return this.hash == hk.hash;
+    }
+
+    @Override
+    public String toString() {
+        try {
+            return new String(key, "US-ASCII");
+        } catch (final UnsupportedEncodingException e) {
+            LOGGER.error(e);
+            return null;
+        }
     }
 
     /**
