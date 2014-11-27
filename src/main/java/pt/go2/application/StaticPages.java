@@ -47,6 +47,7 @@ class StaticPages extends RequestHandler {
      */
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse exchange) {
+
         final String requested = getRequestedFilename(request.getRequestURI());
 
         if (requested.length() == HashKey.LENGTH) {
