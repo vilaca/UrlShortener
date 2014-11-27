@@ -151,10 +151,12 @@ public class Uri {
 
     /**
      * Get domain ( and TLD )
+     *
+     * @throws UnsupportedEncodingException
      */
-    public String domain() {
+    public String domain() throws UnsupportedEncodingException {
 
-        String uri = toString();
+        String uri = new String(inner, "US-ASCII");
 
         // remove https/http
         int i = uri.indexOf("//");

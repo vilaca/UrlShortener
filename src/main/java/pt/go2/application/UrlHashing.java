@@ -87,7 +87,12 @@ class UrlHashing extends RequestHandler {
                         AbstractResponse.MIME_TEXT_PLAIN), true);
                 break;
             case OK:
-                reply(request, response, new GenericResponse(hk.toString(), "US-ASCII"), false);
+                final String hash = hk.toString();
+                if (!hash.isEmpty()) {
+                    reply(request, response, new GenericResponse(hash, "US-ASCII"), false);
+                } else {
+                    reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+                }
                 break;
             case PHISHING:
                 reply(request, response, new GenericResponse("phishing", "US-ASCII", HttpStatus.FORBIDDEN_403,

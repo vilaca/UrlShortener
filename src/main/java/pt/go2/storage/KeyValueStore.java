@@ -67,6 +67,13 @@ public class KeyValueStore {
             hk = new HashKey();
         }
 
+        final String hash = hk.toString();
+
+        if (hash.isEmpty()) {
+            LOGGER.error("Hash not valid");
+            return false;
+        }
+
         try {
 
             final StringBuilder sb = new StringBuilder();

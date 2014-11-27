@@ -1,5 +1,6 @@
 package pt.go2.external;
 
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -64,9 +65,13 @@ public class UrlHealth {
             return;
         }
 
-        if (this.whitelist.contains(uri.domain())) {
-            uri.setHealth(Health.OK);
-            return;
+        try {
+            if (this.whitelist.contains(uri.domain())) {
+                uri.setHealth(Health.OK);
+                return;
+            }
+        } catch (final UnsupportedEncodingException e) {
+            LOGGER.info("Uri could not be decoded", e);
         }
 
         // check if Phishing
