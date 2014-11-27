@@ -8,12 +8,21 @@ import org.junit.Test;
 public class HashKeyTest {
 
     @Test
-    public void testEquals() throws UnsupportedEncodingException {
+    public void testEqual() throws UnsupportedEncodingException {
 
         final HashKey hk5 = new HashKey("AABBCC");
         final HashKey hk6 = new HashKey("AABBCC");
 
         Assert.assertTrue(hk5.equals(hk6));
+    }
+
+    @Test
+    public void testNotEqual() throws UnsupportedEncodingException {
+
+        final HashKey hk5 = new HashKey("AABBCC");
+        final HashKey hk6 = new HashKey("AABBCD");
+
+        Assert.assertTrue(!hk5.equals(hk6));
     }
 
     @Test
