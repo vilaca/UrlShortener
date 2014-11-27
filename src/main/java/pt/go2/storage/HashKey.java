@@ -113,7 +113,7 @@ public class HashKey {
             return new String(key, "US-ASCII");
         } catch (final UnsupportedEncodingException e) {
             LOGGER.error(e);
-            return null;
+            return "";
         }
     }
 
