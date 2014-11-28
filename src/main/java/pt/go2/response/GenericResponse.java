@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -15,8 +16,8 @@ public class GenericResponse extends AbstractResponse {
     final int error;
     final String mime;
 
-    public GenericResponse(String content, String encoding, int error, String mime) throws UnsupportedEncodingException {
-        this.body = content.getBytes(encoding);
+    public GenericResponse(String content, Charset charset, int error, String mime) throws UnsupportedEncodingException {
+        this.body = content.getBytes(charset);
         this.error = error;
         this.mime = mime;
     }
@@ -27,8 +28,8 @@ public class GenericResponse extends AbstractResponse {
         this.mime = MIME_TEXT_PLAIN;
     }
 
-    public GenericResponse(String content, String encoding) throws UnsupportedEncodingException {
-        this.body = content.getBytes(encoding);
+    public GenericResponse(String content, Charset charset) throws UnsupportedEncodingException {
+        this.body = content.getBytes(charset);
         this.error = HttpStatus.OK_200;
         this.mime = MIME_TEXT_PLAIN;
     }
