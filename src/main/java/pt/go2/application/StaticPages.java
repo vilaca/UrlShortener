@@ -1,14 +1,10 @@
 package pt.go2.application;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.Calendar;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
@@ -23,8 +19,6 @@ import pt.go2.storage.Uri;
  * Handles server requests
  */
 class StaticPages extends RequestHandler {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     final Calendar calendar = Calendar.getInstance();
 
@@ -54,16 +48,7 @@ class StaticPages extends RequestHandler {
 
             final HashKey hk;
 
-            try {
-
-                hk = new HashKey(requested);
-
-            } catch (final UnsupportedEncodingException e) {
-
-                LOGGER.error("Couldn't decode hash: " + requested);
-                reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
-                return;
-            }
+            hk = new HashKey(requested);
 
             final Uri uri = ks.get(hk);
 
