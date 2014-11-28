@@ -66,16 +66,11 @@ public class KeyValueStore {
 
         final String hash = hk.toString();
 
-        if (hash.isEmpty()) {
-            LOGGER.error("Hash not valid");
-            return false;
-        }
-
         try {
 
             final StringBuilder sb = new StringBuilder();
 
-            sb.append(hk.toString());
+            sb.append(hash);
             sb.append(",");
             sb.append(uri.toString());
             sb.append(System.getProperty("line.separator"));
