@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -61,19 +62,7 @@ class UrlHashing extends RequestHandler {
 
         if (hk == null) {
 
-            // hash not found, add new
-
-            if (!ks.add(uri)) {
-                reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-                return;
-            }
-
-            reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
-            health.test(uri, true);
-
-            if (uri.health() == Health.PROCESSING) {
-                uri.setHealth(Health.OK);
-            }
+            handleNewUrl(request, response, uri);
 
             return;
         }
@@ -83,20 +72,16 @@ class UrlHashing extends RequestHandler {
         try {
             switch (uri.health()) {
             case MALWARE:
-                reply(request, response, new GenericResponse("malware", "US-ASCII", HttpStatus.FORBIDDEN_403,
-                        AbstractResponse.MIME_TEXT_PLAIN), true);
+                reply(request, response, new GenericResponse("malware", StandardCharsets.US_ASCII,
+                        HttpStatus.FORBIDDEN_403, AbstractResponse.MIME_TEXT_PLAIN), true);
                 break;
             case OK:
                 final String hash = hk.toString();
-                if (!hash.isEmpty()) {
-                    reply(request, response, new GenericResponse(hash, "US-ASCII"), false);
-                } else {
-                    reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-                }
+                reply(request, response, new GenericResponse(hash, StandardCharsets.US_ASCII), false);
                 break;
             case PHISHING:
-                reply(request, response, new GenericResponse("phishing", "US-ASCII", HttpStatus.FORBIDDEN_403,
-                        AbstractResponse.MIME_TEXT_PLAIN), true);
+                reply(request, response, new GenericResponse("phishing", StandardCharsets.US_ASCII,
+                        HttpStatus.FORBIDDEN_403, AbstractResponse.MIME_TEXT_PLAIN), true);
                 break;
             case PROCESSING:
                 reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
@@ -109,6 +94,25 @@ class UrlHashing extends RequestHandler {
             reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
             LOGGER.error(e);
         }
+    }
+
+    private void handleNewUrl(HttpServletRequest request, HttpServletResponse response, Uri uri) {
+        // hash not found, add new
+
+        if (!ks.add(uri)) {
+            reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+            return;
+        }
+
+        reply(request, response, new GenericResponse(HttpStatus.ACCEPTED_202), false);
+
+        health.test(uri, true);
+
+        if (uri.health() == Health.PROCESSING) {
+            uri.setHealth(Health.OK);
+        }
+
+        return;
     }
 
     /**
