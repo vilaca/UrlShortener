@@ -33,7 +33,7 @@ public class GenericResponse extends AbstractResponse {
         this.mime = MIME_TEXT_PLAIN;
     }
 
-    public GenericResponse(InputStream is, int notFound404, String mimeTextHtml) throws IOException {
+    public GenericResponse(InputStream is) throws IOException {
 
         final byte[] buffer = new byte[BUFFER_SIZE];
         int read;
@@ -45,7 +45,7 @@ public class GenericResponse extends AbstractResponse {
         }
 
         this.body = output.toByteArray();
-        this.error = HttpStatus.OK_200;
+        this.error = HttpStatus.NOT_FOUND_404;
         this.mime = MIME_TEXT_PLAIN;
     }
 
