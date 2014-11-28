@@ -1,42 +1,36 @@
 package pt.go2.storage;
 
-import java.io.UnsupportedEncodingException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 /**
  * Each Hashkey unequivocally identifies an Url
  */
 public class HashKey {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final int BASE64_MASK = 63;
 
-    private static final int BASE64_WORD_LENGHT = 6;
+    private static final long HASHKEY_MASK = 68719476735L;
 
-    private static final int BASE_64 = 64;
-
-    private static final int ALPHABET_SIZE = 26;
-
-    private static final int UPPERANDLOWERCASE = ALPHABET_SIZE * 2;
-
-    private static final int UPPERANDLOWERCASEANDNUMERALS = UPPERANDLOWERCASE + 10;
+    private static final char[] TABLE = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+        'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+        'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
+        '5', '6', '7', '8', '9', '+', '_' };
 
     public static final int LENGTH = 6;
 
-    private static final long MAX_HASH = 68719476735L;
-
-    // hash key as Base10
-    private long hash;
-
-    // hash key as Base64
-    private byte[] key;
+    private final String hash;
 
     /**
      * C'tor
      */
     public HashKey() {
-        generateHash();
+        final long rnd = System.currentTimeMillis() * super.hashCode() & HASHKEY_MASK;
+
+        final StringBuilder sb = new StringBuilder();
+
+        for (int i = 0; i < LENGTH; i++) {
+
+            sb.append(TABLE[(int) rnd & BASE64_MASK]);
+        }
+        this.hash = sb.toString();
     }
 
     /**
@@ -45,36 +39,10 @@ public class HashKey {
      * @param key
      *            base64 key/hash
      *
-     * @throws UnsupportedEncodingException
      */
-    public HashKey(final String hk) throws UnsupportedEncodingException {
+    public HashKey(final String hk) {
 
-        this.key = hk.getBytes("US-ASCII");
-
-        for (final byte b : this.key) {
-
-            long inc;
-
-            if (b >= 'a' && b <= 'z') {
-                inc = b - 'a';
-
-            } else if (b >= 'A' && b <= 'Z') {
-                inc = b - 'A' + ALPHABET_SIZE;
-
-            } else if (b >= '0' && b <= '9') {
-                inc = b - '0' + UPPERANDLOWERCASE;
-
-            } else if (b == '_') {
-
-                inc = UPPERANDLOWERCASEANDNUMERALS;
-
-            } else {
-                inc = BASE_64 - 1;
-            }
-
-            hash *= BASE_64;
-            hash += inc;
-        }
+        this.hash = hk;
     }
 
     /**
@@ -83,7 +51,7 @@ public class HashKey {
      */
     @Override
     public int hashCode() {
-        return (int) hash;
+        return hash.hashCode();
     }
 
     @Override
@@ -104,59 +72,11 @@ public class HashKey {
         // internal hash is long, while hashCode() is int
 
         final HashKey hk = (HashKey) obj;
-        return this.hash == hk.hash;
+        return this.hash.equals(hk.hash);
     }
 
     @Override
     public String toString() {
-        try {
-            return new String(key, "US-ASCII");
-        } catch (final UnsupportedEncodingException e) {
-            LOGGER.error(e);
-            return "";
-        }
-    }
-
-    /**
-     * Generate a "random" hashkey
-     */
-    private void generateHash() {
-        final long millis = System.currentTimeMillis();
-        this.hash = super.hashCode();
-        this.hash *= millis;
-        // 36 bit limit
-        this.hash = this.hash & MAX_HASH;
-        encode64();
-    }
-
-    /**
-     * Encode hashkey as a base64 byte array
-     */
-    private void encode64() {
-
-        this.key = new byte[LENGTH];
-
-        int i = LENGTH - 1;
-        long v = this.hash;
-
-        while (i >= 0) {
-
-            long b = v & BASE_64 - 1;
-            v >>= BASE64_WORD_LENGHT;
-
-            if (b < ALPHABET_SIZE) {
-                b += 'a';
-            } else if (b < UPPERANDLOWERCASE) {
-                b += -ALPHABET_SIZE + 'A';
-            } else if (b < UPPERANDLOWERCASEANDNUMERALS) {
-                b += -UPPERANDLOWERCASE + '0';
-            } else if (b == UPPERANDLOWERCASEANDNUMERALS) {
-                b = '_';
-            } else {
-                b = '-';
-            }
-            this.key[i] = (byte) b;
-            i--;
-        }
+        return hash;
     }
 }
