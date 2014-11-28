@@ -5,7 +5,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.TimeUnit;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -151,8 +150,7 @@ public abstract class RequestHandler extends AbstractHandler {
     }
 
     @Override
-    public void handle(String dontcare, Request base, HttpServletRequest request, HttpServletResponse response)
-            throws IOException, ServletException {
+    public void handle(String dontcare, Request base, HttpServletRequest request, HttpServletResponse response) {
 
         base.setHandled(true);
 
