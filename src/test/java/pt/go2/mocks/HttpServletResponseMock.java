@@ -3,13 +3,20 @@ package pt.go2.mocks;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 
 public class HttpServletResponseMock implements HttpServletResponse {
+
+    final Map<String, String> headers = new HashMap<>();
+
+    private int status, written;
 
     @Override
     public void flushBuffer() throws IOException {
@@ -18,7 +25,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public int getBufferSize() {
-        throw new UnsupportedOperationException();
+        return written;
     }
 
     @Override
@@ -38,7 +45,30 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public ServletOutputStream getOutputStream() throws IOException {
-        throw new UnsupportedOperationException();
+        return new ServletOutputStream() {
+
+            @Override
+            public boolean isReady() {
+                // TODO Auto-generated method stub
+                return false;
+            }
+
+            @Override
+            public void setWriteListener(WriteListener arg0) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void write(int arg0) throws IOException {
+                // TODO Auto-generated method stub
+            }
+
+            @Override
+            public void write(byte[] array) throws IOException {
+                written = array.length;
+            }
+        };
     }
 
     @Override
@@ -103,7 +133,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public void addHeader(String arg0, String arg1) {
-        throw new UnsupportedOperationException();
+        headers.put(arg0, arg1);
     }
 
     @Override
@@ -138,7 +168,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public String getHeader(String arg0) {
-        throw new UnsupportedOperationException();
+        return headers.get(arg0);
     }
 
     @Override
@@ -153,7 +183,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public int getStatus() {
-        throw new UnsupportedOperationException();
+        return status;
     }
 
     @Override
@@ -178,8 +208,7 @@ public class HttpServletResponseMock implements HttpServletResponse {
 
     @Override
     public void setHeader(String arg0, String arg1) {
-        // TODO Auto-generated method stub
-
+        addHeader(arg0, arg1);
     }
 
     @Override
@@ -188,8 +217,8 @@ public class HttpServletResponseMock implements HttpServletResponse {
     }
 
     @Override
-    public void setStatus(int arg0) {
-        throw new UnsupportedOperationException();
+    public void setStatus(int status) {
+        this.status = status;
     }
 
     @Override
