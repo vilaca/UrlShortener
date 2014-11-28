@@ -7,12 +7,12 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import pt.go2.Mocks.HttpServletRequestMock;
-import pt.go2.Mocks.HttpServletResponseMock;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;
 import pt.go2.fileio.RestoreItem;
+import pt.go2.mocks.HttpServletRequestMock;
+import pt.go2.mocks.HttpServletResponseMock;
 import pt.go2.response.AbstractResponse;
 import pt.go2.storage.KeyValueStore;
 
