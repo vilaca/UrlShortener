@@ -119,7 +119,7 @@ public class HttpServletRequestMock implements HttpServletRequest {
 
     @Override
     public String getProtocol() {
-        throw new UnsupportedOperationException();
+        return "HTTP1.1";
     }
 
     @Override
@@ -134,7 +134,7 @@ public class HttpServletRequestMock implements HttpServletRequest {
 
     @Override
     public String getRemoteAddr() {
-        throw new UnsupportedOperationException();
+        return "255.255.255.255";
     }
 
     @Override
@@ -247,7 +247,7 @@ public class HttpServletRequestMock implements HttpServletRequest {
 
     @Override
     public String getHeader(String arg0) {
-        throw new UnsupportedOperationException();
+        return arg0;
     }
 
     @Override
@@ -267,7 +267,7 @@ public class HttpServletRequestMock implements HttpServletRequest {
 
     @Override
     public String getMethod() {
-        throw new UnsupportedOperationException();
+        return "GET";
     }
 
     @Override

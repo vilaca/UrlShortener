@@ -1,17 +1,19 @@
 package pt.go2.application;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
-import javax.servlet.ServletOutputStream;
-
+import org.junit.Assert;
 import org.junit.Test;
 
 import pt.go2.Mocks.HttpServletRequestMock;
 import pt.go2.Mocks.HttpServletResponseMock;
-import pt.go2.Mocks.ServletOutputStreamMock;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;
+import pt.go2.fileio.RestoreItem;
+import pt.go2.response.AbstractResponse;
 import pt.go2.storage.KeyValueStore;
 
 public class StaticPagesTest {
@@ -19,18 +21,15 @@ public class StaticPagesTest {
     @Test
     public void test() throws IOException {
 
-        final Configuration config;
+        final String redirected = "http://redirected.com";
 
-        final KeyValueStore ks;
-        final ErrorPages errors;
-        final EmbeddedFiles res;
+        final List<RestoreItem> uris = Arrays.asList(new RestoreItem("aabbcc", redirected));
 
-        config = new Configuration();
-        ks = new KeyValueStore(config.getDbFolder());
-        errors = new ErrorPages();
-        res = new EmbeddedFiles(config);
+        final Configuration config = new Configuration();
 
-        final StaticPages sp = new StaticPages(config, errors, ks, res);
+        final KeyValueStore ks = new KeyValueStore(uris, config.getDbFolder());
+        final ErrorPages errors = new ErrorPages();
+        final EmbeddedFiles res = new EmbeddedFiles(config);
 
         final HttpServletRequestMock request = new HttpServletRequestMock() {
 
@@ -41,14 +40,14 @@ public class StaticPagesTest {
 
         };
 
-        final HttpServletResponseMock exchange = new HttpServletResponseMock() {
+        final HttpServletResponseMock response = new HttpServletResponseMock();
 
-            @Override
-            public ServletOutputStream getOutputStream() {
-                return new ServletOutputStreamMock();
-            }
-        };
+        final StaticPages sp = new StaticPages(config, errors, ks, res);
 
-        sp.handle(request, exchange);
+        sp.handle(request, response);
+
+        Assert.assertEquals(config.getRedirect(), response.getStatus());
+        Assert.assertEquals(redirected, response.getHeader(AbstractResponse.RESPONSE_HEADER_LOCATION));
+
     }
 }
