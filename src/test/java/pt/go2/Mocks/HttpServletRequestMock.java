@@ -1,4 +1,4 @@
-package pt.go2.Mocks;
+package pt.go2.mocks;
 
 import java.io.BufferedReader;
 import java.io.IOException;

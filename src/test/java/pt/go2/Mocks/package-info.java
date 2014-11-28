@@ -1,4 +1,4 @@
 /**
  * Class mocks
  */
-package pt.go2.Mocks;
+package pt.go2.mocks;

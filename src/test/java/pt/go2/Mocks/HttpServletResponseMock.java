@@ -1,4 +1,4 @@
-package pt.go2.Mocks;
+package pt.go2.mocks;
 
 import java.io.IOException;
 import java.io.PrintWriter;
