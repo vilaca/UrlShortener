@@ -1,12 +1,8 @@
 package pt.go2.storage;
 
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
-import java.util.Date;
 
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 /**
  * Immutable ASCII string
@@ -20,21 +16,17 @@ import org.apache.logging.log4j.Logger;
  */
 public class Uri {
 
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    private static final String HTTP = "http://";
-    private static final String HTTPS = "https://";
-
     public enum Health {
 
         OK, PROCESSING, PHISHING, MALWARE;
     }
 
-    private final byte[] inner;
-    private final int hashcode;
+    private static final String HTTP = "http://";
+    private static final String HTTPS = "https://";
 
     private volatile Health health;
-    private Date updated;
+
+    private final String uri;
 
     /**
      * Use create method instead
@@ -42,9 +34,8 @@ public class Uri {
      * @param bs
      * @param state
      */
-    private Uri(final byte[] bs, final Health state) {
-        inner = bs;
-        hashcode = Arrays.hashCode(inner);
+    private Uri(String uri, final Health state) {
+        this.uri = uri;
         this.health = state;
     }
 
@@ -60,17 +51,12 @@ public class Uri {
             return null;
         }
 
-        try {
-            return new Uri(normalized.getBytes("US-ASCII"), state);
-        } catch (final UnsupportedEncodingException e) {
-            LOGGER.error("ERROR decoding URI.", e);
-            return null;
-        }
+        return new Uri(normalized, state);
     }
 
     @Override
     public int hashCode() {
-        return hashcode;
+        return this.uri.hashCode();
     }
 
     @Override
@@ -88,13 +74,9 @@ public class Uri {
             return false;
         }
 
-        final byte[] otherInner = ((Uri) other).inner;
+        final String otherUri = ((Uri) other).uri;
 
-        if (this.inner.length != otherInner.length) {
-            return false;
-        }
-
-        return Arrays.equals(this.inner, otherInner);
+        return this.uri.length() == otherUri.length() && this.uri.equals(otherUri);
     }
 
     /**
@@ -142,11 +124,6 @@ public class Uri {
 
     public void setHealth(final Health h) {
         this.health = h;
-        this.updated = new Date();
-    }
-
-    public long lastChecked() {
-        return updated == null ? 0 : updated.getTime();
     }
 
     /**
@@ -154,33 +131,33 @@ public class Uri {
      *
      * @throws UnsupportedEncodingException
      */
-    public String domain() throws UnsupportedEncodingException {
+    public String domain() {
 
-        String uri = new String(inner, "US-ASCII");
+        String domain = this.uri;
 
         // remove https/http
-        int i = uri.indexOf("//");
+        int i = domain.indexOf("//");
         if (i != -1) {
-            uri = uri.substring(i + "//".length());
+            domain = domain.substring(i + "//".length());
         }
 
         // remove file path
-        i = uri.indexOf("/", i);
+        i = domain.indexOf("/", i);
         if (i != -1) {
-            uri = uri.substring(0, i);
+            domain = domain.substring(0, i);
         }
         // remove port
-        i = uri.indexOf(":");
+        i = domain.indexOf(":");
         if (i != -1) {
-            uri = uri.substring(0, i);
+            domain = domain.substring(0, i);
         }
 
         // remove subdomain
-        i = uri.lastIndexOf(".", uri.lastIndexOf(".") - 1);
+        i = domain.lastIndexOf(".", domain.lastIndexOf(".") - 1);
         if (i != -1) {
-            uri = uri.substring(i + 1);
+            domain = domain.substring(i + 1);
         }
 
-        return uri;
+        return domain;
     }
 }

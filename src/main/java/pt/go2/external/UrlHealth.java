@@ -1,8 +1,6 @@
 package pt.go2.external;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -14,8 +12,6 @@ import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
 
 public class UrlHealth {
-
-    private static final int ONE_HOUR = 60 * 60 * 1000;
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -59,19 +55,9 @@ public class UrlHealth {
 
     public void test(Uri uri, boolean useSafeBrowsing) {
 
-        final long now = new Date().getTime();
-
-        if (now - uri.lastChecked() < ONE_HOUR) {
+        if (this.whitelist.contains(uri.domain())) {
+            uri.setHealth(Health.OK);
             return;
-        }
-
-        try {
-            if (this.whitelist.contains(uri.domain())) {
-                uri.setHealth(Health.OK);
-                return;
-            }
-        } catch (final UnsupportedEncodingException e) {
-            LOGGER.info("Uri could not be decoded", e);
         }
 
         // check if Phishing
