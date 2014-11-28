@@ -1,6 +1,7 @@
 package pt.go2.application;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,6 +19,8 @@ import pt.go2.external.UrlHealth;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;
+import pt.go2.fileio.Restore;
+import pt.go2.fileio.RestoreItem;
 import pt.go2.fileio.WhiteList;
 import pt.go2.storage.KeyValueStore;
 
@@ -45,7 +48,10 @@ public class Server {
 
         try {
             config = new Configuration();
-            ks = new KeyValueStore(config.getDbFolder());
+
+            final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
+
+            ks = new KeyValueStore(restoredItems, config.getDbFolder());
             errors = new ErrorPages();
             res = new EmbeddedFiles(config);
 
