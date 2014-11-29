@@ -5,14 +5,6 @@ import java.io.UnsupportedEncodingException;
 import org.apache.commons.validator.routines.UrlValidator;
 
 /**
- * Immutable ASCII string
- *
- * More memory efficient than String by using byte instead of char.
- *
- * Other future optimizations are possible.
- *
- * MUST OVERRIDE BOTH hashCode() and equals(Object). hashCode() value calculated
- * in c'tor for faster lookups in Map
  */
 public class Uri {
 
@@ -159,5 +151,10 @@ public class Uri {
         }
 
         return domain;
+    }
+
+    @Override
+    public String toString() {
+        return this.uri;
     }
 }
