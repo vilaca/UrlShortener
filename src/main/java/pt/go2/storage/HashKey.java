@@ -7,12 +7,14 @@ public class HashKey {
 
     private static final int BASE64_MASK = 63;
 
+    private static final int CHAR_BIT_LEN = 6;
+
     private static final long HASHKEY_MASK = 68719476735L;
 
     private static final char[] TABLE = { 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
-        'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
-        'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
-        '5', '6', '7', '8', '9', '+', '_' };
+            'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j',
+            'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '0', '1', '2', '3', '4',
+            '5', '6', '7', '8', '9', '+', '_' };
 
     public static final int LENGTH = 6;
 
@@ -22,14 +24,18 @@ public class HashKey {
      * C'tor
      */
     public HashKey() {
-        final long rnd = System.currentTimeMillis() * super.hashCode() & HASHKEY_MASK;
+
+        long rnd = System.currentTimeMillis() * super.hashCode() & HASHKEY_MASK;
 
         final StringBuilder sb = new StringBuilder();
 
         for (int i = 0; i < LENGTH; i++) {
 
             sb.append(TABLE[(int) rnd & BASE64_MASK]);
+
+            rnd >>= CHAR_BIT_LEN;
         }
+
         this.hash = sb.toString();
     }
 
