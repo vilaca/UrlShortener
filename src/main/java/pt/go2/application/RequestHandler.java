@@ -51,24 +51,20 @@ public abstract class RequestHandler extends AbstractHandler {
 
         setHeaders(exchange, response, cache);
 
-        int status;
-
         try {
 
-            response.run(exchange);
+            exchange.setStatus(response.getHttpStatus());
 
-            status = response.getHttpStatus();
+            response.run(exchange);
 
         } catch (final IOException e) {
 
             LOG.error("Error while streaming the response.", e);
 
-            status = HttpStatus.INTERNAL_SERVER_ERROR_500;
+            exchange.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
 
-        exchange.setStatus(status);
-
-        ACCESSLOG.log(printLogMessage(status, request, exchange.getBufferSize()));
+        ACCESSLOG.log(printLogMessage(exchange.getStatus(), request, exchange.getBufferSize()));
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
