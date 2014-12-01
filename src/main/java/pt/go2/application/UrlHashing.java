@@ -50,9 +50,12 @@ class UrlHashing extends RequestHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response) {
 
-        Uri uri = urltoHash(request, response);
+        final String field = urltoHash(request, response);
+
+        Uri uri = Uri.create(field, true, Health.PROCESSING);
 
         if (uri == null) {
+            reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
             return;
         }
 
@@ -122,7 +125,7 @@ class UrlHashing extends RequestHandler {
      * @param response
      * @return
      */
-    private Uri urltoHash(HttpServletRequest request, HttpServletResponse response) {
+    private String urltoHash(HttpServletRequest request, HttpServletResponse response) {
 
         try (final InputStream is = request.getInputStream();
                 final InputStreamReader sr = new InputStreamReader(is, "UTF-8");
@@ -148,13 +151,7 @@ class UrlHashing extends RequestHandler {
 
             // Parse string into Uri
 
-            final Uri uri = Uri.create(postBody.substring(idx), true, Health.PROCESSING);
-
-            if (uri == null) {
-                reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
-            }
-
-            return uri;
+            return postBody.substring(idx);
 
         } catch (final IOException e) {
 
