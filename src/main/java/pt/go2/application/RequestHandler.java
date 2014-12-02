@@ -167,7 +167,7 @@ public abstract class RequestHandler extends AbstractHandler {
             boolean isValidDomain = false;
 
             for (final String entry : config.getValidDomains()) {
-                if (host.startsWith(entry)) {
+                if (host.equals(entry)) {
                     isValidDomain = true;
                     break;
                 }
