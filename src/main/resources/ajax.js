@@ -17,7 +17,7 @@ function getUrlFromForm() {
 
 function isValidUrl(url) {
 
-    return url.indexOf('http://go2.pt') !== 0
+    return url.indexOf('http://go2.pt') !== 0 && url.indexOf('http://www.go2.pt') !== 0
 
 }
 
@@ -63,7 +63,7 @@ function submit(su) {
 
             if (http.status == 200) {
                 if (http.responseText !== '') {
-                    error.innerHTML = ''
+                    error.innerHTML = '&nbsp;'
                         // place result in form and select text
                     f.v.value = 'go2.pt/' + http.responseText
                     f.v.focus()
