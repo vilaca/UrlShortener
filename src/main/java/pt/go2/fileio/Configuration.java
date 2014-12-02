@@ -4,6 +4,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -28,7 +31,7 @@ public class Configuration {
     private final String dbFolder;
 
     // site domain
-    private final String domain;
+    private final List<String> domain;
 
     // Google validation for webmaster tools site
     private final String googleVerification;
@@ -98,7 +101,7 @@ public class Configuration {
         redirect = getPropertyAsInt("server.redirect");
 
         dbFolder = getResumeFolder();
-        domain = getProperty("server.domain");
+        domain = getPropertyAsList("server.domain");
 
         googleVerification = getProperty("google-site-verification");
         phishtankApiKey = getProperty("phishtank-api-key");
@@ -106,6 +109,20 @@ public class Configuration {
 
         watchdogWait = getPropertyAsInt("watchdog.wait");
         watchdogInterval = getPropertyAsInt("watchdog.interval");
+    }
+
+    private List<String> getPropertyAsList(String key) {
+
+        final String value = getProperty(key);
+
+        if (value != null) {
+
+            final String[] values = value.split(",");
+
+            return Collections.unmodifiableList(Arrays.asList(values));
+        }
+
+        return Collections.emptyList();
     }
 
     /**
@@ -164,7 +181,7 @@ public class Configuration {
         return dbFolder;
     }
 
-    public String getDomain() {
+    public List<String> getValidDomains() {
         return domain;
     }
 

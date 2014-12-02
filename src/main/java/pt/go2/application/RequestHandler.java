@@ -19,7 +19,6 @@ import pt.go2.fileio.Configuration;
 import pt.go2.fileio.ErrorPages;
 import pt.go2.response.AbstractResponse;
 import pt.go2.response.GenericResponse;
-import pt.go2.response.RedirectResponse;
 
 public abstract class RequestHandler extends AbstractHandler {
 
@@ -152,20 +151,31 @@ public abstract class RequestHandler extends AbstractHandler {
 
         // we need a host header to continue
 
-        final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+        String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
 
-        if (host.isEmpty()) {
+        if (host == null || host.isEmpty()) {
             reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), false);
             return;
         }
 
-        // redirect to domain if host header is not correct
+        host = host.toLowerCase();
 
-        final String enforce = config.getDomain();
+        if (!config.getValidDomains().isEmpty()) {
 
-        if (enforce != null && !enforce.isEmpty() && !host.startsWith(enforce)) {
+            // redirect to domain if host header is not correct
 
-            reply(request, response, new RedirectResponse("//" + enforce, HttpStatus.MOVED_PERMANENTLY_301), false);
+            boolean isValidDomain = false;
+
+            for (final String entry : config.getValidDomains()) {
+                if (host.startsWith(entry)) {
+                    isValidDomain = true;
+                    break;
+                }
+            }
+
+            if (!isValidDomain) {
+                reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), true);
+            }
 
             LOG.error("Wrong host: " + host);
             return;
