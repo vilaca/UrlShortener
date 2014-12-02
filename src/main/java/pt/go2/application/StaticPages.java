@@ -6,6 +6,9 @@ import java.util.Calendar;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.http.HttpMethod;
+import org.eclipse.jetty.http.HttpStatus;
+
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;
@@ -46,32 +49,28 @@ class StaticPages extends RequestHandler {
 
         if (requested.length() == HashKey.LENGTH) {
 
-            final HashKey hk;
-
-            hk = new HashKey(requested);
-
-            final Uri uri = ks.get(hk);
-
-            if (uri == null) {
-                reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
-                return;
-            }
-
-            switch (uri.health()) {
-            case PHISHING:
-                reply(request, exchange, ErrorPages.Error.PHISHING, true);
-                break;
-            case OK:
-                reply(request, exchange, new RedirectResponse(uri.toString(), config.getRedirect()), true);
-                break;
-            case MALWARE:
-                reply(request, exchange, ErrorPages.Error.MALWARE, true);
-                break;
-            default:
-                reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
-            }
+            handleShortenedUrl(request, exchange, requested);
 
             return;
+        }
+
+        if (!config.getValidDomains().isEmpty() && request.getMethod().equals(HttpMethod.GET)) {
+
+            // if its not a shortened URL that was requested, make sure
+            // the prefered name is being used (ie www.go2.pt vs go2.pt)
+
+            final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST).toLowerCase();
+
+            final String preffered = config.getValidDomains().get(0);
+
+            if (!host.equals(preffered)) {
+
+                final String redirect = requested.startsWith("/") ? preffered + requested : preffered + "/" + requested;
+
+                reply(request, exchange, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
+
+                return;
+            }
         }
 
         final AbstractResponse response = files.getFile(requested);
@@ -80,6 +79,30 @@ class StaticPages extends RequestHandler {
             reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
         } else {
             reply(request, exchange, response, true);
+        }
+    }
+
+    private void handleShortenedUrl(HttpServletRequest request, HttpServletResponse exchange, final String requested) {
+
+        final Uri uri = ks.get(new HashKey(requested));
+
+        if (uri == null) {
+            reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
+            return;
+        }
+
+        switch (uri.health()) {
+        case PHISHING:
+            reply(request, exchange, ErrorPages.Error.PHISHING, true);
+            break;
+        case OK:
+            reply(request, exchange, new RedirectResponse(uri.toString(), config.getRedirect()), true);
+            break;
+        case MALWARE:
+            reply(request, exchange, ErrorPages.Error.MALWARE, true);
+            break;
+        default:
+            reply(request, exchange, ErrorPages.Error.PAGE_NOT_FOUND, true);
         }
     }
 
