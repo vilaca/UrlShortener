@@ -1,15 +1,11 @@
 package pt.go2.external;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.util.HashSet;
 import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.ContentResponse;
 import org.eclipse.jetty.http.HttpStatus;
 
 import pt.go2.storage.Uri;
@@ -54,49 +50,29 @@ public class PhishTankDownloader {
 
         LOGGER.info("Download starting");
 
-        final HttpClient httpClient = new HttpClient();
+        final HttpClientResponse response = HttpClientAdapter.get(apiUrl);
 
-        ContentResponse response;
-        try {
-            httpClient.start();
-            response = httpClient.GET(apiUrl);
-        } catch (final Exception e) {
-            LOGGER.error(e);
+        if (response == null) {
             return false;
         }
 
-        final int statusCode = response.getStatus();
-
-        if (statusCode != HttpStatus.OK_200) {
-            LOGGER.error("Error on download: " + statusCode);
+        if (response.status() != HttpStatus.OK_200) {
+            LOGGER.error("Error on download. " + response.status());
             return false;
         }
 
-        final BufferedReader br = new BufferedReader(new StringReader(response.getContentAsString()));
-
-        try {
-
-            // skip header
-            br.readLine();
-            String entry;
-
-            while ((entry = br.readLine()) != null) {
-
-                final Uri uri = parseLineIntoUri(entry);
-
-                if (uri != null) {
-
-                    newList.add(uri);
-                }
-            }
-        } catch (final IOException e) {
-            LOGGER.error(e);
+        if (response.records().size() <= 1) {
+            LOGGER.error("Error on download?? Size is " + response.records().size());
             return false;
-        } finally {
-            try {
-                br.close();
-            } catch (final IOException e) {
-                LOGGER.error(e);
+        }
+
+        for (int i = 1; i < response.records().size(); i++) {
+
+            final Uri uri = parseLineIntoUri(response.records().get(i));
+
+            if (uri != null) {
+
+                newList.add(uri);
             }
         }
 
