@@ -47,7 +47,7 @@ public class GenericResponse extends AbstractResponse {
 
         this.body = output.toByteArray();
         this.error = HttpStatus.NOT_FOUND_404;
-        this.mime = MIME_TEXT_PLAIN;
+        this.mime = MIME_TEXT_HTML;
     }
 
     @Override
