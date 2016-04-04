@@ -23,9 +23,9 @@ import pt.go2.response.GenericResponse;
 public abstract class RequestHandler extends AbstractHandler {
 
     // only for access_log file
-    private static final Logger LOG = LogManager.getLogger();
+	private static final AccessLogger ACCESSLOG = new AccessLogger();
 
-    private static final AccessLogger ACCESSLOG = new AccessLogger();
+    private static final Logger LOG = LogManager.getLogger();
 
     protected final Configuration config;
     private final ErrorPages errors;
@@ -63,7 +63,7 @@ public abstract class RequestHandler extends AbstractHandler {
             exchange.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
 
-        ACCESSLOG.log(printLogMessage(exchange.getStatus(), request, exchange.getBufferSize()));
+        ACCESSLOG.log(exchange.getStatus(), request, exchange.getBufferSize());
     }
 
     protected void reply(HttpServletRequest request, HttpServletResponse exchange, ErrorPages.Error badRequest,
@@ -99,49 +99,6 @@ public abstract class RequestHandler extends AbstractHandler {
         if (response.isZipped()) {
             exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
         }
-    }
-
-    /**
-     * Access log output
-     *
-     * @param status
-     *
-     * @param request
-     * @param exchange
-     * @param exchange
-     *
-     * @param params
-     * @param response
-     * @return
-     */
-    protected String printLogMessage(int status, HttpServletRequest request, final int size) {
-
-        final StringBuilder sb = new StringBuilder();
-
-        sb.append(request.getRemoteAddr());
-        sb.append(" - - [");
-        sb.append(new SimpleDateFormat("dd/MMM/yyyy:HH:mm:ss Z").format(new Date()));
-        sb.append("] \"");
-        sb.append(request.getMethod());
-        sb.append(" ");
-        sb.append(request.getRequestURI());
-        sb.append(" ");
-        sb.append(request.getProtocol());
-        sb.append("\" ");
-        sb.append(status);
-        sb.append(" ");
-        sb.append(size);
-        sb.append(" \"");
-
-        final String referer = request.getHeader(AbstractResponse.REQUEST_HEADER_REFERER);
-
-        final String agent = request.getHeader(AbstractResponse.REQUEST_HEADER_USER_AGENT);
-
-        sb.append(referer == null ? "-" : referer);
-
-        sb.append("\" \"" + agent + "\"");
-
-        return sb.toString();
     }
 
     @Override
