@@ -38,8 +38,6 @@ public class Server {
 
         LOGGER.trace("Starting server...");
 
-        // log server version
-
         final Configuration config;
 
         final KeyValueStore ks;
