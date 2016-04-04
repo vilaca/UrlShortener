@@ -15,8 +15,6 @@ import pt.go2.fileio.RestoreItem;
  */
 public class KeyValueStore {
 
-    private static final int MAX_HASHING_RETRIES = 10;
-
     private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
 
     private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
@@ -45,25 +43,9 @@ public class KeyValueStore {
      */
     public synchronized boolean add(final Uri uri) {
 
-        int retries = 0;
-        HashKey hk = new HashKey();
-
-        // loop if hash already being used
-
-        while (map.contains(hk)) {
-
-            retries++;
-            if (retries > MAX_HASHING_RETRIES) {
-                // give up
-                LOGGER.warn("Giving up rehashing " + uri);
-                return false;
-            } else if (retries > 1) {
-                LOGGER.warn("Rehashing " + uri + " / " + retries + "try.");
-            }
-
-            hk = new HashKey();
-        }
-
+        
+        final HashKey hk = findUniqueHash(); 
+        		
         final String hash = hk.toString();
 
         try {
@@ -89,7 +71,23 @@ public class KeyValueStore {
         return true;
     }
 
-    /**
+    private HashKey findUniqueHash() {
+
+		int retries = 0;
+
+		do {
+			final HashKey hk = HashKey.create();
+
+			if (!map.contains(hk)) {
+				return hk;
+			}
+
+			LOGGER.warn("Unique hash failed. " + retries + " try.");
+			
+		} while (true);
+	}
+
+	/**
      * Close Backup
      *
      * @throws IOException
