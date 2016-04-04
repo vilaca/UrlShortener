@@ -164,21 +164,13 @@ public abstract class RequestHandler extends AbstractHandler {
 
             // redirect to domain if host header is not correct
 
-            boolean isValidDomain = false;
-
-            for (final String entry : config.getValidDomains()) {
-                if (host.equals(entry)) {
-                    isValidDomain = true;
-                    break;
-                }
-            }
-
-            if (!isValidDomain) {
+            if (!config.getValidDomains().contains(host)) {
+            	
                 reply(request, response, new GenericResponse(HttpStatus.BAD_REQUEST_400), true);
+                LOG.error("Wrong host: " + host);
+                return;
             }
 
-            LOG.error("Wrong host: " + host);
-            return;
         }
 
         handle(request, response);
