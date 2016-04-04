@@ -53,8 +53,8 @@ public class Server {
             errors = new ErrorPages();
             res = new EmbeddedFiles(config);
 
-        } catch (final IOException e3) {
-            LOGGER.fatal(e3);
+        } catch (final IOException ioe) {
+            LOGGER.fatal(ioe);
             return;
         }
 
