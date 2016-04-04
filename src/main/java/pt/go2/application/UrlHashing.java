@@ -65,7 +65,7 @@ class UrlHashing extends RequestHandler {
 
         if (hk == null) {
 
-            handleNewUrl(request, response, uri);
+            createNewHash(request, response, uri);
 
             return;
         }
@@ -99,8 +99,9 @@ class UrlHashing extends RequestHandler {
         }
     }
 
-    private void handleNewUrl(HttpServletRequest request, HttpServletResponse response, Uri uri) {
-        // hash not found, add new
+    private void createNewHash(HttpServletRequest request, HttpServletResponse response, Uri uri) {
+        
+    	// hash not found, add new
 
         if (!ks.add(uri)) {
             reply(request, response, new GenericResponse(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
