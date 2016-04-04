@@ -6,9 +6,6 @@ import java.util.Calendar;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.eclipse.jetty.http.HttpMethod;
-import org.eclipse.jetty.http.HttpStatus;
-
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.fileio.ErrorPages;
@@ -52,25 +49,6 @@ class StaticPages extends RequestHandler {
             handleShortenedUrl(request, exchange, requested);
 
             return;
-        }
-
-        if (!config.getValidDomains().isEmpty() && request.getMethod().equals(HttpMethod.GET)) {
-
-            // if its not a shortened URL that was requested, make sure
-            // the prefered name is being used (ie www.go2.pt vs go2.pt)
-
-            final String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST).toLowerCase();
-
-            final String preffered = config.getValidDomains().get(0);
-
-            if (!host.equals(preffered)) {
-
-                final String redirect = requested.startsWith("/") ? preffered + requested : preffered + "/" + requested;
-
-                reply(request, exchange, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
-
-                return;
-            }
         }
 
         final AbstractResponse response = files.getFile(requested);
