@@ -7,71 +7,92 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pt.go2.response.AbstractResponse;
+import pt.go2.response.GenericResponse;
 import pt.go2.response.GzipResponse;
 
 public class EmbeddedFiles {
 
-    private static final int BUFFER = 4096;
-    final Map<String, AbstractResponse> pages = new HashMap<>();
+	private static final int BUFFER = 4096;
 
-    public EmbeddedFiles(Configuration config) throws IOException {
+	final Map<String, AbstractResponse> pages = new HashMap<>();
+	final Map<String, AbstractResponse> zipped = new HashMap<>();
 
-        final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
+	public EmbeddedFiles(Configuration config) throws IOException {
 
-        final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
+		final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
 
-        final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
+		final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
 
-        final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
+		final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
 
-        final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
+		final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
 
-        this.pages.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
+		final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
 
-        this.pages.put("ajax.js", new GzipResponse(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
+		// zipped
+		
+		this.zipped.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
 
-        this.pages.put("robots.txt", new GzipResponse(robots, AbstractResponse.MIME_TEXT_PLAIN));
+		this.zipped.put("ajax.js", new GzipResponse(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
 
-        this.pages.put("sitemap.xml", new GzipResponse(map, AbstractResponse.MIME_TEXT_XML));
+		this.zipped.put("robots.txt", new GzipResponse(robots, AbstractResponse.MIME_TEXT_PLAIN));
 
-        this.pages.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
+		this.zipped.put("sitemap.xml", new GzipResponse(map, AbstractResponse.MIME_TEXT_XML));
 
-        if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
-            this.pages.put(
-                    config.getGoogleVerification(),
-                    new GzipResponse(("google-site-verification: " + config.getGoogleVerification())
-                            .getBytes("US-ASCII"), AbstractResponse.MIME_TEXT_PLAIN));
-        }
+		this.zipped.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
 
-        // check if all pages created
+		// plain
+		
+		this.pages.put("/", GenericResponse.create(index, AbstractResponse.MIME_TEXT_HTML));
 
-        for (final String page : this.pages.keySet()) {
+		this.pages.put("ajax.js", GenericResponse.create(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
 
-            final AbstractResponse response = this.pages.get(page);
+		this.pages.put("robots.txt", GenericResponse.create(robots, AbstractResponse.MIME_TEXT_PLAIN));
 
-            if (response == null) {
+		this.pages.put("sitemap.xml", GenericResponse.create(map, AbstractResponse.MIME_TEXT_XML));
 
-                throw new IOException("Failed to load page " + page);
-            }
-        }
-    }
+		this.pages.put("screen.css", GenericResponse.create(css, AbstractResponse.MIME_TEXT_CSS));
 
-    public AbstractResponse getFile(String filename) {
-        return pages.get(filename);
-    }
+		// google verification for webmaster tools
+		
+		if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
+			this.zipped.put(config.getGoogleVerification(),
+					new GzipResponse(
+							("google-site-verification: " + config.getGoogleVerification()).getBytes("US-ASCII"),
+							AbstractResponse.MIME_TEXT_PLAIN));
+		}
 
-    private byte[] read(InputStream is) throws IOException {
+		// check if all pages created
 
-        final byte[] buffer = new byte[BUFFER];
-        int read;
+		// TODO is this check required ??
+		
+		for (final String page : this.zipped.keySet()) {
 
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
+			final AbstractResponse response = this.zipped.get(page);
 
-        while ((read = is.read(buffer)) != -1) {
-            output.write(buffer, 0, read);
-        }
+			if (response == null) {
 
-        return output.toByteArray();
-    }
+				throw new IOException("Failed to load page " + page);
+			}
+		}
+	}
+
+	public AbstractResponse getFile(String filename, boolean compressed) {
+		return compressed ? zipped.get(filename) : pages.get(filename);
+	}
+
+	private byte[] read(InputStream is) throws IOException {
+
+		final byte[] buffer = new byte[BUFFER];
+		int read;
+
+		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		while ((read = is.read(buffer)) != -1) {
+			output.write(buffer, 0, read);
+		}
+
+		return output.toByteArray();
+	}
 
 }

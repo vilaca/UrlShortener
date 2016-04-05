@@ -90,14 +90,10 @@ public class Server {
 
         final ContextHandler root = new ContextHandler();
         root.setContextPath("/");
-        root.setHandler(new StaticPages(config, errors, ks, res));
-
-        final ContextHandler novo = new ContextHandler();
-        novo.setContextPath("/new/");
-        novo.setHandler(new UrlHashing(config, errors, ks, ul));
+        root.setHandler(new RequestHandler(config, errors, ks, res));
 
         final ContextHandlerCollection contexts = new ContextHandlerCollection();
-        contexts.setHandlers(new Handler[] { novo, root });
+        contexts.setHandlers(new Handler[] { root });
 
         listener.setHandler(contexts);
 

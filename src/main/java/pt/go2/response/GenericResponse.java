@@ -3,8 +3,6 @@ package pt.go2.response;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 
 import org.eclipse.jetty.http.HttpStatus;
 
@@ -16,25 +14,7 @@ public class GenericResponse extends AbstractResponse {
     final int error;
     final String mime;
 
-    public GenericResponse(String content, Charset charset, int error, String mime) throws UnsupportedEncodingException {
-        this.body = content.getBytes(charset);
-        this.error = error;
-        this.mime = mime;
-    }
-
-    public GenericResponse(int error) {
-        this.body = new byte[0];
-        this.error = error;
-        this.mime = MIME_TEXT_PLAIN;
-    }
-
-    public GenericResponse(String content, Charset charset) throws UnsupportedEncodingException {
-        this.body = content.getBytes(charset);
-        this.error = HttpStatus.OK_200;
-        this.mime = MIME_TEXT_PLAIN;
-    }
-
-    public GenericResponse(InputStream is) throws IOException {
+    public static GenericResponse createFromFile(InputStream is, int error) throws IOException {
 
         final byte[] buffer = new byte[BUFFER_SIZE];
         int read;
@@ -44,13 +24,28 @@ public class GenericResponse extends AbstractResponse {
         while ((read = is.read(buffer)) != -1) {
             output.write(buffer, 0, read);
         }
-
-        this.body = output.toByteArray();
-        this.error = HttpStatus.NOT_FOUND_404;
-        this.mime = MIME_TEXT_HTML;
+        
+        return new GenericResponse(output.toByteArray(), error, MIME_TEXT_HTML);
     }
 
-    @Override
+    public static GenericResponse createError(int status){
+        
+        return new GenericResponse(new byte[0], status, MIME_TEXT_HTML);
+    }
+
+    public static GenericResponse create(byte[] body, String mime) {
+        
+        return new GenericResponse(body, HttpStatus.OK_200, mime);
+    }
+
+	private GenericResponse(byte[] body, int error, String mime) {
+
+		this.body = body;
+		this.error = error;
+		this.mime = mime;
+	}
+    
+	@Override
     public int getHttpStatus() {
         return error;
     }

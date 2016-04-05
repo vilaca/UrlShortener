@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.servlet.ServletException;
+
+import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -19,7 +22,7 @@ import pt.go2.storage.KeyValueStore;
 public class StaticPagesTest {
 
     @Test
-    public void test() throws IOException {
+    public void test() throws IOException, ServletException {
 
         final String redirected = "http://redirected.com";
 
@@ -42,9 +45,9 @@ public class StaticPagesTest {
 
         final HttpServletResponseMock response = new HttpServletResponseMock();
 
-        final StaticPages sp = new StaticPages(config, errors, ks, res);
+        final AbstractHandler sp = new RequestHandler(config, errors, ks, res);
 
-        sp.handle(request, response);
+        sp.handle("", null, request, response);
 
         Assert.assertEquals(config.getRedirect(), response.getStatus());
         Assert.assertEquals(redirected, response.getHeader(AbstractResponse.RESPONSE_HEADER_LOCATION));
