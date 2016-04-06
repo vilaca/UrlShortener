@@ -9,8 +9,8 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
-import pt.go2.daemon.BadUrlScanner;
-import pt.go2.daemon.PhishTankInterface;
+import pt.go2.daemon.BadUrlScannerTask;
+import pt.go2.daemon.PhishTankInterfaceTask;
 import pt.go2.daemon.WatchDog;
 import pt.go2.external.PhishLocalCache;
 import pt.go2.external.PhishTankDownloader;
@@ -66,8 +66,8 @@ public class Server {
         final UrlHealth ul = new UrlHealth(whitelist, banned, sbl);
 
         final WatchDog watchdog = new WatchDog();
-        final PhishTankInterface pi = new PhishTankInterface(phishdl);
-        final BadUrlScanner bad = new BadUrlScanner(ks, ul);
+        final PhishTankInterfaceTask pi = new PhishTankInterfaceTask(phishdl);
+        final BadUrlScannerTask bad = new BadUrlScannerTask(ks, ul);
 
         watchdog.register(pi, true);
         watchdog.register(bad, false);

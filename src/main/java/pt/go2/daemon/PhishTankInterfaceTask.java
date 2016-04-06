@@ -8,7 +8,7 @@ import pt.go2.external.PhishTankDownloader;
 /**
  * Downloads file from PhishTank API for Phishing Url detection
  */
-public class PhishTankInterface implements WatchDogTask {
+public class PhishTankInterfaceTask implements WatchDogTask {
 
     private final PhishTankDownloader phishTankDownloader;
 
@@ -22,7 +22,7 @@ public class PhishTankInterface implements WatchDogTask {
 
     // url to fetch list from, needs api-key from configuration
 
-    public PhishTankInterface(PhishTankDownloader phishTankDownloader) {
+    public PhishTankInterfaceTask(PhishTankDownloader phishTankDownloader) {
         this.phishTankDownloader = phishTankDownloader;
     }
 

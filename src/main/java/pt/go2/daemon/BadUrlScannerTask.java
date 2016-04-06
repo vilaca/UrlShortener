@@ -10,7 +10,7 @@ import pt.go2.external.UrlHealth;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
 
-public class BadUrlScanner implements WatchDogTask {
+public class BadUrlScannerTask implements WatchDogTask {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -33,7 +33,7 @@ public class BadUrlScanner implements WatchDogTask {
      * @param config
      * @return
      */
-    public BadUrlScanner(KeyValueStore ks, UrlHealth ul) {
+    public BadUrlScannerTask(KeyValueStore ks, UrlHealth ul) {
         this.ks = ks;
         this.ul = ul;
     }
