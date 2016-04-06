@@ -66,15 +66,48 @@ class RequestHandler extends AbstractHandler {
 
 		if (!config.getValidDomains().isEmpty()) {
 
-			enforceHost(request, response, host, requested);
+			if (!config.getValidDomains().contains(host)) {
+
+				reply(request, response, GenericResponse.createError(HttpStatus.BAD_REQUEST_400), true);
+				
+				LOG.error("Wrong host: " + host);
+				
+				return;
+			}
+
+			if (request.getMethod().equals(HttpMethod.GET.toString())) {
+
+				// if its not a shortened URL that was requested, make sure
+				// the preferred name is being used (ie www.go2.pt vs go2.pt)
+
+				final String preffered = config.getValidDomains().get(0);
+
+				if (!host.equals(preffered)) {
+
+					// TODO support HTTPS too
+
+					final String redirect = "http://" + preffered
+							+ (requested.startsWith("/") ? request : "/" + requested);
+
+					reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
+					
+					LOG.error("Use preffered hostname. Redirected from " + host + " to " + redirect);
+					
+					return;
+				}
+			}
 		}
 
-		if (!request.getMethod().equals(HttpMethod.GET.toString())) {
+		if (request.getMethod().equals(HttpMethod.GET.toString())) {
 
 			if (requested.length() == HashKey.LENGTH) {
 
 				handleShortenedUrl(request, response, requested);
+				
+				return;
+				
 			} else {
+				
 				final String accept = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
 
 				// TODO pack200-gzip false positive
@@ -84,45 +117,22 @@ class RequestHandler extends AbstractHandler {
 				final AbstractResponse file = files.getFile(requested, gzip);
 
 				if (response == null) {
+				
 					reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
+				
 				} else {
+					
 					reply(request, response, file, true);
 				}
 			}
 
-		} else if (!request.getMethod().equals(HttpMethod.POST.toString()) && "new".equals(requested)) {
+		} else if (request.getMethod().equals(HttpMethod.POST.toString()) && "new".equals(requested)) {
 
+			
+			
 		} else {
 			reply(request, response, GenericResponse.createError(HttpStatus.METHOD_NOT_ALLOWED_405), true);
 			LOG.error("Method not allowed: " + request.getMethod());
-		}
-	}
-
-	private void enforceHost(HttpServletRequest request, HttpServletResponse response, String host,
-			final String requested) {
-		// redirect to domain if host header is not correct
-
-		if (!config.getValidDomains().contains(host)) {
-
-			reply(request, response, GenericResponse.createError(HttpStatus.BAD_REQUEST_400), true);
-			LOG.error("Wrong host: " + host);
-			return;
-		}
-
-		if (!request.getMethod().equals(HttpMethod.GET.toString())) {
-			return;
-		}
-
-		// if its not a shortened URL that was requested, make sure
-		// the preferred name is being used (ie www.go2.pt vs go2.pt)
-
-		final String preffered = config.getValidDomains().get(0);
-
-		if (!host.equals(preffered)) {
-
-			final String redirect = preffered + "/" + requested;
-
-			reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
 		}
 	}
 
