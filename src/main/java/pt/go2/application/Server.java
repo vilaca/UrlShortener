@@ -90,7 +90,7 @@ public class Server {
 
         final ContextHandler root = new ContextHandler();
         root.setContextPath("/");
-        root.setHandler(new RequestHandler(config, errors, ks, res));
+        root.setHandler(new RequestHandler(config, errors, ks, res, ul));
 
         final ContextHandlerCollection contexts = new ContextHandlerCollection();
         contexts.setHandlers(new Handler[] { root });

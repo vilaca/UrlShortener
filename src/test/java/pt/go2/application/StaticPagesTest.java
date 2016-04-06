@@ -45,7 +45,7 @@ public class StaticPagesTest {
 
         final HttpServletResponseMock response = new HttpServletResponseMock();
 
-        final AbstractHandler sp = new RequestHandler(config, errors, ks, res);
+        final AbstractHandler sp = new RequestHandler(config, errors, ks, res, null);
 
         sp.handle("", null, request, response);
 

@@ -1,6 +1,7 @@
 package pt.go2.storage;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Set;
 
@@ -17,9 +18,10 @@ public class KeyValueStore {
 
     private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
 
-    private final BidiMap<HashKey, Uri> map = new BidiMap<HashKey, Uri>();
+    private final BidiMap<HashKey, Uri> map = new BidiMap<>();
 
     // log for restoring hash->url
+
     private final Backup backupFile;
 
     public KeyValueStore(Collection<? extends RestoreItem> restoredItems, String dbFolder) throws IOException {
@@ -27,10 +29,8 @@ public class KeyValueStore {
         this.backupFile = new Backup(dbFolder);
 
         for (final RestoreItem item : restoredItems) {
-            final HashKey hk = new HashKey(item.getKey());
-            final Uri uri = Uri.create(item.getValue(), false);
 
-            map.put(hk, uri);
+            map.put(new HashKey(item.getKey().getBytes(StandardCharsets.US_ASCII)), Uri.create(item.getValue(), false));
         }
     }
 
@@ -43,9 +43,8 @@ public class KeyValueStore {
      */
     public synchronized boolean add(final Uri uri) {
 
-        
-        final HashKey hk = findUniqueHash(); 
-        		
+        final HashKey hk = findUniqueHash();
+
         final String hash = hk.toString();
 
         try {
@@ -73,21 +72,21 @@ public class KeyValueStore {
 
     private HashKey findUniqueHash() {
 
-		int retries = 0;
+        int retries = 0;
 
-		do {
-			final HashKey hk = HashKey.create();
+        do {
+            final HashKey hk = HashKey.create();
 
-			if (!map.contains(hk)) {
-				return hk;
-			}
+            if (!map.contains(hk)) {
+                return hk;
+            }
 
-			LOGGER.warn("Unique hash failed. " + retries + " try.");
-			
-		} while (true);
-	}
+            LOGGER.warn("Unique hash failed. " + retries + " try.");
 
-	/**
+        } while (true);
+    }
+
+    /**
      * Close Backup
      *
      * @throws IOException

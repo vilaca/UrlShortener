@@ -1,6 +1,10 @@
 package pt.go2.application;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
@@ -14,6 +18,7 @@ import org.eclipse.jetty.http.HttpStatus;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 
+import pt.go2.external.UrlHealth;
 import pt.go2.fileio.AccessLogger;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
@@ -24,219 +29,328 @@ import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
+import pt.go2.storage.Uri.Health;
 
 class RequestHandler extends AbstractHandler {
 
-	// only for access_log file
-	private static final AccessLogger ACCESSLOG = new AccessLogger();
+    // only for access_log file
 
-	private static final Logger LOG = LogManager.getLogger();
+    private static final AccessLogger ACCESSLOG = new AccessLogger();
 
-	private final KeyValueStore ks;
-	private final EmbeddedFiles files;
+    private static final Logger LOG = LogManager.getLogger();
 
-	private final Configuration config;
-	private final ErrorPages errors;
+    private final KeyValueStore ks;
+    private final EmbeddedFiles files;
+    private final UrlHealth health;
 
-	public RequestHandler(Configuration config, ErrorPages errors, KeyValueStore ks, EmbeddedFiles files) {
-		this.config = config;
-		this.errors = errors;
-		this.ks = ks;
-		this.files = files;
-	}
+    private final Configuration config;
+    private final ErrorPages errors;
 
-	@Override
-	public void handle(String dontcare, Request base, HttpServletRequest request, HttpServletResponse response)
-			throws IOException, ServletException {
+    public RequestHandler(Configuration conf, ErrorPages err, KeyValueStore ks, EmbeddedFiles files, UrlHealth health) {
+        this.config = conf;
+        this.errors = err;
+        this.ks = ks;
+        this.files = files;
+        this.health = health;
+    }
 
-		base.setHandled(true);
+    @Override
+    public void handle(String dontcare, Request base, HttpServletRequest request, HttpServletResponse response)
+            throws IOException, ServletException {
 
-		// we need a host header to continue
+        base.setHandled(true);
 
-		String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+        // we need a host header to continue
 
-		if (host == null || host.isEmpty()) {
-			reply(request, response, GenericResponse.createError(HttpStatus.BAD_REQUEST_400), false);
-			return;
-		}
+        String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
 
-		host = host.toLowerCase();
+        if (host == null || host.isEmpty()) {
+            reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
+            return;
+        }
 
-		final String requested = getRequestedFilename(request.getRequestURI());
+        host = host.toLowerCase();
 
-		if (!config.getValidDomains().isEmpty()) {
+        final String requested = getRequestedFilename(request.getRequestURI());
 
-			if (!config.getValidDomains().contains(host)) {
+        if (!config.getValidDomains().isEmpty()) {
 
-				reply(request, response, GenericResponse.createError(HttpStatus.BAD_REQUEST_400), true);
-				
-				LOG.error("Wrong host: " + host);
-				
-				return;
-			}
+            if (!config.getValidDomains().contains(host)) {
 
-			if (request.getMethod().equals(HttpMethod.GET.toString())) {
+                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), true);
 
-				// if its not a shortened URL that was requested, make sure
-				// the preferred name is being used (ie www.go2.pt vs go2.pt)
+                LOG.error("Wrong host: " + host);
 
-				final String preffered = config.getValidDomains().get(0);
+                return;
+            }
 
-				if (!host.equals(preffered)) {
+            if (request.getMethod().equals(HttpMethod.GET.toString())) {
 
-					// TODO support HTTPS too
+                // if its not a shortened URL that was requested, make sure
+                // the preferred name is being used (ie www.go2.pt vs go2.pt)
 
-					final String redirect = "http://" + preffered
-							+ (requested.startsWith("/") ? request : "/" + requested);
+                final String preffered = config.getValidDomains().get(0);
 
-					reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
-					
-					LOG.error("Use preffered hostname. Redirected from " + host + " to " + redirect);
-					
-					return;
-				}
-			}
-		}
+                if (!host.equals(preffered)) {
 
-		if (request.getMethod().equals(HttpMethod.GET.toString())) {
+                    // TODO support HTTPS too
 
-			if (requested.length() == HashKey.LENGTH) {
+                    final String redirect = "http://" + preffered
+                            + (requested.startsWith("/") ? request : "/" + requested);
 
-				handleShortenedUrl(request, response, requested);
-				
-				return;
-				
-			} else {
-				
-				final String accept = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
+                    reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
 
-				// TODO pack200-gzip false positive
+                    LOG.error("Use preffered hostname. Redirected from " + host + " to " + redirect);
 
-				final boolean gzip = accept != null && accept.contains("gzip");
+                    return;
+                }
+            }
+        }
 
-				final AbstractResponse file = files.getFile(requested, gzip);
+        if (request.getMethod().equals(HttpMethod.GET.toString())) {
 
-				if (response == null) {
-				
-					reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
-				
-				} else {
-					
-					reply(request, response, file, true);
-				}
-			}
+            if (requested.length() == HashKey.LENGTH) {
 
-		} else if (request.getMethod().equals(HttpMethod.POST.toString()) && "new".equals(requested)) {
+                handleShortenedUrl(request, response, requested.getBytes());
 
-			
-			
-		} else {
-			reply(request, response, GenericResponse.createError(HttpStatus.METHOD_NOT_ALLOWED_405), true);
-			LOG.error("Method not allowed: " + request.getMethod());
-		}
-	}
+                return;
 
-	/**
-	 * Stream Http Response
-	 *
-	 * @param request
-	 *
-	 * @param exchange
-	 * @param response
-	 * @throws IOException
-	 */
-	protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
-			final AbstractResponse response, final boolean cache) {
+            } else {
 
-		setHeaders(exchange, response, cache);
+                final String accept = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
 
-		try {
+                // TODO pack200-gzip false positive
 
-			exchange.setStatus(response.getHttpStatus());
+                final boolean gzip = accept != null && accept.contains("gzip");
 
-			response.run(exchange);
+                final AbstractResponse file = files.getFile(requested, gzip);
 
-		} catch (final IOException e) {
+                if (response == null) {
 
-			LOG.error("Error while streaming the response.", e);
+                    reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
 
-			exchange.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-		}
+                } else {
 
-		ACCESSLOG.log(exchange.getStatus(), request, exchange.getBufferSize());
-	}
+                    reply(request, response, file, true);
+                }
+            }
 
-	/**
-	 * Set response headers
-	 *
-	 * @param exchange
-	 *
-	 * @param response
-	 * @param headers
-	 */
-	private void setHeaders(HttpServletResponse exchange, final AbstractResponse response, final boolean cache) {
+        } else if (request.getMethod().equals(HttpMethod.POST.toString()) && "new".equals(requested)) {
 
-		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
+            final String field = urltoHash(request, response);
 
-		exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
+            Uri uri = Uri.create(field, true, Health.PROCESSING);
 
-		if (cache) {
+            if (uri == null) {
+                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
+                return;
+            }
 
-			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
-					"max-age=" + TimeUnit.HOURS.toSeconds(config.getCacheHint()));
+            // try to find hash for url is ks
 
-		} else {
-			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+            final HashKey hk = ks.find(uri);
 
-			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
-		}
+            if (hk == null) {
 
-		if (response.isZipped()) {
-			exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
-		}
-	}
+                createNewHash(request, response, uri);
 
-	/**
-	 * Parse requested filename from URI
-	 *
-	 * @param path
-	 *
-	 * @return Requested filename
-	 */
-	private String getRequestedFilename(String path) {
+                return;
+            }
 
-		// split into tokens
+            uri = ks.get(hk);
 
-		if (path.isEmpty() || "/".equals(path)) {
-			return "/";
-		}
+            switch (uri.health()) {
+            case MALWARE:
+                reply(request, response, GenericResponse.createForbidden("malware".getBytes(StandardCharsets.US_ASCII)),
+                        true);
+                break;
+            case OK:
+                reply(request, response, GenericResponse.create(hk.getHash(), AbstractResponse.MIME_TEXT_PLAIN), false);
+                break;
+            case PHISHING:
+                reply(request, response,
+                        GenericResponse.createForbidden("phishing".getBytes(StandardCharsets.US_ASCII)), true);
+                break;
+            case PROCESSING:
+                reply(request, response, GenericResponse.NotOk(HttpStatus.ACCEPTED_202), false);
+                break;
+            default:
+                reply(request, response, GenericResponse.NotOk(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+                break;
+            }
 
-		final int idx = path.indexOf("/", 1);
+        } else {
+            reply(request, response, GenericResponse.NotOk(HttpStatus.METHOD_NOT_ALLOWED_405), true);
+            LOG.error("Method not allowed: " + request.getMethod());
+        }
+    }
 
-		return idx == -1 ? path.substring(1) : path.substring(1, idx);
-	}
+    /**
+     * Stream Http Response
+     *
+     * @param request
+     *
+     * @param exchange
+     * @param response
+     * @throws IOException
+     */
+    protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
+            final AbstractResponse response, final boolean cache) {
 
-	private void handleShortenedUrl(HttpServletRequest request, HttpServletResponse exchange, final String requested) {
+        setHeaders(exchange, response, cache);
 
-		final Uri uri = ks.get(new HashKey(requested));
+        try {
 
-		if (uri == null) {
-			reply(request, exchange, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
-			return;
-		}
+            exchange.setStatus(response.getHttpStatus());
 
-		switch (uri.health()) {
-		case PHISHING:
-			reply(request, exchange, errors.get(ErrorPages.Error.PHISHING), true);
-			break;
-		case OK:
-			reply(request, exchange, new RedirectResponse(uri.toString(), config.getRedirect()), true);
-			break;
-		case MALWARE:
-			reply(request, exchange, errors.get(ErrorPages.Error.MALWARE), true);
-			break;
-		default:
-			reply(request, exchange, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
-		}
-	}
+            response.run(exchange);
+
+        } catch (final IOException e) {
+
+            LOG.error("Error while streaming the response.", e);
+
+            exchange.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        ACCESSLOG.log(exchange.getStatus(), request, exchange.getBufferSize());
+    }
+
+    /**
+     * Set response headers
+     *
+     * @param exchange
+     *
+     * @param response
+     * @param headers
+     */
+    private void setHeaders(HttpServletResponse exchange, final AbstractResponse response, final boolean cache) {
+
+        exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
+
+        exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
+
+        if (cache) {
+
+            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
+                    "max-age=" + TimeUnit.HOURS.toSeconds(config.getCacheHint()));
+
+        } else {
+            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+
+            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
+        }
+
+        if (response.isZipped()) {
+            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
+        }
+    }
+
+    /**
+     * Parse requested filename from URI
+     *
+     * @param path
+     *
+     * @return Requested filename
+     */
+    private String getRequestedFilename(String path) {
+
+        // split into tokens
+
+        if (path.isEmpty() || "/".equals(path)) {
+            return "/";
+        }
+
+        final int idx = path.indexOf("/", 1);
+
+        return idx == -1 ? path.substring(1) : path.substring(1, idx);
+    }
+
+    private void handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, final byte[] requested) {
+
+        final Uri uri = ks.get(new HashKey(requested));
+
+        if (uri == null) {
+            reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
+            return;
+        }
+
+        switch (uri.health()) {
+        case PHISHING:
+            reply(request, response, errors.get(ErrorPages.Error.PHISHING), true);
+            break;
+        case OK:
+            reply(request, response, new RedirectResponse(uri.toString(), config.getRedirect()), true);
+            break;
+        case MALWARE:
+            reply(request, response, errors.get(ErrorPages.Error.MALWARE), true);
+            break;
+        default:
+            reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
+        }
+    }
+
+    /**
+     * Get URL to hash from POST request
+     *
+     * @param request
+     * @param response
+     * @return
+     */
+    private String urltoHash(HttpServletRequest request, HttpServletResponse response) {
+
+        try (final InputStream is = request.getInputStream();
+                final InputStreamReader sr = new InputStreamReader(is, "UTF-8");
+                final BufferedReader br = new BufferedReader(sr);) {
+
+            // read body content
+
+            final String postBody = br.readLine();
+
+            if (postBody == null) {
+                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
+                return null;
+            }
+
+            // format for form content is 'fieldname=value'
+
+            final int idx = postBody.indexOf('=') + 1;
+
+            if (idx == -1 || postBody.length() - idx < 3) {
+                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
+                return null;
+            }
+
+            // Parse string into Uri
+
+            return postBody.substring(idx);
+
+        } catch (final IOException e) {
+
+            LOG.error(e);
+
+            reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
+
+            return null;
+        }
+    }
+
+    private void createNewHash(HttpServletRequest request, HttpServletResponse response, Uri uri) {
+
+        // hash not found, add new
+
+        if (!ks.add(uri)) {
+            reply(request, response, GenericResponse.NotOk(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
+            return;
+        }
+
+        reply(request, response, GenericResponse.NotOk(HttpStatus.ACCEPTED_202), false);
+
+        health.test(uri, true);
+
+        if (uri.health() == Health.PROCESSING) {
+            uri.setHealth(Health.OK);
+        }
+
+        return;
+    }
 }

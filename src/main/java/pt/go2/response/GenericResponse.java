@@ -24,28 +24,33 @@ public class GenericResponse extends AbstractResponse {
         while ((read = is.read(buffer)) != -1) {
             output.write(buffer, 0, read);
         }
-        
+
         return new GenericResponse(output.toByteArray(), error, MIME_TEXT_HTML);
     }
 
-    public static GenericResponse createError(int status){
-        
-        return new GenericResponse(new byte[0], status, MIME_TEXT_HTML);
-    }
-
     public static GenericResponse create(byte[] body, String mime) {
-        
+
         return new GenericResponse(body, HttpStatus.OK_200, mime);
     }
 
-	private GenericResponse(byte[] body, int error, String mime) {
+    public static GenericResponse NotOk(int status) {
 
-		this.body = body;
-		this.error = error;
-		this.mime = mime;
-	}
-    
-	@Override
+        return new GenericResponse(new byte[0], status, MIME_TEXT_HTML);
+    }
+
+    public static GenericResponse createForbidden(byte[] body) {
+
+        return new GenericResponse(body, HttpStatus.FORBIDDEN_403, MIME_TEXT_HTML);
+    }
+
+    private GenericResponse(byte[] body, int error, String mime) {
+
+        this.body = body;
+        this.error = error;
+        this.mime = mime;
+    }
+
+    @Override
     public int getHttpStatus() {
         return error;
     }
