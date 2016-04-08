@@ -125,7 +125,7 @@ class RequestHandler extends AbstractHandler {
 
                 final AbstractResponse file = files.getFile(requested, gzip);
 
-                if (response == null) {
+                if (file == null) {
 
                     reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
 
