@@ -117,11 +117,11 @@ class RequestHandler extends AbstractHandler {
 
             } else {
 
-                final String accept = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
+                final String acceptedEncoding = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
 
                 // TODO pack200-gzip false positive
 
-                final boolean gzip = accept != null && accept.contains("gzip");
+                final boolean gzip = acceptedEncoding != null && acceptedEncoding.contains("gzip");
 
                 final AbstractResponse file = files.getFile(requested, gzip);
 
