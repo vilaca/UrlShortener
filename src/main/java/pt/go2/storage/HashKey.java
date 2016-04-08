@@ -1,5 +1,7 @@
 package pt.go2.storage;
 
+import java.util.Arrays;
+
 /**
  * Each Hashkey unequivocally identifies an Url
  */
@@ -68,7 +70,7 @@ public class HashKey {
      */
     @Override
     public int hashCode() {
-        return hash.hashCode();
+        return Arrays.hashCode(hash);
     }
 
     @Override
