@@ -96,7 +96,7 @@ class RequestHandler extends AbstractHandler {
                     // TODO support HTTPS too
 
                     final String redirect = "http://" + preffered
-                            + (requested.startsWith("/") ? request : "/" + requested);
+                            + (requested.startsWith("/") ? requested : "/" + requested);
 
                     reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
 
