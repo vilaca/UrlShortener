@@ -59,6 +59,11 @@ class RequestHandler extends AbstractHandler {
             throws IOException, ServletException {
 
         base.setHandled(true);
+        
+        _handle(request, response);
+    }
+    
+    public void _handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         // we need a host header to continue
 
