@@ -7,7 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Http Redirect
  */
-public class RedirectResponse extends AbstractResponse {
+public class RedirectResponse implements Response {
 
     private final String redirect;
     private final int status;
@@ -26,11 +26,25 @@ public class RedirectResponse extends AbstractResponse {
     @Override
     public void run(HttpServletResponse exchange) throws IOException {
         exchange.setHeader(RESPONSE_HEADER_LOCATION, redirect);
-        super.run(exchange);
     }
 
     @Override
-    protected byte[] getBody() {
+    public byte[] getBody() {
         return new byte[0];
+    }
+
+    @Override
+    public String getMimeType() {
+        return Response.MIME_TEXT_PLAIN;
+    }
+
+    @Override
+    public boolean isZipped() {
+        return false;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        return true;
     }
 }

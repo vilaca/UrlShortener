@@ -4,9 +4,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.jetty.http.HttpStatus;
 
-public class GenericResponse extends AbstractResponse {
+public class GenericResponse implements Response {
 
     private static final int BUFFER_SIZE = 4096;
 
@@ -61,7 +63,25 @@ public class GenericResponse extends AbstractResponse {
     }
 
     @Override
-    protected byte[] getBody() {
+    public byte[] getBody() {
         return body;
+    }
+
+    @Override
+    public void run(HttpServletResponse exchange) throws IOException {
+        // TODO Auto-generated method stub
+        
+    }
+
+    @Override
+    public boolean isZipped() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public boolean isCacheable() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }

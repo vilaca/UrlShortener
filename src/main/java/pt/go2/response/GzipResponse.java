@@ -15,7 +15,7 @@ import org.eclipse.jetty.http.HttpStatus;
  * @author vilaca
  *
  */
-public class GzipResponse extends AbstractResponse {
+public class GzipResponse implements Response {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -128,7 +128,13 @@ public class GzipResponse extends AbstractResponse {
     }
 
     @Override
-    protected byte[] getBody() {
+    public byte[] getBody() {
         return new byte[0];
+    }
+
+    @Override
+    public boolean isCacheable() {
+        // TODO Auto-generated method stub
+        return false;
     }
 }
