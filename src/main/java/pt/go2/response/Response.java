@@ -2,13 +2,12 @@ package pt.go2.response;
 
 import java.io.IOException;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletResponse;
 
 /**
  * Abstract class for server response
  */
-public abstract class AbstractResponse {
+public interface Response {
 
     // Request headers
     public static final String REQUEST_HEADER_ACCEPT_ENCODING = "Accept-encoding";
@@ -42,14 +41,14 @@ public abstract class AbstractResponse {
      *
      * @return
      */
-    public abstract int getHttpStatus();
+    public int getHttpStatus();
 
     /**
      * Http Status code for response
      *
      * @return
      */
-    protected abstract byte[] getBody();
+    public byte[] getBody();
 
     /**
      * Generate response
@@ -58,30 +57,11 @@ public abstract class AbstractResponse {
      * @return
      * @throws IOException
      */
-    public void run(final HttpServletResponse exchange) throws IOException {
+    public void run(final HttpServletResponse exchange) throws IOException;
+    
+    public String getMimeType();
 
-        try (ServletOutputStream stream = exchange.getOutputStream()) {
+    public boolean isZipped();
 
-            stream.write(getBody());
-            stream.flush();
-        }
-    }
-
-    /**
-     * Implementations should override mime type when necessary
-     *
-     * @return
-     */
-    public String getMimeType() {
-        return MIME_TEXT_PLAIN;
-    }
-
-    /**
-     * Implementations that return gzip content must override
-     *
-     * @return
-     */
-    public boolean isZipped() {
-        return false;
-    }
+    public boolean isCacheable();
 }

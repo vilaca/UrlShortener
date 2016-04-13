@@ -4,10 +4,9 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.validator.routines.UrlValidator;
 
-/**
- */
 public class Uri {
 
+    // TODO think about using ErrorPages instead
     public enum Health {
 
         OK, PROCESSING, PHISHING, MALWARE;
