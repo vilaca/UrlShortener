@@ -11,24 +11,24 @@ import pt.go2.fileio.Configuration;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.GzipResponse;
 
-public class EmbeddedFiles {
+class EmbeddedPages {
 
 	private static final int BUFFER = 4096;
 
 	final Map<String, Response> pages = new HashMap<>();
 	final Map<String, Response> zipped = new HashMap<>();
 
-	public EmbeddedFiles(Configuration config) throws IOException {
+	public EmbeddedPages(Configuration config) throws IOException {
 
-		final byte[] index = read(EmbeddedFiles.class.getResourceAsStream("/index.html"));
+		final byte[] index = read(EmbeddedPages.class.getResourceAsStream("/index.html"));
 
-		final byte[] ajax = read(EmbeddedFiles.class.getResourceAsStream("/ajax.js"));
+		final byte[] ajax = read(EmbeddedPages.class.getResourceAsStream("/ajax.js"));
 
-		final byte[] robots = read(EmbeddedFiles.class.getResourceAsStream("/robots.txt"));
+		final byte[] robots = read(EmbeddedPages.class.getResourceAsStream("/robots.txt"));
 
-		final byte[] map = read(EmbeddedFiles.class.getResourceAsStream("/sitemap.xml"));
+		final byte[] map = read(EmbeddedPages.class.getResourceAsStream("/sitemap.xml"));
 
-		final byte[] css = read(EmbeddedFiles.class.getResourceAsStream("/screen.css"));
+		final byte[] css = read(EmbeddedPages.class.getResourceAsStream("/screen.css"));
 
 		// zipped
 		

@@ -11,7 +11,7 @@ import org.eclipse.jetty.http.HttpStatus;
 
 import pt.go2.response.Response;
 
-public enum ErrorPages implements Response {
+enum ErrorPages implements Response {
 
     PAGE_NOT_FOUND(readStream(ErrorPages.class.getResourceAsStream("/404.html")), 404),
     

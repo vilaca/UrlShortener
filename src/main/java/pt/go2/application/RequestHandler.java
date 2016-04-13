@@ -38,12 +38,12 @@ class RequestHandler extends AbstractHandler {
     private final AccessLogger accessLog = new AccessLogger();
 
     private final KeyValueStore ks;
-    private final EmbeddedFiles files;
+    private final EmbeddedPages files;
     private final UrlHealth health;
 
     private final Configuration config;
 
-    public RequestHandler(Configuration conf, KeyValueStore ks, EmbeddedFiles files, UrlHealth health) {
+    public RequestHandler(Configuration conf, KeyValueStore ks, EmbeddedPages files, UrlHealth health) {
         this.config = conf;
         this.ks = ks;
         this.files = files;

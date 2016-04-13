@@ -39,7 +39,7 @@ public class Server {
         final Configuration config;
 
         final KeyValueStore ks;
-        final EmbeddedFiles res;
+        final EmbeddedPages res;
 
         try {
             config = new Configuration();
@@ -47,7 +47,7 @@ public class Server {
             final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
             ks = new KeyValueStore(restoredItems, config.getDbFolder());
-            res = new EmbeddedFiles(config);
+            res = new EmbeddedPages(config);
 
         } catch (final IOException ioe) {
             LOGGER.fatal(ioe);
