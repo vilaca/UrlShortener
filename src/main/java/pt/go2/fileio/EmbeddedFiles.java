@@ -6,7 +6,7 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
-import pt.go2.response.AbstractResponse;
+import pt.go2.response.Response;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.GzipResponse;
 
@@ -14,8 +14,8 @@ public class EmbeddedFiles {
 
 	private static final int BUFFER = 4096;
 
-	final Map<String, AbstractResponse> pages = new HashMap<>();
-	final Map<String, AbstractResponse> zipped = new HashMap<>();
+	final Map<String, Response> pages = new HashMap<>();
+	final Map<String, Response> zipped = new HashMap<>();
 
 	public EmbeddedFiles(Configuration config) throws IOException {
 
@@ -31,27 +31,27 @@ public class EmbeddedFiles {
 
 		// zipped
 		
-		this.zipped.put("/", new GzipResponse(index, AbstractResponse.MIME_TEXT_HTML));
+		this.zipped.put("/", new GzipResponse(index, Response.MIME_TEXT_HTML));
 
-		this.zipped.put("ajax.js", new GzipResponse(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
+		this.zipped.put("ajax.js", new GzipResponse(ajax, Response.MIME_APP_JAVASCRIPT));
 
-		this.zipped.put("robots.txt", new GzipResponse(robots, AbstractResponse.MIME_TEXT_PLAIN));
+		this.zipped.put("robots.txt", new GzipResponse(robots, Response.MIME_TEXT_PLAIN));
 
-		this.zipped.put("sitemap.xml", new GzipResponse(map, AbstractResponse.MIME_TEXT_XML));
+		this.zipped.put("sitemap.xml", new GzipResponse(map, Response.MIME_TEXT_XML));
 
-		this.zipped.put("screen.css", new GzipResponse(css, AbstractResponse.MIME_TEXT_CSS));
+		this.zipped.put("screen.css", new GzipResponse(css, Response.MIME_TEXT_CSS));
 
 		// plain
 		
-		this.pages.put("/", GenericResponse.create(index, AbstractResponse.MIME_TEXT_HTML));
+		this.pages.put("/", GenericResponse.create(index, Response.MIME_TEXT_HTML));
 
-		this.pages.put("ajax.js", GenericResponse.create(ajax, AbstractResponse.MIME_APP_JAVASCRIPT));
+		this.pages.put("ajax.js", GenericResponse.create(ajax, Response.MIME_APP_JAVASCRIPT));
 
-		this.pages.put("robots.txt", GenericResponse.create(robots, AbstractResponse.MIME_TEXT_PLAIN));
+		this.pages.put("robots.txt", GenericResponse.create(robots, Response.MIME_TEXT_PLAIN));
 
-		this.pages.put("sitemap.xml", GenericResponse.create(map, AbstractResponse.MIME_TEXT_XML));
+		this.pages.put("sitemap.xml", GenericResponse.create(map, Response.MIME_TEXT_XML));
 
-		this.pages.put("screen.css", GenericResponse.create(css, AbstractResponse.MIME_TEXT_CSS));
+		this.pages.put("screen.css", GenericResponse.create(css, Response.MIME_TEXT_CSS));
 
 		// google verification for webmaster tools
 		
@@ -59,7 +59,7 @@ public class EmbeddedFiles {
 			this.zipped.put(config.getGoogleVerification(),
 					new GzipResponse(
 							("google-site-verification: " + config.getGoogleVerification()).getBytes("US-ASCII"),
-							AbstractResponse.MIME_TEXT_PLAIN));
+							Response.MIME_TEXT_PLAIN));
 		}
 
 		// check if all pages created
@@ -68,7 +68,7 @@ public class EmbeddedFiles {
 		
 		for (final String page : this.zipped.keySet()) {
 
-			final AbstractResponse response = this.zipped.get(page);
+			final Response response = this.zipped.get(page);
 
 			if (response == null) {
 
@@ -77,7 +77,7 @@ public class EmbeddedFiles {
 		}
 	}
 
-	public AbstractResponse getFile(String filename, boolean compressed) {
+	public Response getFile(String filename, boolean compressed) {
 		return compressed ? zipped.get(filename) : pages.get(filename);
 	}
 

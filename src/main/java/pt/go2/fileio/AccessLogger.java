@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.response.AbstractResponse;
+import pt.go2.response.Response;
 
 /**
  * Helper class for logging user access file
@@ -50,9 +50,9 @@ public class AccessLogger {
         sb.append(size);
         sb.append(" \"");
 
-        final String referer = request.getHeader(AbstractResponse.REQUEST_HEADER_REFERER);
+        final String referer = request.getHeader(Response.REQUEST_HEADER_REFERER);
 
-        final String agent = request.getHeader(AbstractResponse.REQUEST_HEADER_USER_AGENT);
+        final String agent = request.getHeader(Response.REQUEST_HEADER_USER_AGENT);
 
         sb.append(referer == null ? "-" : referer);
 
