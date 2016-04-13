@@ -41,8 +41,8 @@ public enum ErrorPages implements Response {
     METHOD_NOT_ALLOWED_405(HttpStatus.METHOD_NOT_ALLOWED_405);
 
     
-    private int status;
-    private byte[] body;
+    final private int status;
+    final private byte[] body;
 
     ErrorPages(byte[] body, int status) {
         this.status = status;

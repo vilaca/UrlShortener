@@ -21,7 +21,6 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import pt.go2.external.UrlHealth;
 import pt.go2.fileio.AccessLogger;
 import pt.go2.fileio.Configuration;
-import pt.go2.fileio.EmbeddedFiles;
 import pt.go2.response.Response;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.RedirectResponse;

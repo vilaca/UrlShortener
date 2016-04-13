@@ -1,4 +1,4 @@
-package pt.go2.fileio;
+package pt.go2.application;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import pt.go2.response.Response;
+import pt.go2.fileio.Configuration;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.GzipResponse;
 
