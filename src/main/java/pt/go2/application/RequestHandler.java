@@ -34,9 +34,9 @@ class RequestHandler extends AbstractHandler {
 
     // only for access_log file
 
-    private static final AccessLogger ACCESSLOG = new AccessLogger();
-
     private static final Logger LOG = LogManager.getLogger();
+
+    private final AccessLogger accessLog = new AccessLogger();
 
     private final KeyValueStore ks;
     private final EmbeddedFiles files;
@@ -95,7 +95,7 @@ class RequestHandler extends AbstractHandler {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
 
-        ACCESSLOG.log(response.getStatus(), request, response.getBufferSize());
+        accessLog.log(response.getStatus(), request, response.getBufferSize());
 
     }
     
