@@ -4,10 +4,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -22,8 +22,7 @@ import pt.go2.external.UrlHealth;
 import pt.go2.fileio.AccessLogger;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
-import pt.go2.fileio.ErrorPages;
-import pt.go2.response.AbstractResponse;
+import pt.go2.response.Response;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
@@ -44,11 +43,9 @@ class RequestHandler extends AbstractHandler {
     private final UrlHealth health;
 
     private final Configuration config;
-    private final ErrorPages errors;
 
-    public RequestHandler(Configuration conf, ErrorPages err, KeyValueStore ks, EmbeddedFiles files, UrlHealth health) {
+    public RequestHandler(Configuration conf, KeyValueStore ks, EmbeddedFiles files, UrlHealth health) {
         this.config = conf;
-        this.errors = err;
         this.ks = ks;
         this.files = files;
         this.health = health;
@@ -60,18 +57,56 @@ class RequestHandler extends AbstractHandler {
 
         base.setHandled(true);
         
-        _handle(request, response);
+        Response file = _handle(request, response);
+        
+        response.setHeader(Response.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
+
+        response.setHeader(Response.RESPONSE_HEADER_CONTENT_TYPE, file.getMimeType());
+
+        if (file.isCacheable()) {
+
+            response.setHeader(Response.RESPONSE_HEADER_CACHE_CONTROL,
+                    "max-age=" + TimeUnit.HOURS.toSeconds(config.getCacheHint()));
+
+        } else {
+            response.setHeader(Response.RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+
+            response.setHeader(Response.RESPONSE_HEADER_EXPIRES, "0");
+        }
+
+        if (file.isZipped()) {
+            response.setHeader(Response.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
+        }
+
+
+        try (ServletOutputStream stream = response.getOutputStream()) {
+
+            response.setStatus(file.getHttpStatus());
+
+            file.run(response);
+
+            stream.write(file.getBody());
+            stream.flush();
+            
+        } catch (final IOException e) {
+
+            LOG.error("Error while streaming the response.", e);
+
+            response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
+        }
+
+        ACCESSLOG.log(response.getStatus(), request, response.getBufferSize());
+
     }
     
-    public void _handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
+    public Response _handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         // we need a host header to continue
 
-        String host = request.getHeader(AbstractResponse.REQUEST_HEADER_HOST);
+        String host = request.getHeader(Response.REQUEST_HEADER_HOST);
 
         if (host == null || host.isEmpty()) {
-            reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
-            return;
+            return ErrorPages.BAD_REQUEST;
         }
 
         host = host.toLowerCase();
@@ -82,11 +117,9 @@ class RequestHandler extends AbstractHandler {
 
             if (!config.getValidDomains().contains(host)) {
 
-                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), true);
-
                 LOG.error("Wrong host: " + host);
 
-                return;
+                return ErrorPages.BAD_REQUEST;
             }
 
             if (request.getMethod().equals(HttpMethod.GET.toString())) {
@@ -103,11 +136,9 @@ class RequestHandler extends AbstractHandler {
                     final String redirect = "http://" + preffered
                             + (requested.startsWith("/") ? requested : "/" + requested);
 
-                    reply(request, response, new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301), true);
-
                     LOG.error("Use preffered hostname. Redirected from " + host + " to " + redirect);
 
-                    return;
+                    return new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301);
                 }
             }
         }
@@ -116,27 +147,25 @@ class RequestHandler extends AbstractHandler {
 
             if (requested.length() == HashKey.LENGTH) {
 
-                handleShortenedUrl(request, response, requested.getBytes());
-
-                return;
+                return handleShortenedUrl(request, response, requested.getBytes());
 
             } else {
 
-                final String acceptedEncoding = request.getHeader(AbstractResponse.REQUEST_HEADER_ACCEPT_ENCODING);
+                final String acceptedEncoding = request.getHeader(Response.REQUEST_HEADER_ACCEPT_ENCODING);
 
                 // TODO pack200-gzip false positive
 
                 final boolean gzip = acceptedEncoding != null && acceptedEncoding.contains("gzip");
 
-                final AbstractResponse file = files.getFile(requested, gzip);
+                final Response file = files.getFile(requested, gzip);
 
                 if (file == null) {
 
-                    reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
+                    return ErrorPages.PAGE_NOT_FOUND;
 
                 } else {
 
-                    reply(request, response, file, true);
+                    return file;
                 }
             }
 
@@ -144,11 +173,15 @@ class RequestHandler extends AbstractHandler {
 
             final String field = urltoHash(request, response);
 
+            if ( field == null)
+            {
+                return ErrorPages.BAD_REQUEST;
+            }
+            
             Uri uri = Uri.create(field, true, Health.PROCESSING);
 
             if (uri == null) {
-                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
-                return;
+                return ErrorPages.BAD_REQUEST;
             }
 
             // try to find hash for url is ks
@@ -157,96 +190,29 @@ class RequestHandler extends AbstractHandler {
 
             if (hk == null) {
 
-                createNewHash(request, response, uri);
-
-                return;
+                return createNewHash(request, response, uri);
             }
 
             uri = ks.get(hk);
 
             switch (uri.health()) {
-            case MALWARE:
-                reply(request, response, GenericResponse.createForbidden("malware".getBytes(StandardCharsets.US_ASCII)),
-                        true);
-                break;
+            case MALWARE:                
+                return ErrorPages.MALWARE_REFUSED;
             case OK:
-                reply(request, response, GenericResponse.create(hk.getHash(), AbstractResponse.MIME_TEXT_PLAIN), false);
-                break;
+                return GenericResponse.create(hk.getHash(), Response.MIME_TEXT_PLAIN);
             case PHISHING:
-                reply(request, response,
-                        GenericResponse.createForbidden("phishing".getBytes(StandardCharsets.US_ASCII)), true);
-                break;
+                return ErrorPages.PHISHING;
             case PROCESSING:
-                reply(request, response, GenericResponse.NotOk(HttpStatus.ACCEPTED_202), false);
-                break;
+                return ErrorPages.PROCESSING;
             default:
-                reply(request, response, GenericResponse.NotOk(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-                break;
+                return ErrorPages.INTERNAL_SERVER_ERROR_500;
             }
 
         } else {
-            reply(request, response, GenericResponse.NotOk(HttpStatus.METHOD_NOT_ALLOWED_405), true);
+            
             LOG.error("Method not allowed: " + request.getMethod());
-        }
-    }
-
-    /**
-     * Stream Http Response
-     *
-     * @param request
-     *
-     * @param exchange
-     * @param response
-     * @throws IOException
-     */
-    protected void reply(HttpServletRequest request, final HttpServletResponse exchange,
-            final AbstractResponse response, final boolean cache) {
-
-        setHeaders(exchange, response, cache);
-
-        try {
-
-            exchange.setStatus(response.getHttpStatus());
-
-            response.run(exchange);
-
-        } catch (final IOException e) {
-
-            LOG.error("Error while streaming the response.", e);
-
-            exchange.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
-        }
-
-        ACCESSLOG.log(exchange.getStatus(), request, exchange.getBufferSize());
-    }
-
-    /**
-     * Set response headers
-     *
-     * @param exchange
-     *
-     * @param response
-     * @param headers
-     */
-    private void setHeaders(HttpServletResponse exchange, final AbstractResponse response, final boolean cache) {
-
-        exchange.setHeader(AbstractResponse.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
-
-        exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_TYPE, response.getMimeType());
-
-        if (cache) {
-
-            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL,
-                    "max-age=" + TimeUnit.HOURS.toSeconds(config.getCacheHint()));
-
-        } else {
-            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
-
-            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_EXPIRES, "0");
-        }
-
-        if (response.isZipped()) {
-            exchange.setHeader(AbstractResponse.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
+            
+            return ErrorPages.METHOD_NOT_ALLOWED_405;
         }
     }
 
@@ -270,28 +236,28 @@ class RequestHandler extends AbstractHandler {
         return idx == -1 ? path.substring(1) : path.substring(1, idx);
     }
 
-    private void handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, final byte[] requested) {
+    private Response handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, final byte[] requested) {
 
         final Uri uri = ks.get(new HashKey(requested));
 
         if (uri == null) {
-            reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
-            return;
+            return ErrorPages.PAGE_NOT_FOUND;
         }
 
         switch (uri.health()) {
         case PHISHING:
-            reply(request, response, errors.get(ErrorPages.Error.PHISHING), true);
-            break;
+            return ErrorPages.PHISHING;
         case OK:
-            reply(request, response, new RedirectResponse(uri.toString(), config.getRedirect()), true);
-            break;
+            return new RedirectResponse(uri.toString(), config.getRedirect());
         case MALWARE:
-            reply(request, response, errors.get(ErrorPages.Error.MALWARE), true);
-            break;
-        default:
-            reply(request, response, errors.get(ErrorPages.Error.PAGE_NOT_FOUND), true);
+            return ErrorPages.MALWARE;
+        case PROCESSING:
+            return ErrorPages.PROCESSING;
         }
+        
+        // TODO log error
+        
+        return ErrorPages.INTERNAL_SERVER_ERROR_500;
     }
 
     /**
@@ -312,7 +278,6 @@ class RequestHandler extends AbstractHandler {
             final String postBody = br.readLine();
 
             if (postBody == null) {
-                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
                 return null;
             }
 
@@ -321,7 +286,6 @@ class RequestHandler extends AbstractHandler {
             final int idx = postBody.indexOf('=') + 1;
 
             if (idx == -1 || postBody.length() - idx < 3) {
-                reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
                 return null;
             }
 
@@ -332,23 +296,18 @@ class RequestHandler extends AbstractHandler {
         } catch (final IOException e) {
 
             LOG.error(e);
-
-            reply(request, response, GenericResponse.NotOk(HttpStatus.BAD_REQUEST_400), false);
-
-            return null;
         }
+        
+        return null;
     }
 
-    private void createNewHash(HttpServletRequest request, HttpServletResponse response, Uri uri) {
+    private Response createNewHash(HttpServletRequest request, HttpServletResponse response, Uri uri) {
 
         // hash not found, add new
 
         if (!ks.add(uri)) {
-            reply(request, response, GenericResponse.NotOk(HttpStatus.INTERNAL_SERVER_ERROR_500), false);
-            return;
+            return ErrorPages.INTERNAL_SERVER_ERROR_500;
         }
-
-        reply(request, response, GenericResponse.NotOk(HttpStatus.ACCEPTED_202), false);
 
         health.test(uri, true);
 
@@ -356,6 +315,6 @@ class RequestHandler extends AbstractHandler {
             uri.setHealth(Health.OK);
         }
 
-        return;
+        return ErrorPages.PROCESSING;
     }
 }

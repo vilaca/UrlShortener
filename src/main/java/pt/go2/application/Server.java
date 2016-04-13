@@ -18,7 +18,6 @@ import pt.go2.external.SafeBrowsingLookup;
 import pt.go2.external.UrlHealth;
 import pt.go2.fileio.Configuration;
 import pt.go2.fileio.EmbeddedFiles;
-import pt.go2.fileio.ErrorPages;
 import pt.go2.fileio.Restore;
 import pt.go2.fileio.RestoreItem;
 import pt.go2.fileio.WhiteList;
@@ -41,7 +40,6 @@ public class Server {
         final Configuration config;
 
         final KeyValueStore ks;
-        final ErrorPages errors;
         final EmbeddedFiles res;
 
         try {
@@ -50,7 +48,6 @@ public class Server {
             final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
             ks = new KeyValueStore(restoredItems, config.getDbFolder());
-            errors = new ErrorPages();
             res = new EmbeddedFiles(config);
 
         } catch (final IOException ioe) {
@@ -90,7 +87,7 @@ public class Server {
 
         final ContextHandler root = new ContextHandler();
         root.setContextPath("/");
-        root.setHandler(new RequestHandler(config, errors, ks, res, ul));
+        root.setHandler(new RequestHandler(config, ks, res, ul));
 
         final ContextHandlerCollection contexts = new ContextHandlerCollection();
         contexts.setHandlers(new Handler[] { root });
