@@ -198,6 +198,7 @@ class RequestHandler extends AbstractHandler {
             case MALWARE:                
                 return ErrorPages.MALWARE_REFUSED;
             case OK:
+                // TODO remove this instantiation ??
                 return GenericResponse.create(hk.getHash(), Response.MIME_TEXT_PLAIN);
             case PHISHING:
                 return ErrorPages.PHISHING;
