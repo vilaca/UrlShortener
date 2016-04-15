@@ -11,12 +11,10 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import pt.go2.fileio.Configuration;
-import pt.go2.fileio.EmbeddedFiles;
-import pt.go2.fileio.ErrorPages;
 import pt.go2.fileio.RestoreItem;
 import pt.go2.mocks.HttpServletRequestMock;
 import pt.go2.mocks.HttpServletResponseMock;
-import pt.go2.response.AbstractResponse;
+import pt.go2.response.Response;
 import pt.go2.storage.KeyValueStore;
 
 public class StaticPagesTest {
@@ -31,8 +29,7 @@ public class StaticPagesTest {
         final Configuration config = new Configuration();
 
         final KeyValueStore ks = new KeyValueStore(uris, config.getDbFolder());
-        final ErrorPages errors = new ErrorPages();
-        final EmbeddedFiles res = new EmbeddedFiles(config);
+        final EmbeddedPages res = new EmbeddedPages(config);
 
         final HttpServletRequestMock request = new HttpServletRequestMock() {
 
@@ -45,12 +42,12 @@ public class StaticPagesTest {
 
         final HttpServletResponseMock response = new HttpServletResponseMock();
 
-        final AbstractHandler sp = new RequestHandler(config, errors, ks, res, null);
+        final AbstractHandler sp = new RequestHandler(config, ks, res, null);
 
         sp.handle("", null, request, response);
 
         Assert.assertEquals(config.getRedirect(), response.getStatus());
-        Assert.assertEquals(redirected, response.getHeader(AbstractResponse.RESPONSE_HEADER_LOCATION));
+        Assert.assertEquals(redirected, response.getHeader(Response.RESPONSE_HEADER_LOCATION));
 
     }
 }
