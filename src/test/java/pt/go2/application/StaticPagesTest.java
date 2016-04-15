@@ -1,6 +1,7 @@
 package pt.go2.application;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -20,7 +21,7 @@ import pt.go2.storage.KeyValueStore;
 public class StaticPagesTest {
 
     @Test
-    public void test() throws IOException, ServletException {
+    public void test() throws IOException, ServletException, URISyntaxException {
 
         final String redirected = "http://redirected.com";
 

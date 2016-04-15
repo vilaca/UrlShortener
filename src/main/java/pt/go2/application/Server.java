@@ -49,7 +49,7 @@ public class Server {
             ks = new KeyValueStore(restoredItems, config.getDbFolder());
             res = new EmbeddedPages(config);
 
-        } catch (final IOException ioe) {
+        } catch (final Exception ioe) {
             LOGGER.fatal(ioe);
             return;
         }

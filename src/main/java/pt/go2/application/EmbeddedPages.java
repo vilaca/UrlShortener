@@ -1,99 +1,89 @@
 package pt.go2.application;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.HashMap;
 import java.util.Map;
 
-import pt.go2.response.Response;
 import pt.go2.fileio.Configuration;
 import pt.go2.response.GenericResponse;
 import pt.go2.response.GzipResponse;
+import pt.go2.response.Response;
 
 class EmbeddedPages {
 
-	private static final int BUFFER = 4096;
+    final Map<String, Response> pages = new HashMap<>();
+    final Map<String, Response> zipped = new HashMap<>();
 
-	final Map<String, Response> pages = new HashMap<>();
-	final Map<String, Response> zipped = new HashMap<>();
+    public EmbeddedPages(Configuration config) throws IOException, URISyntaxException {
 
-	public EmbeddedPages(Configuration config) throws IOException {
+        final Class<EmbeddedPages> clazz = EmbeddedPages.class;
 
-		final byte[] index = read(EmbeddedPages.class.getResourceAsStream("/index.html"));
+        byte[] index = Files.readAllBytes(new File(clazz.getResource("/index.html").toURI()).toPath());
+        final byte[] ajax = Files.readAllBytes(new File(clazz.getResource("/ajax.js").toURI()).toPath());
+        final byte[] robots = Files.readAllBytes(new File(clazz.getResource("/robots.txt").toURI()).toPath());
+        final byte[] map = Files.readAllBytes(new File(clazz.getResource("/sitemap.xml").toURI()).toPath());
+        final byte[] css = Files.readAllBytes(new File(clazz.getResource("/screen.css").toURI()).toPath());
 
-		final byte[] ajax = read(EmbeddedPages.class.getResourceAsStream("/ajax.js"));
+        // zipped
 
-		final byte[] robots = read(EmbeddedPages.class.getResourceAsStream("/robots.txt"));
+        this.zipped.put("/", new GzipResponse(index, Response.MIME_TEXT_HTML));
 
-		final byte[] map = read(EmbeddedPages.class.getResourceAsStream("/sitemap.xml"));
+        this.zipped.put("ajax.js", new GzipResponse(ajax, Response.MIME_APP_JAVASCRIPT));
 
-		final byte[] css = read(EmbeddedPages.class.getResourceAsStream("/screen.css"));
+        this.zipped.put("robots.txt", new GzipResponse(robots, Response.MIME_TEXT_PLAIN));
 
-		// zipped
-		
-		this.zipped.put("/", new GzipResponse(index, Response.MIME_TEXT_HTML));
+        this.zipped.put("sitemap.xml", new GzipResponse(map, Response.MIME_TEXT_XML));
 
-		this.zipped.put("ajax.js", new GzipResponse(ajax, Response.MIME_APP_JAVASCRIPT));
+        this.zipped.put("screen.css", new GzipResponse(css, Response.MIME_TEXT_CSS));
 
-		this.zipped.put("robots.txt", new GzipResponse(robots, Response.MIME_TEXT_PLAIN));
+        // plain
 
-		this.zipped.put("sitemap.xml", new GzipResponse(map, Response.MIME_TEXT_XML));
+        this.pages.put("/", GenericResponse.create(index, Response.MIME_TEXT_HTML));
 
-		this.zipped.put("screen.css", new GzipResponse(css, Response.MIME_TEXT_CSS));
+        this.pages.put("ajax.js", GenericResponse.create(ajax, Response.MIME_APP_JAVASCRIPT));
 
-		// plain
-		
-		this.pages.put("/", GenericResponse.create(index, Response.MIME_TEXT_HTML));
+        this.pages.put("robots.txt", GenericResponse.create(robots, Response.MIME_TEXT_PLAIN));
 
-		this.pages.put("ajax.js", GenericResponse.create(ajax, Response.MIME_APP_JAVASCRIPT));
+        this.pages.put("sitemap.xml", GenericResponse.create(map, Response.MIME_TEXT_XML));
 
-		this.pages.put("robots.txt", GenericResponse.create(robots, Response.MIME_TEXT_PLAIN));
+        this.pages.put("screen.css", GenericResponse.create(css, Response.MIME_TEXT_CSS));
 
-		this.pages.put("sitemap.xml", GenericResponse.create(map, Response.MIME_TEXT_XML));
+        // google verification for webmaster tools
 
-		this.pages.put("screen.css", GenericResponse.create(css, Response.MIME_TEXT_CSS));
+        if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty())
 
-		// google verification for webmaster tools
-		
-		if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
-			this.zipped.put(config.getGoogleVerification(),
-					new GzipResponse(
-							("google-site-verification: " + config.getGoogleVerification()).getBytes("US-ASCII"),
-							Response.MIME_TEXT_PLAIN));
-		}
+        {
+            this.zipped.put(config.getGoogleVerification(),
+                    new GzipResponse(
+                            ("google-site-verification: " + config.getGoogleVerification()).getBytes("US-ASCII"),
+                            Response.MIME_TEXT_PLAIN));
+        }
 
-		// check if all pages created
+        // check if all pages created
 
-		// TODO is this check required ??
-		
-		for (final String page : this.zipped.keySet()) {
+        // TODO is this check required ??
 
-			final Response response = this.zipped.get(page);
+        for (
 
-			if (response == null) {
+        final String page : this.zipped.keySet())
 
-				throw new IOException("Failed to load page " + page);
-			}
-		}
-	}
+        {
 
-	public Response getFile(String filename, boolean compressed) {
-		return compressed ? zipped.get(filename) : pages.get(filename);
-	}
+            final Response response = this.zipped.get(page);
 
-	private byte[] read(InputStream is) throws IOException {
+            if (response == null) {
 
-		final byte[] buffer = new byte[BUFFER];
-		int read;
+                throw new IOException("Failed to load page " + page);
+            }
+        }
 
-		final ByteArrayOutputStream output = new ByteArrayOutputStream();
+    }
 
-		while ((read = is.read(buffer)) != -1) {
-			output.write(buffer, 0, read);
-		}
-
-		return output.toByteArray();
-	}
+    public Response getFile(String filename, boolean compressed) {
+        return compressed ? zipped.get(filename) : pages.get(filename);
+    }
 
 }
