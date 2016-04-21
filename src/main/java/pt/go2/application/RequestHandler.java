@@ -21,13 +21,12 @@ import org.eclipse.jetty.server.handler.AbstractHandler;
 import pt.go2.external.UrlHealth;
 import pt.go2.fileio.AccessLogger;
 import pt.go2.fileio.Configuration;
-import pt.go2.response.Response;
-import pt.go2.response.GenericResponse;
-import pt.go2.response.RedirectResponse;
 import pt.go2.storage.HashKey;
 import pt.go2.storage.KeyValueStore;
 import pt.go2.storage.Uri;
 import pt.go2.storage.Uri.Health;
+
+import static pt.go2.application.HeaderConstants.*;
 
 class RequestHandler extends AbstractHandler {
 
@@ -58,34 +57,27 @@ class RequestHandler extends AbstractHandler {
         
         Response file = _handle(request, response);
         
-        response.setHeader(Response.RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
+        setHeader(response, RESPONSE_HEADER_SERVER, "Carapau de corrida " + config.getVersion());
 
-        response.setHeader(Response.RESPONSE_HEADER_CONTENT_TYPE, file.getMimeType());
+        setHeader(response, RESPONSE_HEADER_CONTENT_TYPE, file.getMimeType());
 
         if (file.isCacheable()) {
 
-            response.setHeader(Response.RESPONSE_HEADER_CACHE_CONTROL,
+            setHeader(response, RESPONSE_HEADER_CACHE_CONTROL,
                     "max-age=" + TimeUnit.HOURS.toSeconds(config.getCacheHint()));
 
         } else {
-            response.setHeader(Response.RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
+            setHeader(response, RESPONSE_HEADER_CACHE_CONTROL, "no-cache, no-store, must-revalidate");
 
-            response.setHeader(Response.RESPONSE_HEADER_EXPIRES, "0");
+            setHeader(response, RESPONSE_HEADER_EXPIRES, "0");
         }
 
-        if (file.isZipped()) {
-            response.setHeader(Response.RESPONSE_HEADER_CONTENT_ENCODING, "gzip");
-        }
-
-
-        try (ServletOutputStream stream = response.getOutputStream()) {
+        try {
 
             response.setStatus(file.getHttpStatus());
 
-            file.run(response);
+            file.run(request, response);
 
-            stream.write(file.getBody());
-            stream.flush();
             
         } catch (final IOException e) {
 
@@ -94,15 +86,22 @@ class RequestHandler extends AbstractHandler {
             response.setStatus(HttpStatus.INTERNAL_SERVER_ERROR_500);
         }
 
-        accessLog.log(response.getStatus(), request, response.getBufferSize());
+        final String referer = getHeader(request, REQUEST_HEADER_REFERER);
 
+        final String agent = getHeader(request, REQUEST_HEADER_USER_AGENT);
+
+        accessLog.log(response.getStatus(), request, response.getBufferSize(), referer, agent);
     }
     
+    private void setHeader(HttpServletResponse response, HeaderConstants header, String value) {
+        response.setHeader(header.toString(), value);
+    }
+
     public Response _handle(HttpServletRequest request, HttpServletResponse response) throws IOException, ServletException {
 
         // we need a host header to continue
 
-        String host = request.getHeader(Response.REQUEST_HEADER_HOST);
+        String host = getHeader(request, REQUEST_HEADER_HOST);
 
         if (host == null || host.isEmpty()) {
             return ErrorPages.BAD_REQUEST;
@@ -150,13 +149,7 @@ class RequestHandler extends AbstractHandler {
 
             } else {
 
-                final String acceptedEncoding = request.getHeader(Response.REQUEST_HEADER_ACCEPT_ENCODING);
-
-                // TODO pack200-gzip false positive
-
-                final boolean gzip = acceptedEncoding != null && acceptedEncoding.contains("gzip");
-
-                final Response file = files.getFile(requested, gzip);
+                final Response file = files.getFile(requested);
 
                 if (file == null) {
 
@@ -199,7 +192,7 @@ class RequestHandler extends AbstractHandler {
                 return ErrorPages.MALWARE_REFUSED;
             case OK:
                 // TODO remove this instantiation ??
-                return GenericResponse.create(hk.getHash(), Response.MIME_TEXT_PLAIN);
+                return GenericResponse.create(hk.getHash(), MIME_TEXT_PLAIN.toString());
             case PHISHING:
                 return ErrorPages.PHISHING;
             case PROCESSING:
@@ -214,6 +207,10 @@ class RequestHandler extends AbstractHandler {
             
             return ErrorPages.METHOD_NOT_ALLOWED_405;
         }
+    }
+
+    private String getHeader(HttpServletRequest request, HeaderConstants header) {
+        return request.getHeader(header.toString());
     }
 
     /**

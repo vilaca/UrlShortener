@@ -8,8 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import pt.go2.response.Response;
-
 /**
  * Helper class for logging user access file
  *
@@ -24,6 +22,8 @@ public class AccessLogger {
      * @param status
      *
      * @param request
+     * @param referer 
+     * @param agent 
      * @param exchange
      * @param exchange
      *
@@ -31,7 +31,7 @@ public class AccessLogger {
      * @param response
      * @return
      */
-    public void log(int status, HttpServletRequest request, final int size) {
+    public void log(int status, HttpServletRequest request, final int size, String referer, String agent) {
 
         final StringBuilder sb = new StringBuilder();
 
@@ -49,10 +49,6 @@ public class AccessLogger {
         sb.append(" ");
         sb.append(size);
         sb.append(" \"");
-
-        final String referer = request.getHeader(Response.REQUEST_HEADER_REFERER);
-
-        final String agent = request.getHeader(Response.REQUEST_HEADER_USER_AGENT);
 
         sb.append(referer == null ? "-" : referer);
 
