@@ -18,13 +18,13 @@ import pt.go2.fileio.Configuration;
 
 class EmbeddedPages {
 
-    private static final String[][] fileList = { 
+    private static final Object[][] fileList = { 
     
-            { "/index.html", HeaderConstants.MIME_TEXT_HTML.toString() },
-            { "/ajax.js", HeaderConstants.MIME_APP_JAVASCRIPT.toString() },
-            { "/robots.txt", HeaderConstants.MIME_TEXT_PLAIN.toString() },
-            { "/sitemap.xml", HeaderConstants.MIME_TEXT_XML.toString() },
-            { "/screen.css", HeaderConstants.MIME_TEXT_CSS.toString() }
+            { "/index.html", MimeTypeConstants.MIME_TEXT_HTML.toString() },
+            { "/ajax.js", MimeTypeConstants.MIME_APP_JAVASCRIPT.toString() },
+            { "/robots.txt", MimeTypeConstants.MIME_TEXT_PLAIN.toString() },
+            { "/sitemap.xml", MimeTypeConstants.MIME_TEXT_XML.toString() },
+            { "/screen.css", MimeTypeConstants.MIME_TEXT_CSS.toString() }
     };
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -40,7 +40,7 @@ class EmbeddedPages {
             this.pages.put(
                     config.getGoogleVerification(), ResponseFactory.create(
                                 HttpStatus.OK_200,
-                                HeaderConstants.MIME_TEXT_PLAIN,
+                                MimeTypeConstants.MIME_TEXT_PLAIN,
                                 true,
                                 ("google-site-verification: " + config.getGoogleVerification()).getBytes(StandardCharsets.US_ASCII)
                             )
@@ -49,9 +49,9 @@ class EmbeddedPages {
 
         final Class<EmbeddedPages> clazz = EmbeddedPages.class;
         
-        for ( String file[]: fileList)
+        for ( Object file[]: fileList)
         {
-            final byte[] content = Files.readAllBytes(new File(clazz.getResource(file[0]).toURI()).toPath());
+            final byte[] content = Files.readAllBytes(new File(clazz.getResource((String)file[0]).toURI()).toPath());
             final byte[] zipped;
 
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -69,7 +69,7 @@ class EmbeddedPages {
 
             zipped = baos.toByteArray();
             
-            pages.put(file[0], ResponseFactory.create(200, file[0], zipped, content) ); 
+            pages.put((String)file[0], ResponseFactory.create(200, (MimeTypeConstants)file[1], zipped, content) ); 
         }
     }
 

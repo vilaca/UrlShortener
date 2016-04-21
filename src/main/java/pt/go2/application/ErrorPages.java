@@ -13,23 +13,23 @@ import org.eclipse.jetty.http.HttpStatus;
 
 enum ErrorPages implements Response {
 
-    PAGE_NOT_FOUND(readStream(ErrorPages.class.getResourceAsStream("/404.html")), HttpStatus.NOT_FOUND_404, HeaderConstants.MIME_TEXT_HTML),
+    PAGE_NOT_FOUND(readStream(ErrorPages.class.getResourceAsStream("/404.html")), HttpStatus.NOT_FOUND_404, MimeTypeConstants.MIME_TEXT_HTML),
     
     // this error should be returned when an URL was detected as being a
     // phishing site **after** it was added to the database
-    PHISHING(readStream(ErrorPages.class.getResourceAsStream("/403-phishing.html")), HttpStatus.FORBIDDEN_403, HeaderConstants.MIME_TEXT_HTML),
+    PHISHING(readStream(ErrorPages.class.getResourceAsStream("/403-phishing.html")), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML),
     
     // this error should be returned when an URL was detected as being a
     // phishing site **before** it was added to the database
-    PHISHING_REFUSED("phishing".getBytes(StandardCharsets.US_ASCII), HttpStatus.FORBIDDEN_403, HeaderConstants.MIME_TEXT_PLAIN),
+    PHISHING_REFUSED("phishing".getBytes(StandardCharsets.US_ASCII), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_PLAIN),
     
     // this error should be returned when an URL was detected as being a malware
     // site **after** it was added to the database
-    MALWARE(readStream(ErrorPages.class.getResourceAsStream("/403-malware.html")), HttpStatus.FORBIDDEN_403, HeaderConstants.MIME_TEXT_HTML), 
+    MALWARE(readStream(ErrorPages.class.getResourceAsStream("/403-malware.html")), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML), 
     
     // this error should be returned when an URL was detected as being a
     // phishing site **before** it was added to the database
-    MALWARE_REFUSED("malware".getBytes(StandardCharsets.US_ASCII), HttpStatus.FORBIDDEN_403, HeaderConstants.MIME_TEXT_PLAIN), 
+    MALWARE_REFUSED("malware".getBytes(StandardCharsets.US_ASCII), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_PLAIN), 
     
     // URL has been submitted and is being processed
     PROCESSING(HttpStatus.ACCEPTED_202), 
@@ -43,18 +43,18 @@ enum ErrorPages implements Response {
     // something really bad has happened (See where its being used for more shocking details)
     INTERNAL_SERVER_ERROR_500(HttpStatus.INTERNAL_SERVER_ERROR_500);
     
-    final HeaderConstants mime;
+    final MimeTypeConstants mime;
     final private byte[] body;
     final private int status;
 
-    ErrorPages(byte[] body, int status, HeaderConstants mime) {
+    ErrorPages(byte[] body, int status, MimeTypeConstants mime) {
         this.status = status;
         this.body = body;
         this.mime = mime;
     }
 
     ErrorPages(int status) {
-        this(new byte[0],status, HeaderConstants.MIME_TEXT_PLAIN);
+        this(new byte[0],status, MimeTypeConstants.MIME_TEXT_PLAIN);
     }
 
     private static byte[] readStream(InputStream in) {

@@ -13,7 +13,7 @@ import org.eclipse.jetty.http.HttpStatus;
 
 public class ResponseFactory {
 
-    public static Response create(int status, HeaderConstants mimeTextPlain, boolean cacheable, byte[] body) {
+    public static Response create(int status, MimeTypeConstants mimeTextPlain, boolean cacheable, byte[] body) {
 
         return new Response() {
 
@@ -44,7 +44,7 @@ public class ResponseFactory {
         };
     }
 
-    public static Response create(int status, String mime, byte[] zipped, byte[] content) {
+    public static Response create(int status, MimeTypeConstants mime, byte[] zipped, byte[] content) {
 
         return new Response() {
 
@@ -73,7 +73,7 @@ public class ResponseFactory {
 
             @Override
             public String getMimeType() {
-                return mime;
+                return mime.toString();
             }
 
             @Override
@@ -99,7 +99,7 @@ public class ResponseFactory {
 
             @Override
             public String getMimeType() {
-                return HeaderConstants.MIME_TEXT_PLAIN.toString();
+                return MimeTypeConstants.MIME_TEXT_PLAIN.toString();
             }
 
             @Override
@@ -129,7 +129,7 @@ public class ResponseFactory {
 
             @Override
             public String getMimeType() {
-                return HeaderConstants.MIME_TEXT_PLAIN.toString();
+                return MimeTypeConstants.MIME_TEXT_PLAIN.toString();
             }
 
             @Override
