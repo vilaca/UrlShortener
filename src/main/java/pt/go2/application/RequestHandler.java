@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.util.concurrent.TimeUnit;
 
 import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -136,7 +135,7 @@ class RequestHandler extends AbstractHandler {
 
                     LOG.error("Use preffered hostname. Redirected from " + host + " to " + redirect);
 
-                    return new RedirectResponse(redirect, HttpStatus.MOVED_PERMANENTLY_301);
+                    return ResponseFactory.create(redirect, HttpStatus.MOVED_PERMANENTLY_301);
                 }
             }
         }
@@ -191,8 +190,7 @@ class RequestHandler extends AbstractHandler {
             case MALWARE:                
                 return ErrorPages.MALWARE_REFUSED;
             case OK:
-                // TODO remove this instantiation ??
-                return GenericResponse.create(hk.getHash(), MIME_TEXT_PLAIN.toString());
+                return ResponseFactory.create(hk.getHash());
             case PHISHING:
                 return ErrorPages.PHISHING;
             case PROCESSING:
@@ -245,7 +243,7 @@ class RequestHandler extends AbstractHandler {
         case PHISHING:
             return ErrorPages.PHISHING;
         case OK:
-            return new RedirectResponse(uri.toString(), config.getRedirect());
+            return ResponseFactory.create(uri.toString(), config.getRedirect());
         case MALWARE:
             return ErrorPages.MALWARE;
         case PROCESSING:
