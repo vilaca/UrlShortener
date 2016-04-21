@@ -13,7 +13,7 @@ import org.eclipse.jetty.http.HttpStatus;
 
 public class ResponseFactory {
 
-    public static Response create(int status, MimeTypeConstants mimeTextPlain, boolean cacheable, byte[] body) {
+    public static Response create(final int status, final MimeTypeConstants mimeTextPlain, final boolean cacheable, final byte[] body) {
 
         return new Response() {
 
@@ -44,7 +44,7 @@ public class ResponseFactory {
         };
     }
 
-    public static Response create(int status, MimeTypeConstants mime, byte[] zipped, byte[] content) {
+    public static Response create(final int status, final MimeTypeConstants mime, final byte[] zipped, final byte[] content) {
 
         return new Response() {
 
@@ -83,9 +83,9 @@ public class ResponseFactory {
         };
     }
 
-    public static Response create(String redirect, int status) {
+    public static Response create(final String redirect, final int status) {
 
-        return new Response(){
+        return new Response() {
 
             @Override
             public int getHttpStatus() {
@@ -105,12 +105,13 @@ public class ResponseFactory {
             @Override
             public boolean isCacheable() {
                 return true;
-            }};
+            }
+        };
     }
 
-    public static Response create(byte[] body) {
+    public static Response create(final byte[] body) {
 
-        return new Response(){
+        return new Response() {
 
             @Override
             public int getHttpStatus() {
@@ -135,6 +136,7 @@ public class ResponseFactory {
             @Override
             public boolean isCacheable() {
                 return true;
-            }};
+            }
+        };
     }
 }
