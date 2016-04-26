@@ -48,6 +48,8 @@ public class Server {
 
             ks = new KeyValueStore(restoredItems, config.getDbFolder());
             res = new EmbeddedPages(config);
+            
+            res.setAlias("/", "index.html");
 
         } catch (final Exception ioe) {
             LOGGER.fatal(ioe);
