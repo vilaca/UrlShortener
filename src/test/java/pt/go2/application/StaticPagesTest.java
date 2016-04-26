@@ -15,7 +15,6 @@ import pt.go2.fileio.Configuration;
 import pt.go2.fileio.RestoreItem;
 import pt.go2.mocks.HttpServletRequestMock;
 import pt.go2.mocks.HttpServletResponseMock;
-import pt.go2.response.Response;
 import pt.go2.storage.KeyValueStore;
 
 public class StaticPagesTest {
@@ -48,7 +47,7 @@ public class StaticPagesTest {
         sp.handle("", null, request, response);
 
         Assert.assertEquals(config.getRedirect(), response.getStatus());
-        Assert.assertEquals(redirected, response.getHeader(Response.RESPONSE_HEADER_LOCATION));
+        Assert.assertEquals(redirected, response.getHeader(HeaderConstants.RESPONSE_HEADER_LOCATION.toString()));
 
     }
 }
