@@ -35,7 +35,7 @@ import org.eclipse.jetty.http.HttpStatus;
  * 
  * Includes HTML, CSS, JS and more.
  * 
- * @author João Vilaça
+ * @author Joao Vilaca
  */
 final class EmbeddedPages {
 
