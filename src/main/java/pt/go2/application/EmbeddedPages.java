@@ -28,8 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
 /**
@@ -40,8 +38,6 @@ import org.eclipse.jetty.http.HttpStatus;
  * @author João Vilaça
  */
 final class EmbeddedPages {
-
-    private static final Logger LOGGER = LogManager.getLogger();
 
     final Map<String, Response> pages;
 
@@ -71,7 +67,7 @@ final class EmbeddedPages {
 
         final Map<String, Response> files;
 
-        public Builder() throws IOException, URISyntaxException {
+        public Builder() {
 
             files = new HashMap<>();
         }
@@ -152,13 +148,14 @@ final class EmbeddedPages {
          * @throws URISyntaxException
          */
         private byte[] readFile(String filename) throws IOException, URISyntaxException {
+
             final URL resource = EmbeddedPages.class.getResource(filename);
 
-            if (resource == null) {
-                throw new IllegalArgumentException(filename + " not present in jar file.");
+            if (resource != null) {
+                return Files.readAllBytes(new File(resource.toURI()).toPath());
             }
-
-            return Files.readAllBytes(new File(resource.toURI()).toPath());
+            
+            throw new IllegalArgumentException(filename + " not present in jar file.");
         }
 
         /**
@@ -166,8 +163,10 @@ final class EmbeddedPages {
          * 
          * @param content
          * @return
+         * @throws IOException 
          */
-        private byte[] compress(byte[] content) {
+        private byte[] compress(byte[] content) throws IOException {
+           
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             try (final GZIPOutputStream zip = new GZIPOutputStream(baos);) {
@@ -175,13 +174,7 @@ final class EmbeddedPages {
                 zip.write(content);
                 zip.flush();
                 zip.close();
-
-            } catch (final IOException e) {
-
-                LOGGER.error(e);
-
-                return null;
-            }
+            } 
 
             return baos.toByteArray();
         }
