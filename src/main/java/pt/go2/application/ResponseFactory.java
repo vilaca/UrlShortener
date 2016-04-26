@@ -11,9 +11,9 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 
-public class ResponseFactory {
+class ResponseFactory {
 
-    public static Response create(final int status, final MimeTypeConstants mimeTextPlain, final boolean cacheable, final byte[] body) {
+    public static Response create(final int status, final MimeTypeConstants mime, final boolean cacheable, final byte[] content) {
 
         return new Response() {
 
@@ -24,7 +24,7 @@ public class ResponseFactory {
 
             @Override
             public String getMimeType() {
-                return mimeTextPlain.toString();
+                return mime.toString();
             }
 
             @Override
@@ -37,7 +37,7 @@ public class ResponseFactory {
 
                 try (ServletOutputStream stream = response.getOutputStream()) {
 
-                    stream.write(body);
+                    stream.write(content);
                     stream.flush();
                 }
             }
@@ -109,7 +109,7 @@ public class ResponseFactory {
         };
     }
 
-    public static Response create(final byte[] body) {
+    public static Response create(final byte[] content) {
 
         return new Response() {
 
@@ -123,7 +123,7 @@ public class ResponseFactory {
 
                 try (ServletOutputStream stream = response.getOutputStream()) {
 
-                    stream.write(body);
+                    stream.write(content);
                     stream.flush();
                 }
             }
