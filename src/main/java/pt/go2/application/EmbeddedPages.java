@@ -1,11 +1,29 @@
+/*
+    Copyright (C) 2016 João Vilaça
+
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    
+ */
 package pt.go2.application;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
+import java.net.URL;
 import java.nio.file.Files;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -14,42 +32,142 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.http.HttpStatus;
 
-import pt.go2.fileio.Configuration;
-
-// TODO implement builder pattern 
-
-class EmbeddedPages {
-
-    private static final Object[][] fileList = {
-
-            { "/index.html", MimeTypeConstants.MIME_TEXT_HTML }, { "/ajax.js", MimeTypeConstants.MIME_APP_JAVASCRIPT },
-            { "/robots.txt", MimeTypeConstants.MIME_TEXT_PLAIN }, { "/sitemap.xml", MimeTypeConstants.MIME_TEXT_XML },
-            { "/screen.css", MimeTypeConstants.MIME_TEXT_CSS } };
+/**
+ * Immutable class for static pages stored in the .jar file.
+ * 
+ * Includes HTML, CSS, JS and more.
+ * 
+ * @author João Vilaça
+ */
+final class EmbeddedPages {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    final Map<String, Response> pages = new HashMap<>();
+    final Map<String, Response> pages;
 
-    public EmbeddedPages(Configuration config) throws IOException, URISyntaxException {
+    /**
+     * Get static page. Page must be present in Jar file.
+     * 
+     * @param filename
+     * @return
+     */
+    public Response getFile(String filename) {
+        return pages.get(filename);
+    }
 
-        // google verification for webmaster tools
+    /**
+     * Private constructor, use builder class.
+     */
+    private EmbeddedPages(final Map<String, Response> pages) {
+        this.pages = pages;
+    }
 
-        if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
-            this.pages.put(config.getGoogleVerification(),
-                    ResponseFactory.create(HttpStatus.OK_200, MimeTypeConstants.MIME_TEXT_PLAIN, true,
-                            ("google-site-verification: " + config.getGoogleVerification())
-                                    .getBytes(StandardCharsets.US_ASCII)));
+    /**
+     * Creates EmbeddedPages class.
+     * 
+     * @author vilaca
+     */
+    static class Builder {
+
+        final Map<String, Response> files;
+
+        public Builder() throws IOException, URISyntaxException {
+
+            files = new HashMap<>();
         }
 
-        final Class<EmbeddedPages> clazz = EmbeddedPages.class;
+        /**
+         * Add file to be embedded. File must be present in Jar.
+         * 
+         * @param filename
+         * @param mime
+         * 
+         * @return
+         * @throws URISyntaxException
+         * @throws IOException
+         */
+        public Builder add(String filename, MimeTypeConstants mime) throws IOException, URISyntaxException {
 
-        for (Object file[] : fileList) {
-            final String filename = (String) file[0];
-            final MimeTypeConstants mime = (MimeTypeConstants) file[1];
+            final byte[] content = readFile(filename);
+            final byte[] zipped = compress(content);
 
-            final byte[] content = Files.readAllBytes(new File(clazz.getResource(filename).toURI()).toPath());
-            final byte[] zipped;
+            final Response response = ResponseFactory.create(HttpStatus.OK_200, mime, zipped, content);
 
+            files.put(filename, response);
+            return this;
+        }
+
+        /**
+         * Add file to be embedded. File must be present in Jar.
+         * 
+         * @param filename
+         * @param mime
+         * 
+         * @return
+         */
+        public Builder add(String filename, byte[] content, MimeTypeConstants mime) {
+
+            final Response response = ResponseFactory.create(HttpStatus.OK_200, mime, true, content);
+            files.put(filename, response);
+            return this;
+        }
+
+        /**
+         * Set alias for file. File must have been added with add() method or
+         * create method will fail.
+         * 
+         * @param alias
+         * @param filename
+         * 
+         * @return
+         */
+        public Builder setAlias(String alias, String filename) {
+
+            final Response file = files.get(filename);
+
+            if (file != null) {
+
+                files.put(alias, file);
+                return this;
+            }
+
+            throw new IllegalArgumentException("Cant create alias for " + filename);
+        }
+
+        /**
+         * Create Embedded pages object instance
+         * 
+         * @return
+         */
+        public EmbeddedPages create() {
+            return new EmbeddedPages(Collections.unmodifiableMap(files));
+        }
+
+        /**
+         * Read file from Jar file
+         * 
+         * @param filename
+         * @return
+         * @throws IOException
+         * @throws URISyntaxException
+         */
+        private byte[] readFile(String filename) throws IOException, URISyntaxException {
+            final URL resource = EmbeddedPages.class.getResource(filename);
+
+            if (resource == null) {
+                throw new IllegalArgumentException(filename + " not present in jar file.");
+            }
+
+            return Files.readAllBytes(new File(resource.toURI()).toPath());
+        }
+
+        /**
+         * Compress file content using GZIP
+         * 
+         * @param content
+         * @return
+         */
+        private byte[] compress(byte[] content) {
             final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
             try (final GZIPOutputStream zip = new GZIPOutputStream(baos);) {
@@ -61,31 +179,11 @@ class EmbeddedPages {
             } catch (final IOException e) {
 
                 LOGGER.error(e);
+
+                return null;
             }
 
-            zipped = baos.toByteArray();
-
-            final Response response = ResponseFactory.create(200, mime, zipped, content);
-
-            pages.put(filename.substring(1), response);
+            return baos.toByteArray();
         }
-    }
-
-    public Response getFile(String filename) {
-        return pages.get(filename);
-    }
-
-    public void setAlias(String alias, String filename) {
-
-        final Response page = pages.get(filename);
-
-        if (page == null) {
-            
-            // TODO throw initialization exception
-            
-            return;
-        }
-
-        pages.put(alias, page);
     }
 }

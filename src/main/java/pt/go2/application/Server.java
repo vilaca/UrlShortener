@@ -1,6 +1,7 @@
 package pt.go2.application;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -9,6 +10,7 @@ import org.eclipse.jetty.server.Handler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
+import pt.go2.application.EmbeddedPages.Builder;
 import pt.go2.daemon.BadUrlScannerTask;
 import pt.go2.daemon.PhishTankInterfaceTask;
 import pt.go2.daemon.WatchDog;
@@ -47,9 +49,36 @@ public class Server {
             final List<RestoreItem> restoredItems = Restore.start(config.getDbFolder());
 
             ks = new KeyValueStore(restoredItems, config.getDbFolder());
-            res = new EmbeddedPages(config);
+
+            Builder staticPagesBuilder = new EmbeddedPages.Builder();
+
+            // single HTML page
+            staticPagesBuilder.add("/index.html", MimeTypeConstants.MIME_TEXT_HTML);
+
+            // javascript ( handles ajax )
+            staticPagesBuilder.add("/ajax.js", MimeTypeConstants.MIME_APP_JAVASCRIPT);
+
+            // page style
+            staticPagesBuilder.add("/screen.css", MimeTypeConstants.MIME_TEXT_CSS);
+
+            // search engine stuff
+            staticPagesBuilder.add("/robots.txt", MimeTypeConstants.MIME_TEXT_PLAIN);
+            staticPagesBuilder.add("/sitemap.xml", MimeTypeConstants.MIME_TEXT_XML);
+
+            // root must be redirected to index
+            staticPagesBuilder.setAlias("/", "index.html");
+
+            // create entry required by https://www.google.com/webmasters/tools/home?hl=en
+            // to prove site ownership
+            if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
+
+                staticPagesBuilder.add(config.getGoogleVerification(), 
+                        ("google-site-verification: " + config.getGoogleVerification())
+                        .getBytes(StandardCharsets.US_ASCII), MimeTypeConstants.MIME_TEXT_PLAIN);
+            }
             
-            res.setAlias("/", "index.html");
+            // done
+            res = staticPagesBuilder.create();
 
         } catch (final Exception ioe) {
             LOGGER.fatal(ioe);
