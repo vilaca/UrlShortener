@@ -19,8 +19,6 @@ public class Configuration {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
-    private final Properties prop = new Properties();
-
     // resource file locations on JAR
     private static final String PROPERTIES = "application.properties";
 
@@ -62,6 +60,8 @@ public class Configuration {
      */
     public Configuration() throws IOException {
 
+        final Properties prop = new Properties();
+
         // attempt reading properties/configuration from JAR
 
         boolean readProperties = false;
@@ -95,25 +95,25 @@ public class Configuration {
 
         // even if no .properties files were loaded, we still got defaults
 
-        host = createInetSocketAddress();
-        version = prop.getProperty("server.version");
-        cacheHint = getPropertyAsInt("server.cache");
-        redirect = getPropertyAsInt("server.redirect");
+        host = createInetSocketAddress(prop);
+        version = getProperty(prop, "server.version");
+        cacheHint = getPropertyAsInt(prop, "server.cache");
+        redirect = getPropertyAsInt(prop, "server.redirect");
 
-        dbFolder = getResumeFolder();
-        domain = getPropertyAsList("server.domain");
+        dbFolder = getResumeFolder(prop);
+        domain = getPropertyAsList(prop, "server.domain");
 
-        googleVerification = getProperty("google-site-verification");
-        phishtankApiKey = getProperty("phishtank-api-key");
-        safeLookupApiKey = getProperty("safe-lookup-api-key");
+        googleVerification = getProperty(prop, "google-site-verification");
+        phishtankApiKey = getProperty(prop, "phishtank-api-key");
+        safeLookupApiKey = getProperty(prop, "safe-lookup-api-key");
 
-        watchdogWait = getPropertyAsInt("watchdog.wait");
-        watchdogInterval = getPropertyAsInt("watchdog.interval");
+        watchdogWait = getPropertyAsInt(prop, "watchdog.wait");
+        watchdogInterval = getPropertyAsInt(prop, "watchdog.interval");
     }
 
-    private List<String> getPropertyAsList(String key) {
+    private List<String> getPropertyAsList(Properties prop, String key) {
 
-        final String value = getProperty(key);
+        final String value = getProperty(prop, key);
 
         if (value != null) {
 
@@ -127,12 +127,14 @@ public class Configuration {
 
     /**
      * Use this method only for Smart Tag parsing
+     * 
+     * @param prop
      *
      * @param string
      *
      * @return
      */
-    public String getProperty(String key) {
+    public String getProperty(Properties prop, String key) {
         String value = prop.getProperty(key);
         if (value != null) {
             value = value.trim();
@@ -144,7 +146,7 @@ public class Configuration {
         return value;
     }
 
-    private String getResumeFolder() {
+    private String getResumeFolder(Properties prop) {
 
         final String resumeFolder = prop.getProperty("database.folder");
 
@@ -159,17 +161,17 @@ public class Configuration {
         return resumeFolder + System.getProperty("file.separator");
     }
 
-    private InetSocketAddress createInetSocketAddress() {
+    private InetSocketAddress createInetSocketAddress(Properties prop) {
 
         // both parameters are optional
 
         final String addr = prop.getProperty("server.host");
-        final int port = getPropertyAsInt("server.port");
+        final int port = getPropertyAsInt(prop, "server.port");
 
         return addr == null ? new InetSocketAddress(port) : new InetSocketAddress(addr, port);
     }
 
-    private int getPropertyAsInt(String property) {
+    private int getPropertyAsInt(Properties prop, String property) {
         return Integer.parseInt(prop.getProperty(property));
     }
 
