@@ -83,7 +83,7 @@ function submit(su) {
         }
     };
 
-    http.open('POST', '/new/', true)
+    http.open('POST', '/new', true)
 
     http.send('v=' + su)
 

@@ -108,7 +108,7 @@ class RequestHandler extends AbstractHandler {
 
         host = host.toLowerCase();
 
-        final String requested = getRequestedFilename(request.getRequestURI());
+        final String requested = request.getRequestURI();
 
         if (!config.getValidDomains().isEmpty()) {
 
@@ -160,7 +160,7 @@ class RequestHandler extends AbstractHandler {
                 }
             }
 
-        } else if (request.getMethod().equals(HttpMethod.POST.toString()) && "new".equals(requested)) {
+        } else if (request.getMethod().equals(HttpMethod.POST.toString()) && "/new".equals(requested)) {
 
             final String field = urltoHash(request, response);
 
@@ -209,26 +209,6 @@ class RequestHandler extends AbstractHandler {
 
     private String getHeader(HttpServletRequest request, HeaderConstants header) {
         return request.getHeader(header.toString());
-    }
-
-    /**
-     * Parse requested filename from URI
-     *
-     * @param path
-     *
-     * @return Requested filename
-     */
-    private String getRequestedFilename(String path) {
-
-        // split into tokens
-
-        if (path.isEmpty() || "/".equals(path)) {
-            return "/";
-        }
-
-        final int idx = path.indexOf("/", 1);
-
-        return idx == -1 ? path.substring(1) : path.substring(1, idx);
     }
 
     private Response handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, final byte[] requested) {

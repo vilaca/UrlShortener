@@ -1,6 +1,5 @@
 package pt.go2.application;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -66,7 +65,7 @@ public class Server {
             staticPagesBuilder.add("/sitemap.xml", MimeTypeConstants.MIME_TEXT_XML);
 
             // root must be redirected to index
-            staticPagesBuilder.setAlias("/", "index.html");
+            staticPagesBuilder.setAlias("/", "/index.html");
 
             // create entry required by https://www.google.com/webmasters/tools/home?hl=en
             // to prove site ownership
