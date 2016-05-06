@@ -129,6 +129,7 @@ public class Server {
             // start server
 
             listener.start();
+            listener.join();
 
         } catch (final Exception e1) {
 
@@ -136,22 +137,8 @@ public class Server {
             return;
         }
 
-        LOGGER.info("Server Running. Press [k] to kill listener.");
-
-        boolean running = true;
-        do {
-
-            try {
-
-                running = System.in.read() != 'k';
-
-            } catch (final IOException e) {
-
-                LOGGER.error(e);
-            }
-
-        } while (running);
-
+        // TODO all bellow is unreached
+        
         LOGGER.trace("Server stopping.");
 
         listener.destroy();
