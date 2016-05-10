@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -17,9 +17,7 @@
 */
 package pt.go2.application;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletOutputStream;
@@ -30,11 +28,11 @@ import org.eclipse.jetty.http.HttpStatus;
 
 enum ErrorPages implements Response {
 
-    PAGE_NOT_FOUND(readStream(ErrorPages.class.getResourceAsStream("/404.html")), HttpStatus.NOT_FOUND_404, MimeTypeConstants.MIME_TEXT_HTML),
+    PAGE_NOT_FOUND(Response.readFile("/404.html"), HttpStatus.NOT_FOUND_404, MimeTypeConstants.MIME_TEXT_HTML),
     
     // this error should be returned when an URL was detected as being a
     // phishing site **after** it was added to the database
-    PHISHING(readStream(ErrorPages.class.getResourceAsStream("/403-phishing.html")), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML),
+    PHISHING(Response.readFile("/403-phishing.html"), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML),
     
     // this error should be returned when an URL was detected as being a
     // phishing site **before** it was added to the database
@@ -42,7 +40,7 @@ enum ErrorPages implements Response {
     
     // this error should be returned when an URL was detected as being a malware
     // site **after** it was added to the database
-    MALWARE(readStream(ErrorPages.class.getResourceAsStream("/403-malware.html")), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML), 
+    MALWARE(Response.readFile("/403-malware.html"), HttpStatus.FORBIDDEN_403, MimeTypeConstants.MIME_TEXT_HTML), 
     
     // this error should be returned when an URL was detected as being a
     // phishing site **before** it was added to the database
@@ -72,27 +70,6 @@ enum ErrorPages implements Response {
 
     ErrorPages(int status) {
         this(new byte[0],status, MimeTypeConstants.MIME_TEXT_PLAIN);
-    }
-
-    private static byte[] readStream(InputStream in) {
-
-        final byte[] buffer = new byte[4096];
-        int read;
-
-        final ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-        try {
-            while ((read = in.read(buffer)) != -1) {
-                output.write(buffer, 0, read);
-            }
-        } catch (IOException e) {
-
-            // TODO what's best to use here?
-
-            throw new ExceptionInInitializerError(e);
-        }
-
-        return output.toByteArray();
     }
 
     @Override

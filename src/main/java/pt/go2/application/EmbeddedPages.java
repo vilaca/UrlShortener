@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -14,15 +14,12 @@
     You should have received a copy of the GNU Affero General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
     
- */
+*/
 package pt.go2.application;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -84,7 +81,7 @@ final class EmbeddedPages {
          */
         public Builder add(String filename, MimeTypeConstants mime) throws IOException, URISyntaxException {
 
-            final byte[] content = readFile(filename);
+            final byte[] content = Response.readFile(filename);
             final byte[] zipped = compress(content);
 
             final Response response = ResponseFactory.create(HttpStatus.OK_200, mime, zipped, content);
@@ -137,25 +134,6 @@ final class EmbeddedPages {
          */
         public EmbeddedPages create() {
             return new EmbeddedPages(Collections.unmodifiableMap(files));
-        }
-
-        /**
-         * Read file from Jar file
-         * 
-         * @param filename
-         * @return
-         * @throws IOException
-         * @throws URISyntaxException
-         */
-        private byte[] readFile(String filename) throws IOException, URISyntaxException {
-
-            final URL resource = EmbeddedPages.class.getResource(filename);
-
-            if (resource != null) {
-                return Files.readAllBytes(new File(resource.toURI()).toPath());
-            }
-            
-            throw new IllegalArgumentException(filename + " not present in jar file.");
         }
 
         /**

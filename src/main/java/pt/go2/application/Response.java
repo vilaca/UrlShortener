@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -17,7 +17,11 @@
 */
 package pt.go2.application;
 
+import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.Files;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -46,4 +50,27 @@ public interface Response {
     public String getMimeType();
 
     public boolean isCacheable();
+    
+    /**
+     * Read file from Jar file
+     * 
+     * @param filename
+     * @return
+     * @throws IOException
+     * @throws URISyntaxException
+     */
+    public static byte[] readFile(String filename) {
+
+        final URL resource = EmbeddedPages.class.getResource(filename);
+
+        if (resource == null) {
+            throw new IllegalArgumentException(filename + " not present in jar file.");
+        }
+        
+        try {
+            return Files.readAllBytes(new File(resource.toURI()).toPath());
+        } catch (IOException | URISyntaxException e) {
+            throw new IllegalArgumentException("Cant open or read resource " + filename, e);
+        }
+    }
 }
