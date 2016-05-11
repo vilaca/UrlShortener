@@ -26,6 +26,11 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.http.HttpStatus;
 
+/**
+ * Responses used to report and error has occurred.
+ * 
+ * @author vilaca
+ */
 enum ErrorPages implements Response {
 
     PAGE_NOT_FOUND(Response.readFile("/404.html"), HttpStatus.NOT_FOUND_404, MimeTypeConstants.MIME_TEXT_HTML),
