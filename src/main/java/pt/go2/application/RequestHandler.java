@@ -125,8 +125,14 @@ class RequestHandler extends AbstractHandler {
 
         host = host.toLowerCase();
 
-        final String requested = request.getRequestURI();
+        String requested = request.getRequestURI();
 
+        // sanitize multiple '/'s
+        
+        while (requested.contains("//")) {
+            requested = requested.replace("//", "/");
+        }
+        
         if (!config.getValidDomains().isEmpty()) {
 
             if (!config.getValidDomains().contains(host)) {
