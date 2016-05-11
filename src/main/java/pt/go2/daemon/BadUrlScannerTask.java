@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -17,8 +17,8 @@
 */
 package pt.go2.daemon;
 
+import java.util.Collection;
 import java.util.Date;
-import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -58,7 +58,7 @@ public class BadUrlScannerTask implements WatchDogTask {
     @Override
     public synchronized void refresh() {
 
-        final Set<Uri> uris = ks.uris();
+        final Collection<Uri> uris = ks.uris();
 
         LOGGER.info(uris.size() + " total stored uris.");
 

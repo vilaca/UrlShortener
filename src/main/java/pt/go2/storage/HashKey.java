@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -58,7 +58,7 @@ public class HashKey {
 
         // TODO current time is not a good enough seed, must use random
 
-        long rnd = System.currentTimeMillis() * HASHKEY_MASK;
+        long rnd = System.currentTimeMillis() & HASHKEY_MASK;
 
         final HashKey hk = new HashKey(new byte[LENGTH]);
 
@@ -116,6 +116,6 @@ public class HashKey {
 
     @Override
     public String toString() {
-        return new String(hash);
+        return "/" + new String(hash);
     }
 }

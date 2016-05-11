@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -159,9 +159,9 @@ class RequestHandler extends AbstractHandler {
 
         if (request.getMethod().equals(HttpMethod.GET.toString())) {
 
-            if (requested.length() == HashKey.LENGTH) {
+            if (requested.length() == HashKey.LENGTH + 1) {
 
-                return handleShortenedUrl(request, response, requested.getBytes());
+                return handleShortenedUrl(request, response, requested);
 
             } else {
 
@@ -194,14 +194,14 @@ class RequestHandler extends AbstractHandler {
 
             // try to find hash for url is ks
 
-            final HashKey hk = ks.find(uri);
+            final HashKey hk = ks.getHash(uri);
 
             if (hk == null) {
 
                 return createNewHash(request, response, uri);
             }
-
-            uri = ks.get(hk);
+            
+            uri = ks.getUri(hk.toString());
 
             switch (uri.health()) {
             case MALWARE:                
@@ -228,9 +228,9 @@ class RequestHandler extends AbstractHandler {
         return request.getHeader(header.toString());
     }
 
-    private Response handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, final byte[] requested) {
+    private Response handleShortenedUrl(HttpServletRequest request, HttpServletResponse response, String requested) {
 
-        final Uri uri = ks.get(new HashKey(requested));
+        final Uri uri = ks.getUri(requested);
 
         if (uri == null) {
             return ErrorPages.PAGE_NOT_FOUND;

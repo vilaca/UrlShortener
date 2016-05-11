@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -18,9 +18,9 @@
 package pt.go2.storage;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,7 +35,8 @@ public class KeyValueStore {
 
     private static final Logger LOGGER = LogManager.getLogger(KeyValueStore.class);
 
-    private final BidiMap<HashKey, Uri> map = new BidiMap<>();
+    final Map<String, Uri> hash2Url = new ConcurrentHashMap<>();
+    final Map<String, HashKey> url2Hash = new ConcurrentHashMap<>();
 
     // log for restoring hash->url
 
@@ -47,7 +48,13 @@ public class KeyValueStore {
 
         for (final RestoreItem item : restoredItems) {
 
-            map.put(new HashKey(item.getKey().getBytes(StandardCharsets.US_ASCII)), Uri.create(item.getValue(), false));
+            String hk = item.getKey();
+
+            if (!hk.startsWith("/")) {
+                hk = "/" + hk;
+            }
+
+            hash2Url.put(hk, Uri.create(item.getValue(), false));
         }
     }
 
@@ -58,11 +65,9 @@ public class KeyValueStore {
      *
      * @return
      */
-    public synchronized boolean add(final Uri uri) {
+    public boolean add(final Uri uri) {
 
-        final HashKey hk = findUniqueHash();
-
-        final String hash = hk.toString();
+        final String hash = findUniqueHash(uri).toString();
 
         try {
 
@@ -73,28 +78,32 @@ public class KeyValueStore {
             sb.append(uri.toString());
             sb.append(System.getProperty("line.separator"));
 
-            backupFile.write(sb.toString());
+            synchronized (backupFile) {
+                backupFile.write(sb.toString());
+            }
 
         } catch (final IOException e) {
 
             LOGGER.error("Could not write to the resume log.", e);
 
+            // must remove hash
+            
+            hash2Url.remove(hash);
+            
             return false;
         }
-
-        map.put(hk, uri);
 
         return true;
     }
 
-    private HashKey findUniqueHash() {
+    private HashKey findUniqueHash(Uri uri) {
 
         int retries = 0;
 
         do {
             final HashKey hk = HashKey.create();
 
-            if (!map.contains(hk)) {
+            if (hash2Url.putIfAbsent(hk.toString(), uri) == null) {
                 return hk;
             }
 
@@ -112,22 +121,18 @@ public class KeyValueStore {
         backupFile.close();
     }
 
-    /**
-     * get redirect based on hashkey
-     *
-     * @param filename
-     * @return
-     */
-    public Uri get(final HashKey haskey) {
-
-        return map.get(haskey);
+    public Collection<Uri> uris() {
+        
+        // TODO learn about the performance implications of this method
+        
+        return hash2Url.values();
     }
 
-    public Set<Uri> uris() {
-        return map.getKeys();
+    public Uri getUri(String requested) {
+        return hash2Url.get(requested);
     }
 
-    public HashKey find(Uri uri) {
-        return map.getUrl2Hash(uri);
+    public HashKey getHash(Uri uri) {
+        return url2Hash.get(uri);
     }
 }
