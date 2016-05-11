@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2016 Jo„o VilaÁa
+    Copyright (C) 2016 Jo√£o Vila√ßa
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU Affero General Public License as published by
@@ -84,15 +84,17 @@ public class Server {
             // root must be redirected to index
             staticPagesBuilder.setAlias("/", "/index.html");
 
-            // create entry required by https://www.google.com/webmasters/tools/home?hl=en
+            // create entry required by
+            // https://www.google.com/webmasters/tools/home?hl=en
             // to prove site ownership
             if (config.getGoogleVerification() != null && !config.getGoogleVerification().isEmpty()) {
 
-                staticPagesBuilder.add(config.getGoogleVerification(), 
+                staticPagesBuilder.add(config.getGoogleVerification(),
                         ("google-site-verification: " + config.getGoogleVerification())
-                        .getBytes(StandardCharsets.US_ASCII), MimeTypeConstants.MIME_TEXT_PLAIN);
+                                .getBytes(StandardCharsets.US_ASCII),
+                        MimeTypeConstants.MIME_TEXT_PLAIN);
             }
-            
+
             // done
             res = staticPagesBuilder.create();
 
@@ -147,18 +149,26 @@ public class Server {
             listener.start();
             listener.join();
 
-        } catch (final Exception e1) {
+        } catch (Exception e1) {
 
             LOGGER.error("Server start error.", e1);
             return;
         }
 
-        // TODO all bellow is unreached
-        
-        LOGGER.trace("Server stopping.");
+        try {
 
-        listener.destroy();
+            LOGGER.trace("Server stopping.");
 
-        LOGGER.info("Server stopped.");
+            listener.destroy();
+
+            LOGGER.info("Server stopped.");
+
+            ks.close();
+
+        } catch (Exception e1) {
+
+            LOGGER.error("Server stop error.", e1);
+            return;
+        }
     }
 }
