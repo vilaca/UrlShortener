@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vilaca/UrlShortener.svg?branch=dev-abuse)](https://travis-ci.org/vilaca/UrlShortener)
+[![Build Status](https://travis-ci.org/vilaca/UrlShortener.svg?branch=master)](https://travis-ci.org/vilaca/UrlShortener)
 
 
 UrlShortener
