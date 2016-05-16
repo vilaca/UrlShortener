@@ -23,6 +23,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.eclipse.jetty.server.Handler;
+import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.ContextHandlerCollection;
 
@@ -40,11 +41,11 @@ import pt.go2.fileio.RestoreItem;
 import pt.go2.fileio.WhiteList;
 import pt.go2.storage.KeyValueStore;
 
-public class Server {
+public class UrlShortener {
 
-    private static final Logger LOGGER = LogManager.getLogger(Server.class);
+    private static final Logger LOGGER = LogManager.getLogger(UrlShortener.class);
 
-    private Server() {
+    private UrlShortener() {
     }
 
     /**
@@ -127,9 +128,7 @@ public class Server {
 
         LOGGER.trace("Creating listener.");
 
-        final org.eclipse.jetty.server.Server listener;
-
-        listener = new org.eclipse.jetty.server.Server(config.getHost());
+        final Server listener = new Server(config.getHost());
 
         // RequestHandler
 
