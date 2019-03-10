@@ -1,19 +1,14 @@
-*.class
-
-# Package Files #
-*.war
-*.ear
 
 # bin folder
-bin/*
+build/
 
-# database restore folder
-go2db/*
+# bin folder
+.gradle/
 
-# don't commit logs
-*.log
-access_log
+# eclipse
+.classpath
+.project
+.settings/
 
-# sonarqube files
-.sonar/*
-/bin/
+# file db
+data/*
