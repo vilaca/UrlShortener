@@ -9,7 +9,7 @@ USER root
 # Install jdk8, gradle, git #
 #############################
 
-RUN yum -y install java-1.8.0-openjdk-devel git wget unzip
+RUN yum -y install java-1.8.0-openjdk-devel wget unzip
 RUN wget https://services.gradle.org/distributions/gradle-5.0-bin.zip -P /tmp
 RUN unzip -d /opt/gradle /tmp/gradle-5.0-bin.zip
 ENV JAVA_HOME=/usr

@@ -1,0 +1,13 @@
+version: '3'
+services:
+  rest:
+    build: url-shortener-rest/.
+    ports:
+     - "5000:5000"
+  static:
+    build: url-shortener-static-web/.
+    ports:
+     - "80:80"
+    network_mode: host
+
+
