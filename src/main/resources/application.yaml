@@ -1,0 +1,5 @@
+spring:
+  main.banner-mode: "off"
+  webflux.base-path: "/"
+server.error.include-message: "always"
+logging.level.org.springframework: "WARN"

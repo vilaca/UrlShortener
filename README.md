@@ -1,17 +1,19 @@
 
 # Url Shortener
-Try online at [http://go2.pt/](http://go2.pt/).
+~~Try online at [http://go2.pt/](http://go2.pt/).~~
 
-Runs on docker, uses springboot, gradle and Java 8.
+This sample project is not online since early 2020.
 
-Submited Urls are validated using Apache Commons Validator.
+_Soon_ a new version with improved features will be deployed.
 
-# Build and run with docker
-    $docker build . 
-    $docker run .
+# Description
+
+Since mid 2013 this project has helped me learn Java, Spring, Git, Rest APIs, etc.
+
+The source code has been through many iterations and most recent is a Spring Boot Webflux sample application.
 
 # Build and run with gradle
-    $gradle bootRun
+    ./gradlew bootRun
 
 # License
 [MIT License](https://en.wikipedia.org/wiki/MIT_License).
